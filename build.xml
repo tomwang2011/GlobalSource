@@ -9,8 +9,11 @@
 <!-- in the project's Project Properties dialog box.-->
 <project name="GlobalSource" default="default" basedir=".">
     <description>Builds, tests, and runs the project GlobalSource.</description>
+
     <import file="nbproject/build-impl.xml"/>
+
 	<property file="build.properties" />
+
 	<property name="module.list" value="" />
 	<property name="project.dir" value="${basedir}/portal" />
 	<property name="sdk.dir" value="${portal.dir}/tools/sdk" />
@@ -56,6 +59,10 @@
 			includeantruntime="false"
 		/>
 
+		<delete file="nbproject/project.properties" />
+
+		<copy file="nbproject/default.properties" tofile="nbproject/project.properties" />
+
 		<for param="module">
 			<path>
 				<dirset dir="${portal.dir}">
@@ -83,9 +90,6 @@
 src.${src.dir.name}.dir=$${file.reference.${src.dir.name}}
 
 </concat>
-						<concat destfile="nbproject/project.properties" append="true">file.reference.portal-lib=${portal.dir}/lib
-javac.classpath=\
-	$${file.reference.portal-lib}</concat>
 					</then>
 				</if>
 
@@ -93,6 +97,9 @@ javac.classpath=\
 				<var name="src.dir.name" unset="true" />
 			</sequential>
 		</for>
+		<concat destfile="nbproject/project.properties" append="true">file.reference.portal-lib=${portal.dir}/lib
+javac.classpath=\
+	$${file.reference.portal-lib}</concat>
 		<java classname="CreateProject" classpath="${basedir}/classes">
 			<arg value="${project.name}" />
 			<arg value="${module.list}" />
