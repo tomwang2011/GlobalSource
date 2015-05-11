@@ -13,17 +13,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public class CreateProject {
-	public static void createProjectElement() {
-		Element projectElement = document.createElement("project");
-		projectElement.setAttribute("xmlns", "http://www.netbeans.org/ns/project/1");
-		document.appendChild(projectElement);
-
-		Element typeElement = document.createElement("type");
-		typeElement.appendChild(document.createTextNode("org.netbeans.modules.java.j2seproject"));
-		projectElement.appendChild(typeElement);
-
-		createConfiguration(projectElement);
-	}
 	public static void createConfiguration(Element projectElement) {
 		Element configurationElement = document.createElement("configuration");
 		projectElement.appendChild(configurationElement);
@@ -31,15 +20,7 @@ public class CreateProject {
 		createData(configurationElement);
 		createLibraries(configurationElement);
 	}
-	public static void createLibraries(Element configurationElement) {
-		Element librariesElement = document.createElement("libraries");
-		librariesElement.setAttribute("xmlns", "http://www.netbeans.org/ns/ant-project-libraries/1");
-		configurationElement.appendChild(librariesElement);
 
-		Element definitionsElement = document.createElement("definitions");
-		definitionsElement.appendChild(document.createTextNode("./lib/nblibraries.properties"));
-		librariesElement.appendChild(definitionsElement);
-	}
 	public static void createData(Element configurationElement) {
 		Element dataElement = document.createElement("data");
 		dataElement.setAttribute("xmlns", "http://www.netbeans.org/ns/j2se-project/3");
@@ -59,6 +40,29 @@ public class CreateProject {
 		dataElement.appendChild(testRootsElement);
 		createRoots(testRootsElement, "test.src.dir");
 	}
+
+	public static void createLibraries(Element configurationElement) {
+		Element librariesElement = document.createElement("libraries");
+		librariesElement.setAttribute("xmlns", "http://www.netbeans.org/ns/ant-project-libraries/1");
+		configurationElement.appendChild(librariesElement);
+
+		Element definitionsElement = document.createElement("definitions");
+		definitionsElement.appendChild(document.createTextNode("./lib/nblibraries.properties"));
+		librariesElement.appendChild(definitionsElement);
+	}
+
+	public static void createProjectElement() {
+		Element projectElement = document.createElement("project");
+		projectElement.setAttribute("xmlns", "http://www.netbeans.org/ns/project/1");
+		document.appendChild(projectElement);
+
+		Element typeElement = document.createElement("type");
+		typeElement.appendChild(document.createTextNode("org.netbeans.modules.java.j2seproject"));
+		projectElement.appendChild(typeElement);
+
+		createConfiguration(projectElement);
+	}
+
 	public static void createRoots(Element sourceRootsElement, String module) {
 		Element rootElement = document.createElement("root");
 		rootElement.setAttribute("id", module);
@@ -99,8 +103,6 @@ public class CreateProject {
 			_projectName = args[0];
 
 			_modules = args[1].split(",");
-
-//			_libjars = args[2].split(",");
 		}
 		catch (ArrayIndexOutOfBoundsException e) {
 			System.out.println(
@@ -115,5 +117,4 @@ public class CreateProject {
 	private static Document document;
 	private static String _projectName;
 	private static String[] _modules;
-	private static String[] _libjars;
 }
