@@ -83,6 +83,9 @@
 src.${src.dir.name}.dir=$${file.reference.${src.dir.name}}
 
 </concat>
+						<concat destfile="nbproject/project.properties" append="true">file.reference.portal-lib=${portal.dir}/lib
+javac.classpath=\
+	$${file.reference.portal-lib}</concat>
 					</then>
 				</if>
 
