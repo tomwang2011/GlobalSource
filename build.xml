@@ -10,64 +10,89 @@
 <project name="GlobalSource" default="default" basedir=".">
     <description>Builds, tests, and runs the project GlobalSource.</description>
     <import file="nbproject/build-impl.xml"/>
-    <!--
+	<property file="build.properties" />
+	<property name="module.list" value="" />
+	<property name="project.dir" value="${basedir}/portal" />
+	<property name="sdk.dir" value="${portal.dir}/tools/sdk" />
 
-    There exist several targets which are by default empty and which can be 
-    used for execution of your tasks. These targets are usually executed 
-    before and after some main targets. They are: 
+	<taskdef resource="net/sf/antcontrib/antlib.xml">
+		<classpath>
+			<pathelement location="${portal.dir}/lib/development/ant-contrib.jar" />
+		</classpath>
+	</taskdef>
 
-      -pre-init:                 called before initialization of project properties
-      -post-init:                called after initialization of project properties
-      -pre-compile:              called before javac compilation
-      -post-compile:             called after javac compilation
-      -pre-compile-single:       called before javac compilation of single file
-      -post-compile-single:      called after javac compilation of single file
-      -pre-compile-test:         called before javac compilation of JUnit tests
-      -post-compile-test:        called after javac compilation of JUnit tests
-      -pre-compile-test-single:  called before javac compilation of single JUnit test
-      -post-compile-test-single: called after javac compilation of single JUunit test
-      -pre-jar:                  called before JAR building
-      -post-jar:                 called after JAR building
-      -post-clean:               called after cleaning build products
+	<macrodef name="set-module-source-directory">
+		<attribute name="module" />
 
-    (Targets beginning with '-' are not intended to be called on their own.)
+		<sequential>
+			<dirname property="src.dir" file="@{module}" />
 
-    Example of inserting an obfuscator after compilation could look like this:
+			<basename property="src.dir.name" file="${src.dir}" />
 
-        <target name="-post-compile">
-            <obfuscate>
-                <fileset dir="${build.classes.dir}"/>
-            </obfuscate>
-        </target>
+			<if>
+				<equals arg1="${src.dir.name}" arg2="WEB-INF" />
+				<then>
+					<dirname property="temp" file="${src.dir}" />
 
-    For list of available properties check the imported 
-    nbproject/build-impl.xml file. 
+					<var name="src.dir" unset="true" />
 
+					<dirname property="src.dir" file="${temp}" />
 
-    Another way to customize the build is by overriding existing main targets.
-    The targets of interest are: 
+					<var name="temp" unset="true" />
+					<var name="src.dir.name" unset="true" />
 
-      -init-macrodef-javac:     defines macro for javac compilation
-      -init-macrodef-junit:     defines macro for junit execution
-      -init-macrodef-debug:     defines macro for class debugging
-      -init-macrodef-java:      defines macro for class execution
-      -do-jar:                  JAR building
-      run:                      execution of project 
-      -javadoc-build:           Javadoc generation
-      test-report:              JUnit report generation
+					<basename property="src.dir.name" file="${src.dir}" />
+				</then>
+			</if>
+		</sequential>
+	</macrodef>
 
-    An example of overriding the target for project execution could look like this:
+	<target name="build-all">
+		<mkdir dir="classes" />
 
-        <target name="run" depends="GlobalSource-impl.jar">
-            <exec dir="bin" executable="launcher.exe">
-                <arg file="${dist.jar}"/>
-            </exec>
-        </target>
+		<javac
+			srcdir="${basedir}/src"
+			destdir="${basedir}/classes"
+			includeantruntime="false"
+		/>
 
-    Notice that the overridden target depends on the jar target and not only on 
-    the compile target as the regular run target does. Again, for a list of available 
-    properties which you can use, check the target you are overriding in the
-    nbproject/build-impl.xml file. 
+		<for param="module">
+			<path>
+				<dirset dir="${portal.dir}">
+					<include name="**/src"/>
+				</dirset>
+			</path>
+			<sequential>
+				<set-module-source-directory module="@{module}" />
 
-    -->
+				<if>
+					<available file="${src.dir}/build.xml" />
+					<then>
+						<if>
+							<equals arg1="${module.list}" arg2="" />
+							<then>
+								<var name="concat" value="${src.dir.name}" />
+							</then>
+							<else>
+								<var name="concat" value="${module.list},${src.dir.name}" />
+							</else>
+						</if>
+						<var name="module.list" value="${concat}" />
+
+						<concat destfile="nbproject/project.properties" append="true">file.reference.${src.dir.name}=${src.dir}
+src.${src.dir.name}.dir=$${file.reference.${src.dir.name}}
+
+</concat>
+					</then>
+				</if>
+
+				<var name="src.dir" unset="true" />
+				<var name="src.dir.name" unset="true" />
+			</sequential>
+		</for>
+		<java classname="CreateProject" classpath="${basedir}/classes">
+			<arg value="${project.name}" />
+			<arg value="${module.list}" />
+		</java>
+	</target>
 </project>
