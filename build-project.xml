@@ -82,7 +82,7 @@
 						</if>
 						<var name="module.list" value="${concat}" />
 
-						<concat destfile="nbproject/project.properties" append="true">file.reference.${src.dir.name}=${src.dir}
+						<concat destfile="nbproject/project.properties" append="true">file.reference.${src.dir.name}=@{module}
 src.${src.dir.name}.dir=$${file.reference.${src.dir.name}}
 
 </concat>
@@ -100,5 +100,17 @@ javac.classpath=\
 			<arg value="${project.name}" />
 			<arg value="${module.list}" />
 		</java>
+	</target>
+
+	<target name="clean">
+		<delete dir="classes" />
+
+		<delete file="nbproject/project.properties" />
+
+		<copy file="nbproject/default.properties" tofile="nbproject/project.properties" />
+
+		<delete file="nbproject/project.xml" />
+
+		<copy file="nbproject/defaultproject.xml" tofile="nbproject/project.xml" />
 	</target>
 </project>
