@@ -41,14 +41,14 @@ public class CreateProject {
 		dataElement.appendChild(sourceRootsElement);
 
 		for(String module:_modules) {
-			createRoots(sourceRootsElement,"src."+module+".dir");
+			createRoots(sourceRootsElement,"src."+module+".dir", module);
 		}
 
 		Element testRootsElement = document.createElement("test-roots");
 
 		dataElement.appendChild(testRootsElement);
 
-		createRoots(testRootsElement, "test.src.dir");
+		createRoots(testRootsElement, "test.src.dir", "test");
 	}
 
 	public static void createLibraries(Element configurationElement) {
@@ -81,10 +81,12 @@ public class CreateProject {
 		createConfiguration(projectElement);
 	}
 
-	public static void createRoots(Element sourceRootsElement, String module) {
+	public static void createRoots(Element sourceRootsElement, String module, String moduleName) {
 		Element rootElement = document.createElement("root");
 
 		rootElement.setAttribute("id", module);
+
+		rootElement.setAttribute("name", moduleName);
 
 		sourceRootsElement.appendChild(rootElement);
 	}
