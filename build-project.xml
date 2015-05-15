@@ -55,7 +55,7 @@
 			includeantruntime="false"
 		/>
 
-		<delete file="nbproject/project.properties" />
+		<unzip src="CleanProject.zip" dest="." />
 
 		<copy file="nbproject/default.properties" tofile="nbproject/project.properties" />
 
@@ -104,13 +104,6 @@ javac.classpath=\
 
 	<target name="clean">
 		<delete dir="classes" />
-
-		<delete file="nbproject/project.properties" />
-
-		<copy file="nbproject/default.properties" tofile="nbproject/project.properties" />
-
-		<delete file="nbproject/project.xml" />
-
-		<copy file="nbproject/defaultproject.xml" tofile="nbproject/project.xml" />
+		<delete dir="nbproject" />
 	</target>
 </project>
