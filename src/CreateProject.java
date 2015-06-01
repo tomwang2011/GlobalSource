@@ -41,6 +41,7 @@ public class CreateProject {
 		dataElement.appendChild(sourceRootsElement);
 
 		for(String module:_modules) {
+			if(!(module.endsWith("-test")||module.endsWith("test-internal")))
 			createRoots(sourceRootsElement,"src."+module+".dir", module);
 		}
 
@@ -48,7 +49,10 @@ public class CreateProject {
 
 		dataElement.appendChild(testRootsElement);
 
-		createRoots(testRootsElement, "test.src.dir", "test");
+		for(String test:_tests) {
+			createRoots(testRootsElement, "test."+test+".dir", test);
+		}
+
 	}
 
 	public static void createLibraries(Element configurationElement) {
@@ -125,6 +129,8 @@ public class CreateProject {
 			_projectName = args[0];
 
 			_modules = args[1].split(",");
+
+			_tests = args[2].split(",");
 		}
 		catch (ArrayIndexOutOfBoundsException e) {
 			System.out.println(
@@ -138,4 +144,5 @@ public class CreateProject {
 	private static Document document;
 	private static String _projectName;
 	private static String[] _modules;
+	private static String[] _tests;
 }

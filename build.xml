@@ -10,15 +10,81 @@
 <project name="GlobalSource" default="build" basedir=".">
 	<property file="build.properties" />
 
-	<property name="module.list" value="" />
 	<property name="project.dir" value="${basedir}/portal" />
 	<property name="sdk.dir" value="${portal.dir}/tools/sdk" />
+
+	<property name="module.list" value="" />
+	<property name="test.list" value="" />
 
 	<taskdef resource="net/sf/antcontrib/antlib.xml">
 		<classpath>
 			<pathelement location="${portal.dir}/lib/development/ant-contrib.jar" />
 		</classpath>
 	</taskdef>
+
+	<macrodef name="append-source-list">
+		<attribute name="module" />
+
+		<sequential>
+			<set-module-source-directory module="@{module}" />
+
+				<if>
+					<available file="${src.dir}/build.xml" />
+					<then>
+						<if>
+							<equals arg1="${module.list}" arg2="" />
+							<then>
+								<var name="concat" value="${src.dir.name}" />
+							</then>
+							<else>
+								<var name="concat" value="${module.list},${src.dir.name}" />
+							</else>
+						</if>
+						<var name="module.list" value="${concat}" />
+
+						<concat destfile="${project.dir}/nbproject/project.properties" append="true">file.reference.${src.dir.name}=@{module}
+src.${src.dir.name}.dir=$${file.reference.${src.dir.name}}
+
+</concat>
+					</then>
+				</if>
+
+				<var name="src.dir" unset="true" />
+				<var name="src.dir.name" unset="true" />
+		</sequential>
+	</macrodef>
+
+	<macrodef name="append-test-list">
+		<attribute name="module" />
+
+		<sequential>
+			<set-module-source-directory module="@{module}" />
+
+				<if>
+					<available file="${src.dir}/build.xml" />
+					<then>
+						<if>
+							<equals arg1="${test.list}" arg2="" />
+							<then>
+								<var name="concat" value="${src.dir.name}" />
+							</then>
+							<else>
+								<var name="concat" value="${test.list},${src.dir.name}" />
+							</else>
+						</if>
+						<var name="test.list" value="${concat}" />
+
+						<concat destfile="${project.dir}/nbproject/project.properties" append="true">file.reference.${src.dir.name}.test=@{module}
+test.${src.dir.name}.dir=$${file.reference.${src.dir.name}.test}
+
+</concat>
+					</then>
+				</if>
+
+				<var name="src.dir" unset="true" />
+				<var name="src.dir.name" unset="true" />
+		</sequential>
+	</macrodef>
 
 	<macrodef name="set-module-source-directory">
 		<attribute name="module" />
@@ -66,39 +132,48 @@
 				</dirset>
 			</path>
 			<sequential>
-				<set-module-source-directory module="@{module}" />
-
-				<if>
-					<available file="${src.dir}/build.xml" />
-					<then>
-						<if>
-							<equals arg1="${module.list}" arg2="" />
-							<then>
-								<var name="concat" value="${src.dir.name}" />
-							</then>
-							<else>
-								<var name="concat" value="${module.list},${src.dir.name}" />
-							</else>
-						</if>
-						<var name="module.list" value="${concat}" />
-
-						<concat destfile="${project.dir}/nbproject/project.properties" append="true">file.reference.${src.dir.name}=@{module}
-src.${src.dir.name}.dir=$${file.reference.${src.dir.name}}
-
-</concat>
-					</then>
-				</if>
-
-				<var name="src.dir" unset="true" />
-				<var name="src.dir.name" unset="true" />
+				<append-source-list
+					module="@{module}"
+				/>
 			</sequential>
 		</for>
+
+		<for param="test">
+			<path>
+				<dirset dir="${portal.dir}">
+					<include name="**/test"/>
+				</dirset>
+			</path>
+			<sequential>
+				<append-test-list
+					module="@{test}"
+				/>
+			</sequential>
+		</for>
+
+		<concat destfile="${project.dir}/nbproject/project.properties" append="true">file.reference.portal-test.test=${portal.dir}/portal-test
+test.portal-test.dir=$${file.reference.portal-test.test}
+
+</concat>
+
+		<concat destfile="${project.dir}/nbproject/project.properties" append="true">file.reference.portal-test-internal.test=${portal.dir}/portal-test-internal
+test.portal-test-internal.dir=$${file.reference.portal-test-internal.test}
+
+</concat>
+
+		<var name="concat" value="${test.list},portal-test,portal-test-internal" />
+
+		<var name="test.list" value="${concat}" />
+
 		<concat destfile="${project.dir}/nbproject/project.properties" append="true">file.reference.portal-lib=${portal.dir}/lib
 javac.classpath=\
 	$${file.reference.portal-lib}</concat>
+
+
 		<java classname="CreateProject" classpath="${basedir}/classes">
 			<arg value="${project.name}" />
 			<arg value="${module.list}" />
+			<arg value="${test.list}" />
 		</java>
 	</target>
 
