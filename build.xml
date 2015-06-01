@@ -7,7 +7,7 @@
 <!-- the Compile on Save feature is turned off for the project. -->
 <!-- You can turn off the Compile on Save (or Deploy on Save) setting -->
 <!-- in the project's Project Properties dialog box.-->
-<project name="GlobalSource" default="default" basedir=".">
+<project name="GlobalSource" default="build" basedir=".">
 	<property file="build.properties" />
 
 	<property name="module.list" value="" />
@@ -46,7 +46,7 @@
 		</sequential>
 	</macrodef>
 
-	<target name="build-all">
+	<target name="build">
 		<mkdir dir="classes" />
 
 		<javac
@@ -55,9 +55,9 @@
 			includeantruntime="false"
 		/>
 
-		<unzip src="CleanProject.zip" dest="." />
+		<unzip src="${project.dir}/CleanProject.zip" dest="${project.dir}/" />
 
-		<copy file="nbproject/default.properties" tofile="nbproject/project.properties" />
+		<copy file="${project.dir}/nbproject/default.properties" tofile="${project.dir}/nbproject/project.properties" />
 
 		<for param="module">
 			<path>
@@ -82,7 +82,7 @@
 						</if>
 						<var name="module.list" value="${concat}" />
 
-						<concat destfile="nbproject/project.properties" append="true">file.reference.${src.dir.name}=@{module}
+						<concat destfile="${project.dir}/nbproject/project.properties" append="true">file.reference.${src.dir.name}=@{module}
 src.${src.dir.name}.dir=$${file.reference.${src.dir.name}}
 
 </concat>
@@ -93,7 +93,7 @@ src.${src.dir.name}.dir=$${file.reference.${src.dir.name}}
 				<var name="src.dir.name" unset="true" />
 			</sequential>
 		</for>
-		<concat destfile="nbproject/project.properties" append="true">file.reference.portal-lib=${portal.dir}/lib
+		<concat destfile="${project.dir}/nbproject/project.properties" append="true">file.reference.portal-lib=${portal.dir}/lib
 javac.classpath=\
 	$${file.reference.portal-lib}</concat>
 		<java classname="CreateProject" classpath="${basedir}/classes">
@@ -104,6 +104,6 @@ javac.classpath=\
 
 	<target name="clean">
 		<delete dir="classes" />
-		<delete dir="nbproject" />
+		<delete dir="${project.dir}/nbproject" />
 	</target>
 </project>

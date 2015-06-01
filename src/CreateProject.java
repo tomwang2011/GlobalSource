@@ -112,7 +112,7 @@ public class CreateProject {
 
 		StreamResult streamResult;
 
-		streamResult = new StreamResult(new File("nbproject/project.xml"));
+		streamResult = new StreamResult(new File("portal/nbproject/project.xml"));
 
 		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 		transformer.setOutputProperty(
