@@ -11,7 +11,6 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
 public class CreateProject {
 	public static void createConfiguration(Element projectElement) {
 		Element configurationElement = document.createElement("configuration");
@@ -26,7 +25,8 @@ public class CreateProject {
 	public static void createData(Element configurationElement) {
 		Element dataElement = document.createElement("data");
 
-		dataElement.setAttribute("xmlns", "http://www.netbeans.org/ns/j2se-project/3");
+		dataElement.setAttribute(
+			"xmlns", "http://www.netbeans.org/ns/j2se-project/3");
 
 		configurationElement.appendChild(dataElement);
 
@@ -40,31 +40,33 @@ public class CreateProject {
 
 		dataElement.appendChild(sourceRootsElement);
 
-		for(String module:_modules) {
-			if(!(module.endsWith("-test")||module.endsWith("test-internal")))
-			createRoots(sourceRootsElement,"src."+module+".dir", module);
+		for (String module :_modules) {
+			if (!(module.endsWith("-test")||module.endsWith("test-internal"))) {
+				createRoots(sourceRootsElement, "src."+module+".dir", module);
+			}
 		}
 
 		Element testRootsElement = document.createElement("test-roots");
 
 		dataElement.appendChild(testRootsElement);
 
-		for(String test:_tests) {
+		for (String test :_tests) {
 			createRoots(testRootsElement, "test."+test+".dir", test);
 		}
-
 	}
 
 	public static void createLibraries(Element configurationElement) {
 		Element librariesElement = document.createElement("libraries");
 
-		librariesElement.setAttribute("xmlns", "http://www.netbeans.org/ns/ant-project-libraries/1");
+		librariesElement.setAttribute(
+			"xmlns", "http://www.netbeans.org/ns/ant-project-libraries/1");
 
 		configurationElement.appendChild(librariesElement);
 
 		Element definitionsElement = document.createElement("definitions");
 
-		definitionsElement.appendChild(document.createTextNode("./lib/nblibraries.properties"));
+		definitionsElement.appendChild(
+			document.createTextNode("./lib/nblibraries.properties"));
 
 		librariesElement.appendChild(definitionsElement);
 	}
@@ -72,20 +74,24 @@ public class CreateProject {
 	public static void createProjectElement() {
 		Element projectElement = document.createElement("project");
 
-		projectElement.setAttribute("xmlns", "http://www.netbeans.org/ns/project/1");
+		projectElement.setAttribute(
+			"xmlns", "http://www.netbeans.org/ns/project/1");
 
 		document.appendChild(projectElement);
 
 		Element typeElement = document.createElement("type");
 
-		typeElement.appendChild(document.createTextNode("org.netbeans.modules.java.j2seproject"));
+		typeElement.appendChild(
+			document.createTextNode("org.netbeans.modules.java.j2seproject"));
 
 		projectElement.appendChild(typeElement);
 
 		createConfiguration(projectElement);
 	}
 
-	public static void createRoots(Element sourceRootsElement, String module, String moduleName) {
+	public static void createRoots(
+		Element sourceRootsElement, String module, String moduleName) {
+
 		Element rootElement = document.createElement("root");
 
 		rootElement.setAttribute("id", module);
@@ -94,6 +100,7 @@ public class CreateProject {
 
 		sourceRootsElement.appendChild(rootElement);
 	}
+
 	public static void main(String[] args) throws Exception {
 		parseArgument(args);
 
@@ -116,7 +123,8 @@ public class CreateProject {
 
 		StreamResult streamResult;
 
-		streamResult = new StreamResult(new File("portal/nbproject/project.xml"));
+		streamResult =
+			new StreamResult(new File("portal/nbproject/project.xml"));
 
 		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 		transformer.setOutputProperty(
@@ -141,8 +149,9 @@ public class CreateProject {
 		}
 	}
 
-	private static Document document;
-	private static String _projectName;
 	private static String[] _modules;
+	private static String _projectName;
 	private static String[] _tests;
+	private static Document document;
+
 }
