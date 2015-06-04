@@ -1,12 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- You may freely edit this file. See commented blocks below for -->
-<!-- some examples of how to customize the build. -->
-<!-- (If you delete it and reopen the project it will be recreated.) -->
-<!-- By default, only the Clean and Build commands use this build script. -->
-<!-- Commands such as Run, Debug, and Test only use this build script if -->
-<!-- the Compile on Save feature is turned off for the project. -->
-<!-- You can turn off the Compile on Save (or Deploy on Save) setting -->
-<!-- in the project's Project Properties dialog box.-->
+
 <project name="GlobalSource" default="build" basedir=".">
 	<property file="build.properties" />
 
@@ -57,9 +50,9 @@
 					<var name="module.list" value="${concat}" />
 
 					<concat destfile="${project.dir}/nbproject/project.properties" append="true">file.reference.${src.dir.name}=@{module}
-						src.${src.dir.name}.dir=$${file.reference.${src.dir.name}}
+src.${src.dir.name}.dir=$${file.reference.${src.dir.name}}
 
-					</concat>
+</concat>
 				</then>
 			</if>
 
@@ -89,9 +82,9 @@
 					<var name="test.list" value="${concat}" />
 
 					<concat destfile="${project.dir}/nbproject/project.properties" append="true">file.reference.${src.dir.name}.test=@{module}
-						test.${src.dir.name}.dir=$${file.reference.${src.dir.name}.test}
+test.${src.dir.name}.dir=$${file.reference.${src.dir.name}.test}
 
-					</concat>
+</concat>
 				</then>
 			</if>
 
@@ -148,9 +141,22 @@
 				</dirset>
 			</path>
 			<sequential>
-				<append-source-list
-					module="@{module}"
-				/>
+				<dirname property="src.dir" file="@{module}" />
+
+				<basename property="src.dir.name" file="${src.dir}" />
+
+				<property file="exclude-modules.properties" />
+
+				<if>
+					<not>
+						<contains string="${exclude-modules}" substring="${src.dir.name}" />
+					</not>
+					<then>
+						<append-source-list
+							module="@{module}"
+						/>
+					</then>
+				</if>
 			</sequential>
 		</for>
 
@@ -168,14 +174,14 @@
 		</for>
 
 		<concat destfile="${project.dir}/nbproject/project.properties" append="true">file.reference.portal-test.test=${portal.dir}/portal-test
-			test.portal-test.dir=$${file.reference.portal-test.test}
+test.portal-test.dir=$${file.reference.portal-test.test}
 
-		</concat>
+</concat>
 
 		<concat destfile="${project.dir}/nbproject/project.properties" append="true">file.reference.portal-test-internal.test=${portal.dir}/portal-test-internal
-			test.portal-test-internal.dir=$${file.reference.portal-test-internal.test}
+test.portal-test-internal.dir=$${file.reference.portal-test-internal.test}
 
-		</concat>
+</concat>
 
 		<var name="concat" value="${test.list},portal-test,portal-test-internal" />
 
