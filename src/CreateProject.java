@@ -12,6 +12,7 @@ import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 public class CreateProject {
+
 	public static void createConfiguration(Element projectElement) {
 		Element configurationElement = document.createElement("configuration");
 
@@ -41,7 +42,7 @@ public class CreateProject {
 		dataElement.appendChild(sourceRootsElement);
 
 		for (String module :_modules) {
-			if (!(module.endsWith("-test")||module.endsWith("test-internal"))) {
+			if (!module.endsWith("-test")||module.endsWith("test-internal")) {
 				createRoots(sourceRootsElement, "src."+module+".dir", module);
 			}
 		}

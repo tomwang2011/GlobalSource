@@ -3,7 +3,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
-
 public class AppendLibJars {
 
 	public static void main(String[] args) {
@@ -12,8 +11,8 @@ public class AppendLibJars {
 		File propertyFile = new File("portal/nbproject/project.properties");
 
 		if (propertyFile.exists()) {
-			try (PrintWriter printWriter =
-				new PrintWriter(
+			try (
+				PrintWriter printWriter = new PrintWriter(
 					new BufferedWriter(new FileWriter(propertyFile, true)))) {
 
 				for (String jarPath : jars) {
@@ -43,4 +42,5 @@ public class AppendLibJars {
 			System.out.println("file not found");
 		}
 	}
+
 }
