@@ -31,6 +31,8 @@
 
 	<macrodef name="append-source-list">
 		<attribute name="module" />
+		<attribute name="list" />
+		<attribute name="type" />
 
 		<sequential>
 			<set-module-source-directory module="@{module}" />
@@ -39,50 +41,19 @@
 				<available file="${src.dir}/build.xml" />
 				<then>
 					<if>
-						<equals arg1="${module.list}" arg2="" />
+						<equals arg1="${@{list}}" arg2="" />
 						<then>
 							<var name="concat" value="${src.dir.name}" />
 						</then>
 						<else>
-							<var name="concat" value="${module.list},${src.dir.name}" />
+							<var name="concat" value="${@{list}},${src.dir.name}" />
 						</else>
 					</if>
-					<var name="module.list" value="${concat}" />
 
-					<concat destfile="${project.dir}/nbproject/project.properties" append="true">file.reference.${src.dir.name}=@{module}
-src.${src.dir.name}.dir=$${file.reference.${src.dir.name}}
+					<var name="@{list}" value="${concat}" />
 
-</concat>
-				</then>
-			</if>
-
-			<var name="src.dir" unset="true" />
-			<var name="src.dir.name" unset="true" />
-		</sequential>
-	</macrodef>
-
-	<macrodef name="append-test-list">
-		<attribute name="module" />
-
-		<sequential>
-			<set-module-source-directory module="@{module}" />
-
-			<if>
-				<available file="${src.dir}/build.xml" />
-				<then>
-					<if>
-						<equals arg1="${test.list}" arg2="" />
-						<then>
-							<var name="concat" value="${src.dir.name}" />
-						</then>
-						<else>
-							<var name="concat" value="${test.list},${src.dir.name}" />
-						</else>
-					</if>
-					<var name="test.list" value="${concat}" />
-
-					<concat destfile="${project.dir}/nbproject/project.properties" append="true">file.reference.${src.dir.name}.test=@{module}
-test.${src.dir.name}.dir=$${file.reference.${src.dir.name}.test}
+					<concat destfile="${project.dir}/nbproject/project.properties" append="true">file.reference.${src.dir.name}.@{type}=@{module}
+@{type}.${src.dir.name}.dir=$${file.reference.${src.dir.name}.@{type}}
 
 </concat>
 				</then>
@@ -154,6 +125,8 @@ test.${src.dir.name}.dir=$${file.reference.${src.dir.name}.test}
 					<then>
 						<append-source-list
 							module="@{module}"
+							list="module.list"
+							type="src"
 						/>
 					</then>
 				</if>
@@ -167,8 +140,10 @@ test.${src.dir.name}.dir=$${file.reference.${src.dir.name}.test}
 				</dirset>
 			</path>
 			<sequential>
-				<append-test-list
+				<append-source-list
 					module="@{test}"
+					list="test.list"
+					type="test"
 				/>
 			</sequential>
 		</for>
