@@ -41,21 +41,76 @@
 				<available file="${src.dir}/build.xml" />
 				<then>
 					<if>
-						<equals arg1="${@{list}}" arg2="" />
+						<equals arg1="@{list}" arg2="module.list" />
 						<then>
-							<var name="concat" value="${src.dir.name}" />
+							<if>
+								<equals arg1="${@{list}}" arg2="" />
+								<then>
+									<var name="concat" value="${src.dir.name}" />
+								</then>
+								<else>
+									<var name="concat" value="${@{list}},${src.dir.name}" />
+								</else>
+							</if>
+
+							<var name="@{list}" value="${concat}" />
 						</then>
-						<else>
-							<var name="concat" value="${@{list}},${src.dir.name}" />
-						</else>
 					</if>
 
-					<var name="@{list}" value="${concat}" />
-
-					<concat destfile="${project.dir}/nbproject/project.properties" append="true">file.reference.${src.dir.name}.@{type}=@{module}
+					<if>
+						<equals arg1="@{type}" arg2="test" />
+						<then>
+							<if>
+								<available file="@{module}/unit" type="dir" />
+								<then>
+									<concat destfile="${project.dir}/nbproject/project.properties" append="true">file.reference.${src.dir.name}.@{type}=@{module}/unit
 @{type}.${src.dir.name}.dir=$${file.reference.${src.dir.name}.@{type}}
 
 </concat>
+								<if>
+									<equals arg1="${@{list}}" arg2="" />
+									<then>
+										<var name="concat" value="${src.dir.name}" />
+									</then>
+									<else>
+										<var name="concat" value="${@{list}},${src.dir.name}" />
+									</else>
+								</if>
+
+								<var name="@{list}" value="${concat}" />
+
+								</then>
+							</if>
+							<if>
+								<available file="@{module}/integration" type="dir" />
+								<then>
+									<concat destfile="${project.dir}/nbproject/project.properties" append="true">file.reference.${src.dir.name}.@{type}.integration=@{module}/integration
+@{type}.${src.dir.name}-integration.dir=$${file.reference.${src.dir.name}.@{type}.integration}
+
+</concat>
+
+								<if>
+									<equals arg1="${@{list}}" arg2="" />
+									<then>
+										<var name="concat" value="${src.dir.name}-integration" />
+									</then>
+									<else>
+										<var name="concat" value="${@{list}},${src.dir.name}-integration" />
+									</else>
+								</if>
+
+								<var name="@{list}" value="${concat}" />
+								</then>
+							</if>
+						</then>
+						<else>
+							<concat destfile="${project.dir}/nbproject/project.properties" append="true">file.reference.${src.dir.name}.@{type}=@{module}
+@{type}.${src.dir.name}.dir=$${file.reference.${src.dir.name}.@{type}}
+
+</concat>
+						</else>
+					</if>
+
 				</then>
 			</if>
 
@@ -148,12 +203,12 @@
 			</sequential>
 		</for>
 
-		<concat destfile="${project.dir}/nbproject/project.properties" append="true">file.reference.portal-test.test=${portal.dir}/portal-test
+		<concat destfile="${project.dir}/nbproject/project.properties" append="true">file.reference.portal-test.test=${portal.dir}/portal-test/src
 test.portal-test.dir=$${file.reference.portal-test.test}
 
 </concat>
 
-		<concat destfile="${project.dir}/nbproject/project.properties" append="true">file.reference.portal-test-internal.test=${portal.dir}/portal-test-internal
+		<concat destfile="${project.dir}/nbproject/project.properties" append="true">file.reference.portal-test-internal.test=${portal.dir}/portal-test-internal/src
 test.portal-test-internal.dir=$${file.reference.portal-test-internal.test}
 
 </concat>
