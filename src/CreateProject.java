@@ -1,5 +1,6 @@
 
 import java.io.File;
+import java.util.Arrays;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -41,9 +42,17 @@ public class CreateProject {
 
 		dataElement.appendChild(sourceRootsElement);
 
-		for (String module :_modules) {
+		String moduleName="";
+
+		for (String module : _modules) {
+			for(String path : _pathes) {
+				path = path.substring(_portalDir.length()+1);
+				if(path.contains(module)) {
+					moduleName = path;
+				}
+			}
 			if (!module.endsWith("-test")||module.endsWith("test-internal")) {
-				createRoots(sourceRootsElement, "src."+module+".dir", module);
+				createRoots(sourceRootsElement, "src."+module+".dir", moduleName);
 			}
 		}
 
@@ -51,8 +60,15 @@ public class CreateProject {
 
 		dataElement.appendChild(testRootsElement);
 
-		for (String test :_tests) {
-			createRoots(testRootsElement, "test."+test+".dir", test);
+		for (String test : _tests) {
+			for(String path : _pathes) {
+				path = path.substring(_portalDir.length()+1);
+				String integrationPath = path + "-integration";
+				if(path.contains(test) || integrationPath.contains(test)) {
+					moduleName = path;
+				}
+			}
+			createRoots(testRootsElement, "test."+test+".dir", moduleName);
 		}
 	}
 
@@ -140,6 +156,12 @@ public class CreateProject {
 			_modules = args[1].split(",");
 
 			_tests = args[2].split(",");
+
+			_pathes = args[3].split(",");
+
+			_pathes = Arrays.copyOfRange(_pathes,1,_pathes.length);
+
+			_portalDir = args[4];
 		}
 		catch (ArrayIndexOutOfBoundsException e) {
 			System.out.println(
@@ -151,6 +173,8 @@ public class CreateProject {
 	}
 
 	private static String[] _modules;
+	private static String[] _pathes;
+	private static String _portalDir;
 	private static String _projectName;
 	private static String[] _tests;
 	private static Document document;

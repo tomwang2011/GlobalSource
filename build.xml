@@ -7,6 +7,7 @@
 	<property name="sdk.dir" value="${portal.dir}/tools/sdk" />
 
 	<property name="module.list" value="" />
+	<property name="path.list" value="" />
 	<property name="test.list" value="" />
 
 	<taskdef resource="net/sf/antcontrib/antlib.xml">
@@ -40,6 +41,9 @@
 			<if>
 				<available file="${src.dir}/build.xml" />
 				<then>
+					<var name="concat" value="${path.list},${src.dir}" />
+					<var name="path.list" value="${concat}" />
+
 					<if>
 						<equals arg1="@{list}" arg2="module.list" />
 						<then>
@@ -223,6 +227,8 @@ test.portal-test-internal.dir=$${file.reference.portal-test-internal.test}
 			<arg value="${project.name}" />
 			<arg value="${module.list}" />
 			<arg value="${test.list}" />
+			<arg value="${path.list}" />
+			<arg value="${portal.dir}" />
 		</java>
 	</target>
 
