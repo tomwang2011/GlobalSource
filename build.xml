@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project name="GlobalSource" default="build" basedir=".">
+<project name="GlobalSourceProject" default="build" basedir=".">
+    <description>Builds, tests, and runs the project GlobalSourceProject.</description>
+    <import file="nbproject/build-impl.xml"/>
+
 	<property file="build.properties" />
 
 	<property name="project.dir" value="${basedir}/portal" />
@@ -192,18 +195,34 @@
 			</sequential>
 		</for>
 
-		<for param="test">
+		<for param="test.module">
 			<path>
 				<dirset dir="${portal.dir}">
 					<include name="**/test"/>
 				</dirset>
 			</path>
 			<sequential>
-				<append-source-list
-					module="@{test}"
-					list="test.list"
-					type="test"
-				/>
+				<dirname property="test.dir" file="@{test.module}" />
+
+				<basename property="test.dir.name" file="${test.dir}" />
+
+				<property file="exclude-modules.properties" />
+
+				<if>
+					<not>
+						<contains string="${exclude-modules}" substring="${test.dir.name}" />
+					</not>
+					<then>
+						<append-source-list
+							module="@{test.module}"
+							list="test.list"
+							type="test"
+						/>
+					</then>
+				</if>
+
+				<var name="test.dir" unset="true" />
+				<var name="test.dir.name" unset="true" />
 			</sequential>
 		</for>
 
