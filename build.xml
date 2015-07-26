@@ -146,9 +146,7 @@
 		</sequential>
 	</macrodef>
 
-	<target name="build">
-		<ant target="clean" />
-
+	<target name="build" depends="clean">
 		<mkdir dir="classes" />
 
 		<javac
