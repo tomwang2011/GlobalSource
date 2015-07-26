@@ -43,14 +43,12 @@
 			<if>
 				<equals arg1="${@{list}}" arg2="" />
 				<then>
-					<var name="concat" value="@{src.dir.name}" />
+					<var name="@{list}" value="@{src.dir.name}" />
 				</then>
 				<else>
-					<var name="concat" value="${@{list}},@{src.dir.name}" />
+					<var name="@{list}" value="${@{list}},@{src.dir.name}" />
 				</else>
 			</if>
-
-			<var name="@{list}" value="${concat}" />
 		</sequential>
 	</macrodef>
 
@@ -63,8 +61,7 @@
 			<if>
 				<available file="${src.dir}/build.xml" />
 				<then>
-					<var name="concat" value="${path.list},${src.dir}" />
-					<var name="path.list" value="${concat}" />
+					<var name="path.list" value="${path.list},${src.dir}" />
 
 					<if>
 						<equals arg1="@{type}" arg2="test" />
@@ -218,9 +215,7 @@ src.portal-web.dir=$${file.reference.portal-web.src}
 
 </concat>
 
-		<var name="concat" value="${module.list},portal-web" />
-
-		<var name="module.list" value="${concat}" />
+		<var name="module.list" value="${module.list},portal-web" />
 
 		<concat destfile="${project.dir}/nbproject/project.properties" append="true">file.reference.portal-test.test=${portal.dir}/portal-test/src
 test.portal-test.dir=$${file.reference.portal-test.test}
@@ -232,9 +227,7 @@ test.portal-test-internal.dir=$${file.reference.portal-test-internal.test}
 
 </concat>
 
-		<var name="concat" value="${test.list},portal-test,portal-test-internal" />
-
-		<var name="test.list" value="${concat}" />
+		<var name="test.list" value="${test.list},portal-test,portal-test-internal" />
 
 		<append-lib-jars/>
 
