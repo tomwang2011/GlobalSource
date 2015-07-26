@@ -15,11 +15,7 @@
 	<property name="path.list" value="" />
 	<property name="test.list" value="" />
 
-	<taskdef resource="net/sf/antcontrib/antlib.xml">
-		<classpath>
-			<pathelement location="${portal.dir}/lib/development/ant-contrib.jar" />
-		</classpath>
-	</taskdef>
+	<taskdef classpath="${portal.dir}/lib/development/ant-contrib.jar" resource="net/sf/antcontrib/antlib.xml" />
 
 	<macrodef name="append-lib-jars">
 		<sequential>
