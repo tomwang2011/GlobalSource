@@ -23,10 +23,8 @@
 				<fileset dir="${portal.dir}/lib" includes="**/*.jar" />
 			</path>
 
-			<pathconvert property="lib-jars-convert" refid="lib-jars" pathsep="," />
-
 			<java classname="AppendLibJars" classpath="${basedir}/classes">
-				<arg value="${lib-jars-convert}" />
+				<arg value="${toString:lib-jars}" />
 			</java>
 		</sequential>
 	</macrodef>
