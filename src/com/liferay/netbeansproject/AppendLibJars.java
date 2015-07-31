@@ -1,3 +1,4 @@
+package com.liferay.netbeansproject;
 
 import java.io.BufferedWriter;
 import java.io.File;
