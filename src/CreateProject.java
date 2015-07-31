@@ -146,39 +146,38 @@ public class CreateProject {
 			throw new IllegalArgumentException(
 				"Incorrect Number of arguments");
 		}
-		else {
-			ProjectInfo projectInfo =
-				new ProjectInfo(
-					args[0], args[1], _reorderModules(args[2],args[1]),
-					_reorderModules(args[3],args[1]));
 
-			DocumentBuilderFactory documentBuilderFactory =
-				DocumentBuilderFactory.newInstance();
+		ProjectInfo projectInfo =
+			new ProjectInfo(
+				args[0], args[1], _reorderModules(args[2],args[1]),
+				_reorderModules(args[3],args[1]));
 
-			DocumentBuilder documentBuilder =
-				documentBuilderFactory.newDocumentBuilder();
+		DocumentBuilderFactory documentBuilderFactory =
+			DocumentBuilderFactory.newInstance();
 
-			_document = documentBuilder.newDocument();
+		DocumentBuilder documentBuilder =
+			documentBuilderFactory.newDocumentBuilder();
 
-			_createProjectElement(projectInfo);
+		_document = documentBuilder.newDocument();
 
-			TransformerFactory transformerFactory =
-				TransformerFactory.newInstance();
+		_createProjectElement(projectInfo);
 
-			Transformer transformer = transformerFactory.newTransformer();
+		TransformerFactory transformerFactory =
+			TransformerFactory.newInstance();
 
-			DOMSource source = new DOMSource(_document);
+		Transformer transformer = transformerFactory.newTransformer();
 
-			StreamResult streamResult;
+		DOMSource source = new DOMSource(_document);
 
-			streamResult =
-				new StreamResult(new File("portal/nbproject/project.xml"));
+		StreamResult streamResult;
 
-			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-			transformer.setOutputProperty(
-				"{http://xml.apache.org/xslt}indent-amount", "4");
-			transformer.transform(source, streamResult);
-		}
+		streamResult =
+			new StreamResult(new File("portal/nbproject/project.xml"));
+
+		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+		transformer.setOutputProperty(
+			"{http://xml.apache.org/xslt}indent-amount", "4");
+		transformer.transform(source, streamResult);
 	}
 
 	private static String[] _reorderModules(
