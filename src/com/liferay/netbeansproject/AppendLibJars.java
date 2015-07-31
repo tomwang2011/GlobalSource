@@ -12,11 +12,11 @@ public class AppendLibJars {
 	public static void appendJars(String jarList) throws FileNotFoundException {
 		String[] jars = jarList.split(File.pathSeparator);
 
-		File propertyFile = new File("portal/nbproject/project.properties");
-
 		try (
 			PrintWriter printWriter = new PrintWriter(
-				new BufferedWriter(new FileWriter(propertyFile, true)))) {
+				new BufferedWriter(
+					new FileWriter(
+						"portal/nbproject/project.properties", true)))) {
 
 			for (String jarPath : jars) {
 				String[] jarPathSplit = jarPath.split("/");
