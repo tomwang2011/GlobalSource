@@ -7,8 +7,8 @@ import java.io.PrintWriter;
 
 public class AppendLibJars {
 
-	public static void main(String[] args) {
-		String[] jars = args[0].split(File.pathSeparator);
+	public static void appendJars(String jarList) {
+		String[] jars = jarList.split(File.pathSeparator);
 
 		File propertyFile = new File("portal/nbproject/project.properties");
 
