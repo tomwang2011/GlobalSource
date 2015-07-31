@@ -149,7 +149,7 @@ public class CreateProject {
 				"Incorrect Number of arguments");
 		}
 
-		AppendLibJars.appendJars(args[4]);
+		AppendLibJars.appendJars(args[4].split(File.pathSeparator));
 
 		ProjectInfo projectInfo =
 			new ProjectInfo(

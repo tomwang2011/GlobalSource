@@ -1,7 +1,6 @@
 package com.liferay.netbeansproject;
 
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -10,9 +9,7 @@ import java.nio.file.Paths;
 
 public class AppendLibJars {
 
-	public static void appendJars(String jarList) throws IOException {
-		String[] jars = jarList.split(File.pathSeparator);
-
+	public static void appendJars(String[] jars) throws IOException {
 		if (jars.length == 0) {
 			return;
 		}
