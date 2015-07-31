@@ -9,7 +9,7 @@ import java.io.PrintWriter;
 
 public class AppendLibJars {
 
-	public static void appendJars(String jarList) throws FileNotFoundException {
+	public static void appendJars(String jarList) throws IOException {
 		String[] jars = jarList.split(File.pathSeparator);
 
 		try (
@@ -36,9 +36,6 @@ public class AppendLibJars {
 
 				printWriter.println("${file.reference." + jar + "}:\\");
 			}
-		}
-		catch (IOException e) {
-			System.out.println(e.getClass());
 		}
 	}
 
