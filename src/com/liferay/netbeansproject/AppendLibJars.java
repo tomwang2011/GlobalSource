@@ -14,9 +14,6 @@ public class AppendLibJars {
 
 		File propertyFile = new File("portal/nbproject/project.properties");
 
-		if (!propertyFile.exists()) {
-			throw new FileNotFoundException("Project.properties not found");
-		}
 		try (
 			PrintWriter printWriter = new PrintWriter(
 				new BufferedWriter(new FileWriter(propertyFile, true)))) {
