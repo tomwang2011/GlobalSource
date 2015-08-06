@@ -119,6 +119,8 @@
 						log="quiet"
 						transitive="true"
 					/>
+
+					<ivy:report todir="${ivy.reports.dir}/" outputpattern="${src.dir.name}" xsl="false" graph="false" xml="true" />
 				</then>
 			</if>
 		</sequential>
