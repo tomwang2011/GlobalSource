@@ -5,7 +5,7 @@
 	<property file="build-ext.properties" />
 	<property file="build.properties" />
 
-	<property name="project.dir" value="${basedir}/portal" />
+	<property name="project.dir" value="portal" />
 	<property name="sdk.dir" value="${portal.dir}/tools/sdk" />
 
 	<property name="module.list" value="" />
@@ -167,8 +167,8 @@
 		<mkdir dir="classes" />
 
 		<javac
-			srcdir="${basedir}/src"
-			destdir="${basedir}/classes"
+			srcdir="src"
+			destdir="classes"
 			includeantruntime="false"
 		/>
 
@@ -258,7 +258,7 @@ src.portal-web.dir=$${file.reference.portal-web.src}
 			<fileset dir="${portal.dir}/lib" includes="**/*.jar" />
 		</path>
 
-		<java classname="com.liferay.netbeansproject.CreateProject" classpath="${basedir}/classes/">
+		<java classname="com.liferay.netbeansproject.CreateProject" classpath="classes">
 			<arg value="${project.name}" />
 			<arg value="${portal.dir}" />
 			<arg value="${module.list}" />
