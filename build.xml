@@ -167,6 +167,10 @@
 		<concat destfile="${project.dir}/nbproject/project.properties" append="true">excludes=${exclude.types}
 </concat>
 
+		<copy todir="${ivy.home}">
+			<fileset dir="${portal.dir}/.ivy" />
+		</copy>
+
 		<for param="module">
 			<path>
 				<dirset dir="${portal.dir}">
@@ -247,6 +251,7 @@ src.portal-web.dir=$${file.reference.portal-web.src}
 
 	<target name="clean">
 		<delete dir="classes" />
+		<delete dir="${ivy.home}" />
 		<delete dir="${project.dir}/nbproject" />
 	</target>
 </project>
