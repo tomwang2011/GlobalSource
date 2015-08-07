@@ -9,29 +9,25 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
-import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 public class IvyReportParser {
 
-	public static String ParseIvyReport(String modulePath) throws Exception {
-		Path path = Paths.get(modulePath);
-
-		String reportName = path.getFileName().toString();
-
+	public static String parseIvyReport(String modulePath) throws Exception {
 		DocumentBuilderFactory documentBuilderFactory =
 			DocumentBuilderFactory.newInstance();
 
 		DocumentBuilder documentBuilder =
 			documentBuilderFactory.newDocumentBuilder();
 
-		File reportFile = new File("ivy-reports/" + reportName);
+		Path path = Paths.get(modulePath);
+
+		File reportFile = new File("ivy-reports/" + path.getFileName());
 
 		if(!reportFile.exists()) {
 			return "";
 		}
-
-		Document document = documentBuilder.parse(reportFile);
 
 		XPathFactory xPathFactory = XPathFactory.newInstance();
 
@@ -43,13 +39,15 @@ public class IvyReportParser {
 					"artifact/@location");
 
 		NodeList nodeList =
-			(NodeList) xPathExpression.evaluate(
-				document, XPathConstants.NODESET);
+			(NodeList)xPathExpression.evaluate(
+				documentBuilder.parse(reportFile), XPathConstants.NODESET);
 
 		StringBuilder sb = new StringBuilder();
 
 		for(int i = 0; i < nodeList.getLength(); i++) {
-			sb.append(nodeList.item(i).getNodeValue());
+			Node node = nodeList.item(i);
+
+			sb.append(node.getNodeValue());
 			sb.append(":");
 		}
 

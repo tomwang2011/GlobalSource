@@ -66,8 +66,8 @@ public class CreateProject {
 
 		StringBuilder sb = new StringBuilder(portalJars + ":");
 
-		for(String modulePath:projectInfo.getModules()) {
-			sb.append(IvyReportParser.ParseIvyReport(modulePath));
+		for(String modulePath : projectInfo.getModules()) {
+			sb.append(IvyReportParser.parseIvyReport(modulePath));
 		}
 
 		sb.setLength(sb.length() - 1);
