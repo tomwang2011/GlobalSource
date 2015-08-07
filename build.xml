@@ -104,15 +104,32 @@
 			<if>
 				<available file="${src.dir}/ivy.xml" />
 				<then>
-					<ivy:settings file="${portal.dir}/ivy-settings.xml" />
+					<if>
+						<available file="${src.dir}/ivy-settings.xml" />
+						<then>
+							<ivy:settings file="${src.dir}/ivy-settings.xml" id="ivy.resolve.settings" />
 
-					<ivy:resolve
-						conf="default,internal,provided"
-						file="${src.dir}/ivy.xml"
-						haltonfailure="false"
-						log="quiet"
-						transitive="true"
-					/>
+							<ivy:resolve
+								conf="default,internal,provided"
+								file="${src.dir}/ivy.xml"
+								haltonfailure="false"
+								log="quiet"
+								settingsref="ivy.resolve.settings"
+								transitive="true"
+							/>
+						</then>
+						<else>
+							<ivy:settings file="${portal.dir}/ivy-settings.xml"/>
+
+							<ivy:resolve
+								conf="default,internal,provided"
+								file="${src.dir}/ivy.xml"
+								haltonfailure="false"
+								log="quiet"
+								transitive="true"
+							/>
+						</else>
+					</if>
 
 					<ivy:report todir="${ivy.reports.dir}/" outputpattern="${src.dir.name}" xsl="false" graph="false" xml="true" />
 				</then>
