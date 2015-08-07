@@ -5,7 +5,6 @@
 	<property file="build-ext.properties" />
 	<property file="build.properties" />
 
-	<property name="ivy.home" value="${portal.dir}/.ivy" />
 	<property name="project.dir" value="${basedir}/portal" />
 	<property name="sdk.dir" value="${portal.dir}/tools/sdk" />
 
