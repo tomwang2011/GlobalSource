@@ -8,7 +8,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
-import java.util.Set;
 
 public class AppendLibJars {
 
@@ -25,9 +24,7 @@ public class AppendLibJars {
 
 			StringBuilder sb = new StringBuilder("javac.classpath=\\\n");
 
-			Set<String> jarSet = new LinkedHashSet(Arrays.asList(jars));
-
-			for (String jarPath : jarSet) {
+			for (String jarPath : new LinkedHashSet<>(Arrays.asList(jars))) {
 				Path path = Paths.get(jarPath);
 
 				Path fileNamePath = path.getFileName();
