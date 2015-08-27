@@ -2,6 +2,7 @@ package com.liferay.netbeansproject;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.Properties;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -41,7 +42,11 @@ public class IvyReportParser {
 
 		Properties properties = new Properties();
 
-		properties.load(new FileInputStream("build.properties"));
+		try (InputStream inputStream = new FileInputStream(
+				"build.properties")) {
+
+			properties.load(inputStream);
+		}
 
 		File reportFile =
 			new File(
