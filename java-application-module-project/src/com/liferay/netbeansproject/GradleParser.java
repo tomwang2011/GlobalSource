@@ -5,7 +5,9 @@ import java.io.File;
 import java.io.FileReader;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -25,6 +27,40 @@ public class GradleParser {
 		List<IvyDependency> ivyDependencyList = _parseBuildFile(args[0]);
 
 		_createIvyFile(ivyDependencyList, args[1]);
+	}
+
+	private static void _appendIvy(
+		boolean transitive, List<IvyDependency> ivyDependencyList,
+		Map<String, String> variableList, String line, String type) {
+
+		String[] ivyLine = StringUtils.substringsBetween(line, "\"", "\"");
+
+		if (ivyLine.length < 3) {
+			line = line.replaceAll("[\",]", "");
+
+			String[] variableLine = line.split(" ");
+
+			String name = "";
+			String version = "";
+
+			for (int i = 0; i < variableLine.length; i++) {
+				if (variableLine[i].equals("name:")) {
+					name = variableList.get(variableLine[i + 1]);
+				}
+
+				if (variableLine[i].equals("version:")) {
+					version = variableList.get(variableLine[i + 1]);
+				}
+			}
+
+			ivyDependencyList.add(
+				new IvyDependency(name, ivyLine[0], version, transitive, type));
+		}
+		else {
+			ivyDependencyList.add(
+				new IvyDependency(
+					ivyLine[1], ivyLine[0], ivyLine[2], transitive, type));
+		}
 	}
 
 	private static void _createDependenciesElement(
@@ -84,8 +120,8 @@ public class GradleParser {
 	}
 
 	private static void _createIvyFile(
-			List<IvyDependency> ivyDependencyList, String projectName)
-		throws Exception {
+		List<IvyDependency> ivyDependencyList, String projectName)
+			throws Exception {
 
 		DocumentBuilderFactory documentBuilderFactory =
 			DocumentBuilderFactory.newInstance();
@@ -176,10 +212,12 @@ public class GradleParser {
 
 				String line = br.readLine();
 
+				Map<String, String> variableList = new LinkedHashMap<>();
+
 				while (line != null) {
 					line = line.trim();
 
-					_solveLine(ivyDependencyList, line);
+					_solveLine(ivyDependencyList, variableList, line);
 
 					line = br.readLine();
 				}
@@ -190,7 +228,18 @@ public class GradleParser {
 	}
 
 	private static void _solveLine(
-		List<IvyDependency> ivyDependencyList, String line) {
+		List<IvyDependency> ivyDependencyList, Map<String, String> variableList,
+		String line) {
+
+		if (line.startsWith("String")) {
+			String[] vars = line.split(" ");
+
+			if (vars.length > 2) {
+				if (vars[0].equals("String") && vars[2].equals("=")) {
+					variableList.put(vars[1], vars[3].replace("\"", ""));
+				}
+			}
+		}
 
 		boolean transitive = true;
 
@@ -199,40 +248,26 @@ public class GradleParser {
 		}
 
 		if (line.startsWith("compile group")) {
-			String[] ivyLine = StringUtils.substringsBetween(line, "\"", "\"");
-
-			ivyDependencyList.add(
-					new IvyDependency(
-						ivyLine[1], ivyLine[0], ivyLine[2], transitive,
-							"default"));
+			_appendIvy(
+				transitive, ivyDependencyList, variableList, line, "default");
 		}
 
 		if (line.startsWith("provided group")) {
-			String[] ivyLine = StringUtils.substringsBetween(line, "\"", "\"");
-
-			ivyDependencyList.add(
-					new IvyDependency(
-						ivyLine[1], ivyLine[0], ivyLine[2], transitive,
-							"default"));
+			_appendIvy(
+				transitive, ivyDependencyList, variableList, line, "default");
 		}
 
 		if (line.startsWith("testCompile")) {
-			String[] ivyLine = StringUtils.substringsBetween(line, "\"", "\"");
-
-			ivyDependencyList.add(
-					new IvyDependency(
-						ivyLine[1], ivyLine[0], ivyLine[2], transitive,
-							"test->default"));
+			_appendIvy(
+				transitive, ivyDependencyList, variableList, line,
+					"test->default");
 		}
 
 		// Special case for dynamic-data-mapping-form-values-query
-		if (line.startsWith("antlr group")) {
-			String[] ivyLine = StringUtils.substringsBetween(line, "\"", "\"");
 
-			ivyDependencyList.add(
-					new IvyDependency(
-						ivyLine[1], ivyLine[0], ivyLine[2], transitive,
-							"default"));
+		if (line.startsWith("antlr group")) {
+			_appendIvy(
+				transitive, ivyDependencyList, variableList, line, "default");
 		}
 	}
 
