@@ -115,7 +115,7 @@ test.integration.dir=
 							/>
 						</then>
 						<else>
-							<ivy:settings file="${portal.dir}/tools/sdk/ivy-settings.xml" />
+							<ivy:settings file="../ivy-settings.xml" />
 
 							<ivy:resolve
 								conf="default,internal,provided,test"
