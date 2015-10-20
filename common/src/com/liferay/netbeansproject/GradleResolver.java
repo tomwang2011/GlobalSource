@@ -1,47 +1,47 @@
 package com.liferay.netbeansproject;
 
-import java.io.File;
-
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 public class GradleResolver {
 
 	public static void main(String[] args) throws Exception {
-		StringBuilder gradleSettingSB = new StringBuilder();
+		StringBuilder sb = new StringBuilder();
 
 		for(String pathToGradle : args[0].split(",")) {
-			String dependencyString = _extractDependencyString(pathToGradle);
-
 			Path path = Paths.get(pathToGradle);
 
 			Path fileName = path.getFileName();
 
-			_createGradleFile(dependencyString, "portal/modules/" + fileName);
+			_createGradleFile(
+				_extractDependencyString(path),
+				"portal/modules/" + fileName);
 
-			gradleSettingSB.append("include \"portal/modules/");
-			gradleSettingSB.append(fileName);
-			gradleSettingSB.append("\"\n");
+			sb.append("include \"portal/modules/");
+			sb.append(fileName);
+			sb.append("\"\n");
 		}
 
-		String gradleSettings = gradleSettingSB.toString();
-
-		Files.write(Paths.get("settings.gradle"), gradleSettings.getBytes());
+		Files.write(
+			Paths.get("settings.gradle"), Arrays.asList(sb),
+			Charset.defaultCharset());
 	}
 
-	private static String _extractDependencyString(String modulePath)
+	private static String _extractDependencyString(Path modulePath)
 		throws Exception {
 
-		File gradleFile = new File(modulePath, "build.gradle");
+		Path buildGradlePath = modulePath.resolve("build.gradle");
 
-		if(!gradleFile.exists()) {
+		if (!Files.exists(buildGradlePath)) {
 			return "";
 		}
 
-		String content = new String(Files.readAllBytes(gradleFile.toPath()));
+		String content = new String(Files.readAllBytes(buildGradlePath));
 
 		Matcher jenkinsMatcher = _jenkinsPattern.matcher(content);
 
@@ -80,7 +80,9 @@ public class GradleResolver {
 
 		content = content.replace("*insert-dependencies*", dependency);
 
-		Files.write(Paths.get(filePath + "/build.gradle"), content.getBytes());
+		Files.write(
+			Paths.get(filePath, "build.gradle"), Arrays.asList(content),
+			Charset.defaultCharset());
 	}
 
 	private static String _replaceKeywords(String dependency) {
