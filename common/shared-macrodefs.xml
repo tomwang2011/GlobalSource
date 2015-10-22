@@ -95,6 +95,7 @@
 			<mkdir dir="classes" />
 
 			<javac
+				debug="true"
 				destdir="classes"
 				classpathref="project.lib.path"
 				includeantruntime="false" >
