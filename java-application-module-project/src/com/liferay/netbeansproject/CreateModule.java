@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -39,9 +40,16 @@ public class CreateModule {
 			args[0], args[1], args[2], _reorderModules(args[3], args[1]),
 			_reorderModules(args[4], args[1]), args[5].split(","));
 
-		_replaceProjectName(projectInfo);
+		PropertyLoader propertyLoader = new PropertyLoader();
 
-		_appendProperties(projectInfo);
+		Properties properties =
+			propertyLoader.loadPropertyFile("build.properties");
+
+		String moduleDir = properties.getProperty("module.projects.dir");
+
+		_replaceProjectName(projectInfo, moduleDir);
+
+		_appendProperties(projectInfo, moduleDir);
 
 		DocumentBuilderFactory documentBuilderFactory =
 			DocumentBuilderFactory.newInstance();
@@ -63,7 +71,7 @@ public class CreateModule {
 		StreamResult streamResult = null;
 
 		String fileName =
-			"portal/modules/" + projectInfo.getProjectName() +
+			moduleDir + "/" + projectInfo.getProjectName() +
 				"/nbproject/project.xml";
 
 		streamResult = new StreamResult(new File(fileName));
@@ -127,14 +135,15 @@ public class CreateModule {
 		}
 	}
 
-	private static void _appendProperties(ProjectInfo projectInfo)
+	private static void _appendProperties(
+		ProjectInfo projectInfo, String moduleDir)
 		throws Exception {
 
 		try (
 			PrintWriter printWriter = new PrintWriter(
 				new BufferedWriter(
 					new FileWriter(
-						"portal/modules/" + projectInfo.getProjectName() +
+						moduleDir + "/" + projectInfo.getProjectName() +
 							"/nbproject/project.properties",
 						true)))) {
 
@@ -151,7 +160,7 @@ public class CreateModule {
 			Set<String> importShared = new HashSet<>();
 
 			File libFolder = new File(
-				"portal/modules/" + projectInfo.getProjectName() + "/lib");
+				moduleDir + "/" + projectInfo.getProjectName() + "/lib");
 
 			if (libFolder.exists()) {
 				_appendLibFolders(libFolder, javacSB, testSB);
@@ -167,7 +176,7 @@ public class CreateModule {
 					_appendReferenceProperties(printWriter, module, javacSB);
 
 					File importLibFolder = new File(
-						"portal/modules/" + module + "/lib");
+						moduleDir + "/" + module + "/lib");
 
 					if (importLibFolder.exists()) {
 						_appendLibFolders(importLibFolder, javacSB, testSB);
@@ -435,12 +444,12 @@ public class CreateModule {
 		return portalSourceList.toArray(new String[portalSourceList.size()]);
 	}
 
-	private static void _replaceProjectName(ProjectInfo projectInfo)
+	private static void _replaceProjectName(ProjectInfo projectInfo, String moduleDir)
 		throws IOException {
 
 		File file =
 			new File(
-				"portal/modules/" + projectInfo.getProjectName() +
+				moduleDir + "/" + projectInfo.getProjectName() +
 					"/build.xml");
 
 		String content = new String(Files.readAllBytes(file.toPath()));
