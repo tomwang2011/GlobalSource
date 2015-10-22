@@ -142,7 +142,7 @@
 				</sequential>
 			</for>
 
-			<java classname="com.liferay.netbeansproject.GradleResolver" classpath="classes" classpathref="project.lib.path">
+			<java classname="com.liferay.netbeansproject.gradle.GradleResolver" classpath="classes" classpathref="project.lib.path">
 				<arg value="${module.list}" />
 			</java>
 

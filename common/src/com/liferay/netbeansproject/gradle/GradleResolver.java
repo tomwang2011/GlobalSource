@@ -1,4 +1,4 @@
-package com.liferay.netbeansproject;
+package com.liferay.netbeansproject.gradle;
 
 import java.nio.charset.Charset;
 import java.nio.file.Files;
