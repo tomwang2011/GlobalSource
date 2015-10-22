@@ -18,12 +18,12 @@ configurations {
 *insert-dependencies*
 
 task copyDependencies(type: Copy) {
-    from configurations.compile
-    into "$buildDir"
+	from configurations.compile
+	into "$buildDir"
 }
 task copyTestDependencies(type: Copy) {
 	from configurations.testConfiguration
-    into "$buildDir/test"
+	into "$buildDir/test"
 }
 
 copyDependencies.dependsOn copyTestDependencies
