@@ -143,7 +143,7 @@
 			</for>
 
 			<java classname="com.liferay.netbeansproject.gradle.GradleResolver" classpath="classes" classpathref="project.lib.path">
-				<arg value="${module.list}" />
+				<arg value="module.list=${module.list}" />
 			</java>
 
 			<gradle-execute task="copyDependencies">

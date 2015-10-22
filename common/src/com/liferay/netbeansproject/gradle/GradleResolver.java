@@ -1,25 +1,42 @@
 package com.liferay.netbeansproject.gradle;
 
+import com.liferay.netbeansproject.util.ArgumentsUtil;
+import com.liferay.netbeansproject.util.StringUtil;
+
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import java.util.Arrays;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 public class GradleResolver {
 
 	public static void main(String[] args) throws Exception {
+		Map<String, String> arguments = ArgumentsUtil.parseArguments(args);
+
+		String moduleList = arguments.get("module.list");
+
+		if (moduleList == null) {
+			throw new IllegalArgumentException("Missing module.list");
+		}
+
+		String defaultGradleContent = new String(
+			Files.readAllBytes(Paths.get("../common/default.gradle")));
+
 		StringBuilder sb = new StringBuilder();
 
-		for(String pathToGradle : args[0].split(",")) {
-			Path path = Paths.get(pathToGradle);
+		for(String module : StringUtil.split(moduleList, ',')) {
+			Path modulePath = Paths.get(module);
 
-			Path fileName = path.getFileName();
+			Path fileName = modulePath.getFileName();
 
 			_createGradleFile(
-				_extractDependencyString(path),
+				defaultGradleContent, _extractDependency(modulePath),
 				"portal/modules/" + fileName);
 
 			sb.append("include \"portal/modules/");
@@ -32,8 +49,8 @@ public class GradleResolver {
 			Charset.defaultCharset());
 	}
 
-	private static String _extractDependencyString(Path modulePath)
-		throws Exception {
+	private static String _extractDependency(Path modulePath)
+		throws IOException {
 
 		Path buildGradlePath = modulePath.resolve("build.gradle");
 
@@ -49,21 +66,22 @@ public class GradleResolver {
 
 		while(jenkinsMatcher.find()) {
 			sb.append(jenkinsMatcher.group(0));
-			sb.append("\n");
+			sb.append('\n');
 		}
 
 		Matcher dependencyMatcher = _dependencyPattern.matcher(content);
 
 		while(dependencyMatcher.find()) {
 			sb.append(dependencyMatcher.group(0));
-			sb.append("\n");
+			sb.append('\n');
 		}
 
 		return sb.toString();
 	}
 
-	private static void _createGradleFile(String dependency, String filePath)
-		throws Exception {
+	private static void _createGradleFile(
+			String defaultGradleContent, String dependency, String filePath)
+		throws IOException {
 
 		Matcher projectMatcher = _projectPattern.matcher(dependency);
 
@@ -71,32 +89,29 @@ public class GradleResolver {
 
 		Matcher portalMatcher = _portalPattern.matcher(dependency);
 
-		dependency = portalMatcher.replaceAll("");
-
-		dependency = _replaceKeywords(dependency);
-
-		String content = new String(
-			Files.readAllBytes(Paths.get("../common/default.gradle")));
-
-		content = content.replace("*insert-dependencies*", dependency);
+		String gradleContent = StringUtil.replace(
+			defaultGradleContent, "*insert-dependencies*",
+			_replaceKeywords(portalMatcher.replaceAll("")));
 
 		Files.write(
-			Paths.get(filePath, "build.gradle"), Arrays.asList(content),
+			Paths.get(filePath, "build.gradle"), Arrays.asList(gradleContent),
 			Charset.defaultCharset());
 	}
 
 	private static String _replaceKeywords(String dependency) {
-		dependency = dependency.replace("optional, ", "");
-		dependency = dependency.replace("antlr group", "compile group");
-		dependency = dependency.replace("jarjar group", "compile group");
-		dependency = dependency.replace("jruby group", "compile group");
-		dependency = dependency.replace(
-			"jnaerator classifier: \"shaded\",", "compile");
-		dependency = dependency.replace("provided", "compile");
-		dependency = dependency.replace(
-			"testIntegrationCompile", "testCompile");
+		dependency = StringUtil.replace(dependency, "optional, ", "");
+		dependency = StringUtil.replace(
+			dependency, "antlr group", "compile group");
+		dependency = StringUtil.replace(
+			dependency, "jarjar group", "compile group");
+		dependency = StringUtil.replace(
+			dependency, "jruby group", "compile group");
+		dependency = StringUtil.replace(
+			dependency, "jnaerator classifier: \"shaded\",", "compile");
+		dependency = StringUtil.replace(dependency, "provided", "compile");
 
-		return dependency;
+		return  StringUtil.replace(
+			dependency, "testIntegrationCompile", "testCompile");
 	}
 
 	private static final Pattern _dependencyPattern =
