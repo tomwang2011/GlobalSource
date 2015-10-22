@@ -1,5 +1,6 @@
 package com.liferay.netbeansproject;
 
+import com.liferay.netbeansproject.util.PropertiesUtil;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -33,10 +34,8 @@ public class CreateProject {
 			throw new IllegalArgumentException("Incorrect Number of arguments");
 		}
 
-		PropertyLoader propertyLoader = new PropertyLoader();
-
-		Properties properties =
-			propertyLoader.loadPropertyFile("build.properties");
+		Properties properties = PropertiesUtil.loadProperties(
+			Paths.get("build.properties"));
 
 		String portalDir = properties.getProperty("project.dir");
 

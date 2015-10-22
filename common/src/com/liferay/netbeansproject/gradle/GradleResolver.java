@@ -1,6 +1,6 @@
 package com.liferay.netbeansproject.gradle;
 
-import com.liferay.netbeansproject.PropertyLoader;
+import com.liferay.netbeansproject.util.PropertiesUtil;
 import com.liferay.netbeansproject.util.ArgumentsUtil;
 import com.liferay.netbeansproject.util.StringUtil;
 
@@ -31,31 +31,32 @@ public class GradleResolver {
 		String defaultGradleContent = new String(
 			Files.readAllBytes(Paths.get("../common/default.gradle")));
 
+		Properties properties = PropertiesUtil.loadProperties(
+			Paths.get("build.properties"));
+
+		Path moduleProjectsDirPath = Paths.get(
+			properties.getProperty("module.projects.dir"));
+
 		StringBuilder sb = new StringBuilder();
-
-		PropertyLoader propertyLoader = new PropertyLoader();
-
-		Properties properties = propertyLoader.loadPropertyFile(
-			"build.properties");
-
-		String moduleDir = properties.getProperty("module.projects.dir");
 
 		for(String module : StringUtil.split(moduleList, ',')) {
 			Path modulePath = Paths.get(module);
 
-			Path fileName = modulePath.getFileName();
+			Path moduleName = modulePath.getFileName();
+
+			Path moduleProjectPath = moduleProjectsDirPath.resolve(moduleName);
 
 			_createGradleFile(
 				defaultGradleContent, _extractDependency(modulePath),
-				moduleDir + "/" + fileName);
+				moduleProjectPath.resolve("build.gradle"));
 
 			sb.append("include \"");
-			sb.append(fileName);
+			sb.append(moduleName);
 			sb.append("\"\n");
 		}
 
 		Files.write(
-			Paths.get(moduleDir + "/settings.gradle"), Arrays.asList(sb),
+			moduleProjectsDirPath.resolve("settings.gradle"), Arrays.asList(sb),
 			Charset.defaultCharset());
 	}
 
@@ -90,7 +91,7 @@ public class GradleResolver {
 	}
 
 	private static void _createGradleFile(
-			String defaultGradleContent, String dependency, String filePath)
+			String defaultGradleContent, String dependency, Path gradleFilePath)
 		throws IOException {
 
 		Matcher projectMatcher = _projectPattern.matcher(dependency);
@@ -104,7 +105,7 @@ public class GradleResolver {
 			_replaceKeywords(portalMatcher.replaceAll("")));
 
 		Files.write(
-			Paths.get(filePath, "build.gradle"), Arrays.asList(gradleContent),
+			gradleFilePath, Arrays.asList(gradleContent),
 			Charset.defaultCharset());
 	}
 

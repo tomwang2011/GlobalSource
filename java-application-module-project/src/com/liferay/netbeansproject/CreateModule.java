@@ -1,5 +1,6 @@
 package com.liferay.netbeansproject;
 
+import com.liferay.netbeansproject.util.PropertiesUtil;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -40,10 +41,8 @@ public class CreateModule {
 			args[0], args[1], args[2], _reorderModules(args[3], args[1]),
 			_reorderModules(args[4], args[1]), args[5].split(","));
 
-		PropertyLoader propertyLoader = new PropertyLoader();
-
-		Properties properties =
-			propertyLoader.loadPropertyFile("build.properties");
+		Properties properties = PropertiesUtil.loadProperties(
+			Paths.get("build.properties"));
 
 		String moduleDir = properties.getProperty("module.projects.dir");
 
