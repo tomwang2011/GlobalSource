@@ -1,6 +1,8 @@
 package com.liferay.netbeansproject;
 
+import com.liferay.netbeansproject.ModuleBuildParser.ModuleInfo;
 import com.liferay.netbeansproject.util.PropertiesUtil;
+import com.liferay.netbeansproject.util.StringUtil;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -82,29 +84,30 @@ public class CreateModule {
 	}
 
 	private static void _appendImportSharedList(
-		Set<String> importShared, Set<String> testImportShared,
-		ProjectInfo projectInfo, String fullPath)
+			Set<String> importModuleNames, Set<String> testImportModuleNames,
+			ProjectInfo projectInfo, Path modulePath)
 		throws Exception {
 
-		String importSharedList = ModuleBuildParser.parseBuildFile(fullPath);
+		Map<String, Path> moduleMap = projectInfo.getModuleMap();
 
-		if (!importSharedList.isEmpty()) {
-			for (String module : importSharedList.split(":")) {
-				Map<String, String> moduleNameMap =
-					projectInfo.getModuleNameMap();
+		for (ModuleInfo moduleInfo :
+				ModuleBuildParser.parseBuildFile(modulePath)) {
 
-				if (moduleNameMap.containsKey(module)) {
-					importShared.add(module);
+			String moduleName = moduleInfo.getModuleName();
 
-					_appendImportSharedList(
-						importShared, testImportShared, projectInfo,
-						moduleNameMap.get(module));
-				}
-				else if (moduleNameMap.containsKey(
-					module.replace("-testCompile", ""))) {
+			if (!moduleMap.containsKey(moduleName)) {
+				continue;
+			}
 
-					testImportShared.add(module.replace("-testCompile", ""));
-				}
+			if (moduleInfo.isTest()) {
+				testImportModuleNames.add(moduleName);
+			}
+			else {
+				importModuleNames.add(moduleName);
+
+				_appendImportSharedList(
+					importModuleNames, testImportModuleNames, projectInfo,
+					moduleMap.get(moduleName));
 			}
 		}
 	}
@@ -193,7 +196,7 @@ public class CreateModule {
 
 			_appendImportSharedList(
 				importShared, testImportShared,
-				projectInfo, projectInfo.getFullPath());
+				projectInfo, Paths.get(projectInfo.getFullPath()));
 
 			for (String module : importShared) {
 				if (!module.equals("")) {
@@ -613,8 +616,8 @@ public class CreateModule {
 			return _moduleList;
 		}
 
-		public Map getModuleNameMap() {
-			return _moduleNameMap;
+		public Map<String, Path> getModuleMap() {
+			return _moduleMap;
 		}
 
 		public String getPortalDir() {
@@ -649,16 +652,14 @@ public class CreateModule {
 
 			_moduleList = moduleList;
 
-			_moduleNameMap = new HashMap();
+			_moduleMap = new HashMap<>();
 
 			for (String module : moduleList) {
-				Path path = Paths.get(module);
+				Path modulePath = Paths.get(module);
 
-				Path namePath = path.getFileName();
+				Path namePath = modulePath.getFileName();
 
-				String nameString = namePath.toString();
-
-				_moduleNameMap.put(nameString, module);
+				_moduleMap.put(namePath.toString(), modulePath);
 			}
 		}
 
@@ -666,7 +667,7 @@ public class CreateModule {
 		private Set<String> _importShared;
 		private final String[] _jarLib;
 		private final String[] _moduleList;
-		private final Map _moduleNameMap;
+		private final Map<String, Path> _moduleMap;
 		private final String _portalDir;
 		private final String[] _projectLib;
 		private final String _projectName;
