@@ -95,19 +95,27 @@ public class CreateModule {
 
 			String moduleName = moduleInfo.getModuleName();
 
-			if (!moduleMap.containsKey(moduleName)) {
-				continue;
-			}
+			if (!importModuleNames.contains(moduleName) &&
+				!testImportModuleNames.contains(moduleName)) {
 
-			if (moduleInfo.isTest()) {
-				testImportModuleNames.add(moduleName);
-			}
-			else {
-				importModuleNames.add(moduleName);
+				if (!moduleMap.containsKey(moduleName)) {
+					continue;
+				}
 
-				_appendImportSharedList(
-					importModuleNames, testImportModuleNames, projectInfo,
-					moduleMap.get(moduleName));
+				if (moduleInfo.isTest()) {
+					testImportModuleNames.add(moduleName);
+
+					_appendImportSharedList(
+						importModuleNames, testImportModuleNames, projectInfo,
+						moduleMap.get(moduleName));
+				}
+				else {
+					importModuleNames.add(moduleName);
+
+					_appendImportSharedList(
+						importModuleNames, testImportModuleNames, projectInfo,
+						moduleMap.get(moduleName));
+				}
 			}
 		}
 	}
