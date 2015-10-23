@@ -178,9 +178,6 @@ public class CreateModule {
 				}
 			}
 
-			Set<String> importShared = new HashSet<>();
-			Set<String> testImportShared = new HashSet<>();
-
 			File libFolder = new File(
 				moduleDir + "/" + projectInfo.getProjectName() + "/lib");
 
@@ -190,6 +187,9 @@ public class CreateModule {
 			if (libFolder.exists()) {
 				_appendLibFolders(libFolder, projectSB, testSB);
 			}
+
+			Set<String> importShared = new HashSet<>();
+			Set<String> testImportShared = new HashSet<>();
 
 			_appendImportSharedList(
 				importShared, testImportShared,
