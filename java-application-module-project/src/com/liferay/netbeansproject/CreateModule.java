@@ -83,8 +83,8 @@ public class CreateModule {
 	}
 
 	private static void _appendImportSharedList(
-			Set<ModuleInfo> importModuleNames, ProjectInfo projectInfo,
-			Path modulePath)
+			Map<String, ModuleInfo> dependenciesModuleMap,
+			ProjectInfo projectInfo, Path modulePath)
 		throws Exception {
 
 		Map<String, Path> moduleMap = projectInfo.getModuleMap();
@@ -94,15 +94,14 @@ public class CreateModule {
 
 			String moduleName = moduleInfo.getModuleName();
 
-			if (!_checkModuleInfoSetContains(importModuleNames, moduleName)) {
-				if (!moduleMap.containsKey(moduleName)) {
-					continue;
-				}
+			if (!moduleMap.containsKey(moduleName)) {
+				continue;
+			}
 
-				importModuleNames.add(moduleInfo);
-
+			if (dependenciesModuleMap.put(moduleName, moduleInfo) == null) {
 				_appendImportSharedList(
-					importModuleNames, projectInfo, moduleMap.get(moduleName));
+					dependenciesModuleMap, projectInfo,
+					moduleMap.get(moduleName));
 			}
 		}
 	}
@@ -186,13 +185,13 @@ public class CreateModule {
 				_appendLibFolders(libFolder, projectSB, testSB);
 			}
 
-			Set<ModuleInfo> importShared = new HashSet<>();
+			Map<String, ModuleInfo> dependenciesModuleMap = new HashMap<>();
 
 			_appendImportSharedList(
-				importShared, projectInfo,
+				dependenciesModuleMap, projectInfo,
 				Paths.get(projectInfo.getFullPath()));
 
-			for (ModuleInfo moduleInfo : importShared) {
+			for (ModuleInfo moduleInfo : dependenciesModuleMap.values()) {
 				String moduleName = moduleInfo.getModuleName();
 
 				if(moduleInfo.isTest()) {
@@ -212,7 +211,7 @@ public class CreateModule {
 				}
 			}
 
-			projectInfo.setImportShared(importShared);
+			projectInfo.setDependenciesModuleMap(dependenciesModuleMap);
 
 			_appendJavacClasspath(
 				new File(projectInfo.getPortalDir() + "/lib/development"),
@@ -357,20 +356,6 @@ public class CreateModule {
 		}
 	}
 
-	private static boolean _checkModuleInfoSetContains(
-		Set<ModuleInfo> moduleInfoSet, String testName) {
-
-		for (ModuleInfo moduleInfo : moduleInfoSet) {
-			String moduleName = moduleInfo.getModuleName();
-
-			if (moduleName.equals(testName)) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
 	private static void _createConfiguration(
 			Element projectElement, ProjectInfo projectInfo)
 		throws IOException {
@@ -511,8 +496,11 @@ public class CreateModule {
 
 		configurationElement.appendChild(referencesElement);
 
-		for (ModuleInfo moduleInfo : projectInfo.getImportShared()) {
-			_createReference(referencesElement, moduleInfo.getModuleName());
+		Map<String, ModuleInfo> dependenciesModuleMap =
+			projectInfo.getDependenciesModuleMap();
+
+		for (String moduleName : dependenciesModuleMap.keySet()) {
+			_createReference(referencesElement, moduleName);
 		}
 
 		for (String module : projectInfo.getProjectLibs()) {
@@ -601,8 +589,8 @@ public class CreateModule {
 			return _fullPath;
 		}
 
-		public Set<ModuleInfo> getImportShared() {
-			return _importShared;
+		public Map<String, ModuleInfo> getDependenciesModuleMap() {
+			return _dependenciesModuleMap;
 		}
 
 		public String[] getJarLibs() {
@@ -629,8 +617,10 @@ public class CreateModule {
 			return _projectName;
 		}
 
-		public void setImportShared(Set<ModuleInfo> importShared) {
-			_importShared = importShared;
+		public void setDependenciesModuleMap(
+			Map<String, ModuleInfo> dependenciesModuleMap) {
+
+			_dependenciesModuleMap = dependenciesModuleMap;
 		}
 
 		private ProjectInfo(
@@ -661,7 +651,7 @@ public class CreateModule {
 		}
 
 		private final String _fullPath;
-		private Set<ModuleInfo> _importShared;
+		private Map<String, ModuleInfo> _dependenciesModuleMap;
 		private final String[] _jarLib;
 		private final String[] _moduleList;
 		private final Map<String, Path> _moduleMap;
