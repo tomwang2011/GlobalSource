@@ -38,12 +38,10 @@ public class CreateProject {
 		Properties properties = PropertiesUtil.loadProperties(
 			Paths.get("build.properties"));
 
-		String portalDir = properties.getProperty("portal.dir");
-
 		ProjectInfo projectInfo = new ProjectInfo(
-			properties.getProperty("project.name"), portalDir,
-			_reorderModules(arguments.get("module.list"), portalDir),
-			_reorderModules(arguments.get("umbrella.source.list"), portalDir));
+			properties.getProperty("project.name"),
+			StringUtil.split(arguments.get("module.list"), ','),
+			StringUtil.split(arguments.get("umbrella.source.list"), ','));
 
 		String projectDir = properties.getProperty("project.dir");
 
@@ -286,10 +284,6 @@ public class CreateProject {
 			return _modules;
 		}
 
-		public String getPortalDir() {
-			return _portalDir;
-		}
-
 		public String getProjectName() {
 			return _projectName;
 		}
@@ -299,12 +293,9 @@ public class CreateProject {
 		}
 
 		private ProjectInfo(
-			String projectName, String portalDir, String[] modules,
-			String[] sources) {
+			String projectName, String[] modules, String[] sources) {
 
 			_projectName = projectName;
-
-			_portalDir = portalDir;
 
 			_modules = modules;
 
@@ -312,10 +303,8 @@ public class CreateProject {
 		}
 
 		private final String[] _modules;
-		private final String _portalDir;
 		private final String _projectName;
 		private final String[] _sources;
-
 	}
 
 }
