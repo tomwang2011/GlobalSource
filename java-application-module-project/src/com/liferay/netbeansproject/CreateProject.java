@@ -27,7 +27,6 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import org.apache.commons.lang3.ArrayUtils;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -276,7 +275,7 @@ public class CreateProject {
 			return portalSourceList.toArray(new String[portalSourceList.size()]);
 		}
 
-		return ArrayUtils.EMPTY_STRING_ARRAY;
+		return new String[0];
 	}
 
 	private static Document _document;
