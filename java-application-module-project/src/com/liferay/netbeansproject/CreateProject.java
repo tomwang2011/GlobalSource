@@ -39,14 +39,12 @@ public class CreateProject {
 		Properties properties = PropertiesUtil.loadProperties(
 			Paths.get("build.properties"));
 
-		String projectName = properties.getProperty("project.name");
 		String portalDir = properties.getProperty("portal.dir");
-		String moduleList = arguments.get("module.list");
-		String umbrellaSourceList = arguments.get("umbrella.source.list");
 
 		ProjectInfo projectInfo = new ProjectInfo(
-			projectName, portalDir, _reorderModules(moduleList, portalDir),
-			_reorderModules(umbrellaSourceList, portalDir));
+			properties.getProperty("project.name"), portalDir,
+			_reorderModules(arguments.get("module.list"), portalDir),
+			_reorderModules(arguments.get("umbrella.source.list"), portalDir));
 
 		String projectDir = properties.getProperty("project.dir");
 

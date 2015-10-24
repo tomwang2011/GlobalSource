@@ -3,6 +3,7 @@ package com.liferay.netbeansproject;
 import com.liferay.netbeansproject.ModuleBuildParser.ModuleInfo;
 import com.liferay.netbeansproject.util.ArgumentsUtil;
 import com.liferay.netbeansproject.util.PropertiesUtil;
+import com.liferay.netbeansproject.util.StringUtil;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -14,7 +15,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,7 +29,6 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import org.apache.commons.lang3.ArrayUtils;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -41,18 +40,13 @@ public class CreateModule {
 		Properties properties = PropertiesUtil.loadProperties(
 			Paths.get("build.properties"));
 
-		String srcDirName = arguments.get("src.dir.name");
 		String portalDir = properties.getProperty("portal.dir");
-		String srcDir = arguments.get("src.dir");
-		String projectDependencies = arguments.get("project.dependencies");
-		String jarDependencies = arguments.get("jar.dependencies");
-		String moduleList = arguments.get("module.list");
 
 		ProjectInfo projectInfo = new ProjectInfo(
-			srcDirName, portalDir, srcDir,
-			_reorderModules(projectDependencies, portalDir),
-			_reorderModules(jarDependencies, portalDir),
-			StringUtil.split(moduleList, ','));
+			arguments.get("src.dir.name"), portalDir, arguments.get("src.dir"),
+			_reorderModules(arguments.get("project.dependencies"), portalDir),
+			_reorderModules(arguments.get("jar.dependencies"), portalDir),
+			StringUtil.split(arguments.get("module.list"), ','));
 
 		String moduleDir = properties.getProperty("module.projects.dir");
 
@@ -551,36 +545,22 @@ public class CreateModule {
 
 		String[] modules = StringUtil.split(originalOrder, ',');
 
-		if (modules.length > 0) {
+		List<String> moduleSourceList = new ArrayList<>();
 
-			int i = 0;
+		List<String> portalSourceList = new ArrayList<>();
 
-			List<String> moduleSourceList = new ArrayList<>();
-
-			while (modules[i].startsWith(portalDir + "/modules")) {
-				moduleSourceList.add(modules[i]);
-
-				i++;
+		for (String module : modules) {
+			if (module.startsWith(portalDir + "/modules")) {
+				moduleSourceList.add(module);
 			}
-
-			List<String> portalSourceList = new ArrayList<>();
-
-			while (i < modules.length) {
-				portalSourceList.add(modules[i]);
-
-				i++;
+			else {
+				portalSourceList.add(module);
 			}
-
-			Collections.sort(portalSourceList);
-
-			Collections.sort(moduleSourceList);
-
-			portalSourceList.addAll(moduleSourceList);
-
-			return portalSourceList.toArray(new String[portalSourceList.size()]);
 		}
 
-		return ArrayUtils.EMPTY_STRING_ARRAY;
+		portalSourceList.addAll(moduleSourceList);
+
+		return portalSourceList.toArray(new String[portalSourceList.size()]);
 	}
 
 	private static void _replaceProjectName(
