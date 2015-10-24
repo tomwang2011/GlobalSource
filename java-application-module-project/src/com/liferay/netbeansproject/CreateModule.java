@@ -597,10 +597,6 @@ public class CreateModule {
 			return _dependenciesModuleMap;
 		}
 
-		public String[] getModuleList() {
-			return _moduleList;
-		}
-
 		public Map<String, Path> getModuleMap() {
 			return _moduleMap;
 		}
@@ -635,8 +631,6 @@ public class CreateModule {
 
 			_projectLib = projectLibs;
 
-			_moduleList = moduleList;
-
 			_moduleMap = new HashMap<>();
 
 			for (String module : moduleList) {
@@ -650,7 +644,6 @@ public class CreateModule {
 
 		private final String _fullPath;
 		private Map<String, ModuleInfo> _dependenciesModuleMap;
-		private final String[] _moduleList;
 		private final Map<String, Path> _moduleMap;
 		private final String _portalDir;
 		private final String[] _projectLib;
