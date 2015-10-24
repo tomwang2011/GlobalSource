@@ -15,12 +15,12 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 
+import java.util.Queue;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
@@ -82,16 +82,21 @@ public class CreateModule {
 		transformer.transform(source, streamResult);
 	}
 
-	private static void _appendImportSharedList(
-			Map<String, ModuleInfo> dependenciesModuleMap,
+	private static Map<String, ModuleInfo> _parseModuleDependencies(
 			ProjectInfo projectInfo, Path modulePath)
 		throws Exception {
 
+		Map<String, ModuleInfo> dependenciesModuleMap = new HashMap<>();
+
 		Map<String, Path> moduleMap = projectInfo.getModuleMap();
 
-		for (ModuleInfo moduleInfo :
-				ModuleBuildParser.parseBuildFile(modulePath)) {
+		Queue<ModuleInfo> moduleInfoQueue = new LinkedList<>();
 
+		moduleInfoQueue.addAll(ModuleBuildParser.parseBuildFile(modulePath));
+
+		ModuleInfo moduleInfo = null;
+
+		while ((moduleInfo = moduleInfoQueue.poll()) != null) {
 			String moduleName = moduleInfo.getModuleName();
 
 			if (!moduleMap.containsKey(moduleName)) {
@@ -99,11 +104,13 @@ public class CreateModule {
 			}
 
 			if (dependenciesModuleMap.put(moduleName, moduleInfo) == null) {
-				_appendImportSharedList(
-					dependenciesModuleMap, projectInfo,
-					moduleMap.get(moduleName));
+				moduleInfoQueue.addAll(
+					ModuleBuildParser.parseBuildFile(
+						moduleMap.get(moduleName)));
 			}
 		}
+
+		return dependenciesModuleMap;
 	}
 
 	private static void _appendJavacClasspath(
@@ -185,11 +192,9 @@ public class CreateModule {
 				_appendLibFolders(libFolder, projectSB, testSB);
 			}
 
-			Map<String, ModuleInfo> dependenciesModuleMap = new HashMap<>();
-
-			_appendImportSharedList(
-				dependenciesModuleMap, projectInfo,
-				Paths.get(projectInfo.getFullPath()));
+			Map<String, ModuleInfo> dependenciesModuleMap =
+				_parseModuleDependencies(
+					projectInfo, Paths.get(projectInfo.getFullPath()));
 
 			for (ModuleInfo moduleInfo : dependenciesModuleMap.values()) {
 				String moduleName = moduleInfo.getModuleName();
