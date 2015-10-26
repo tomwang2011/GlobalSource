@@ -48,7 +48,7 @@ public class CreateModule {
 			_reorderModules(arguments.get("jar.dependencies"), portalDir),
 			StringUtil.split(arguments.get("module.list"), ','));
 
-		String moduleDir = properties.getProperty("module.projects.dir");
+		String moduleDir = properties.getProperty("project.dir") + "/modules";
 
 		_replaceProjectName(projectInfo, moduleDir);
 
