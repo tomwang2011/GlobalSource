@@ -299,7 +299,7 @@ public class CreateModule {
 			projectSB.append(modulePath);
 			projectSB.append("/src");
 
-			if(new File(modulePath + "/src/main/java").exists()) {
+			if(new File(modulePath + "/src/main").exists()) {
 				projectSB.append("/main/java\n");
 			}
 			else {
@@ -398,11 +398,14 @@ public class CreateModule {
 
 		dataElement.appendChild(sourceRootsElement);
 
-		String projectPath = projectInfo.getProjectName();
+		String projectPath = projectInfo.getFullPath();
 
-		_createRoots(
-			sourceRootsElement, projectInfo.getFullPath(),
-			"src." + projectInfo.getProjectName() + ".dir");
+		if (!(new File(projectPath + "/src/main").exists()) ||
+			new File(projectPath + "/src/main/java").exists()) {
+
+			_createRoots(sourceRootsElement, projectInfo.getFullPath(),
+				"src." + projectInfo.getProjectName() + ".dir");
+		}
 
 		if (projectInfo.getProjectName().equals("portal-impl") ||
 			projectInfo.getProjectName().equals("portal-service")) {
