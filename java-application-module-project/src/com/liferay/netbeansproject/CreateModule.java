@@ -45,7 +45,6 @@ public class CreateModule {
 		ProjectInfo projectInfo = new ProjectInfo(
 			arguments.get("src.dir.name"), portalDir, arguments.get("src.dir"),
 			_reorderModules(arguments.get("project.dependencies"), portalDir),
-			_reorderModules(arguments.get("jar.dependencies"), portalDir),
 			StringUtil.split(arguments.get("module.list"), ','));
 
 		String moduleDir = properties.getProperty("project.dir") + "/modules";
@@ -598,10 +597,6 @@ public class CreateModule {
 			return _dependenciesModuleMap;
 		}
 
-		public String[] getJarLibs() {
-			return _jarLib;
-		}
-
 		public String[] getModuleList() {
 			return _moduleList;
 		}
@@ -630,7 +625,7 @@ public class CreateModule {
 
 		private ProjectInfo(
 			String projectName, String portalDir, String fullPath,
-			String[] projectLibs, String[] jarLibs, String[] moduleList) {
+			String[] projectLibs, String[] moduleList) {
 
 			_projectName = projectName;
 
@@ -639,8 +634,6 @@ public class CreateModule {
 			_fullPath = fullPath;
 
 			_projectLib = projectLibs;
-
-			_jarLib = jarLibs;
 
 			_moduleList = moduleList;
 
@@ -657,7 +650,6 @@ public class CreateModule {
 
 		private final String _fullPath;
 		private Map<String, ModuleInfo> _dependenciesModuleMap;
-		private final String[] _jarLib;
 		private final String[] _moduleList;
 		private final Map<String, Path> _moduleMap;
 		private final String _portalDir;
