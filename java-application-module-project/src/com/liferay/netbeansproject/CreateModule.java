@@ -398,6 +398,8 @@ public class CreateModule {
 
 		dataElement.appendChild(sourceRootsElement);
 
+		String projectPath = projectInfo.getProjectName();
+
 		_createRoots(
 			sourceRootsElement, projectInfo.getFullPath(),
 			"src." + projectInfo.getProjectName() + ".dir");
@@ -410,14 +412,15 @@ public class CreateModule {
 
 		Element testRootsElement = _document.createElement("test-roots");
 
-		if (new File(projectInfo.getFullPath() + "/test/unit").exists()) {
+		if (new File(projectPath + "/test/unit").exists() ||
+			new File(projectPath + "/src/test").exists()) {
 			_createRoots(
 				testRootsElement,
 				"test." + projectInfo.getProjectName() + ".unit.dir");
 		}
 
-		if (new File(
-			projectInfo.getFullPath() + "/test/integration").exists()) {
+		if (new File(projectPath + "/test/integration").exists() ||
+			new File(projectPath + "/src/testIntegration").exists()) {
 
 			_createRoots(
 				testRootsElement,
