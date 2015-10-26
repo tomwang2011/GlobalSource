@@ -11,12 +11,7 @@
 
 	<property environment="env" />
 
-	<path id="project.lib.path">
-		<fileset dir="../common/lib" includes="*.jar" />
-	</path>
-
 	<taskdef classpath="${portal.dir}/lib/development/ant-contrib.jar" resource="net/sf/antcontrib/antlib.xml" />
-	<taskdef classpathref="project.lib.path" resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant" />
 
 	<macrodef name="append-list">
 		<attribute name="list" />
@@ -97,7 +92,6 @@
 			<javac
 				debug="true"
 				destdir="classes"
-				classpathref="project.lib.path"
 				includeantruntime="false" >
 
 				<src path="../common/src" />
@@ -142,7 +136,7 @@
 				</sequential>
 			</for>
 
-			<java classname="com.liferay.netbeansproject.gradle.GradleResolver" classpath="classes" classpathref="project.lib.path">
+			<java classname="com.liferay.netbeansproject.gradle.GradleResolver" classpath="classes">
 				<arg value="module.list=${module.list}" />
 			</java>
 

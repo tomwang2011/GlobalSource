@@ -77,7 +77,7 @@ reference.@{src.dir.name}.jar=$${project.@{src.dir.name}}/dist/@{src.dir.name}.j
 							</else>
 						</if>
 
-						<java classname="com.liferay.netbeansproject.CreateModule" classpath="classes" classpathref="project.lib.path">
+						<java classname="com.liferay.netbeansproject.CreateModule" classpath="classes">
 							<arg value="src.dir.name=${src.dir.name}" />
 							<arg value="src.dir=${src.dir}" />
 							<arg value="project.dependencies=${project.dependencies}" />
@@ -89,7 +89,7 @@ reference.@{src.dir.name}.jar=$${project.@{src.dir.name}}/dist/@{src.dir.name}.j
 			</sequential>
 		</for>
 
-		<java classname="com.liferay.netbeansproject.CreateProject" classpath="classes" classpathref="project.lib.path">
+		<java classname="com.liferay.netbeansproject.CreateProject" classpath="classes">
 			<arg value="module.list=${module.list}" />
 			<arg value="umbrella.source.list=${umbrella.source.list}" />
 		</java>
