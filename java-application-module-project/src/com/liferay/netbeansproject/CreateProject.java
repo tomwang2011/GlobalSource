@@ -12,11 +12,8 @@ import java.io.PrintWriter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -239,43 +236,6 @@ public class CreateProject {
 		sourceRootsElement.appendChild(rootElement);
 	}
 
-	private static String[] _reorderModules(
-		String originalOrder, String portalDir) {
-
-		String[] modules = StringUtil.split(originalOrder, ',');
-
-		if (modules.length > 0) {
-
-			int i = 0;
-
-			List<String> moduleSourceList = new ArrayList<>();
-
-			while (modules[i].startsWith(portalDir + "/modules")) {
-				moduleSourceList.add(modules[i]);
-
-				i++;
-			}
-
-			List<String> portalSourceList = new ArrayList<>();
-
-			while (i < modules.length) {
-				portalSourceList.add(modules[i]);
-
-				i++;
-			}
-
-			Collections.sort(portalSourceList);
-
-			Collections.sort(moduleSourceList);
-
-			portalSourceList.addAll(moduleSourceList);
-
-			return portalSourceList.toArray(new String[portalSourceList.size()]);
-		}
-
-		return new String[0];
-	}
-
 	private static Document _document;
 
 	private static class ProjectInfo {
@@ -293,7 +253,8 @@ public class CreateProject {
 		}
 
 		private ProjectInfo(
-			String projectName, String[] modules, String[] sources) {
+			String projectName, String[] modules,
+			String[] sources) {
 
 			_projectName = projectName;
 
@@ -305,6 +266,7 @@ public class CreateProject {
 		private final String[] _modules;
 		private final String _projectName;
 		private final String[] _sources;
+
 	}
 
 }
