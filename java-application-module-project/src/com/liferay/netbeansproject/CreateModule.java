@@ -413,7 +413,7 @@ public class CreateModule {
 		if (!(new File(projectPath + "/src/main").exists()) ||
 			new File(projectPath + "/src/main/java").exists()) {
 
-			_createRoots(sourceRootsElement, projectInfo.getFullPath(),
+			_createRoots(sourceRootsElement, projectPath + "/java",
 				"src." + projectInfo.getProjectName() + ".dir");
 		}
 
