@@ -433,7 +433,7 @@ public class CreateModule {
 		if (new File(projectPath + "/test/unit").exists() ||
 			new File(projectPath + "/src/test").exists()) {
 			_createRoots(
-				testRootsElement,
+				testRootsElement, projectPath + "/unit/test",
 				"test." + projectInfo.getProjectName() + ".unit.dir");
 		}
 
@@ -441,7 +441,7 @@ public class CreateModule {
 			new File(projectPath + "/src/testIntegration").exists()) {
 
 			_createRoots(
-				testRootsElement,
+				testRootsElement, projectPath + "/integration/test",
 				"test." + projectInfo.getProjectName() + ".integration.dir");
 		}
 
