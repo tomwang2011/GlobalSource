@@ -348,6 +348,19 @@ public class CreateModule {
 			projectSB.append("-test-unit}\n");
 		}
 
+		if(new File(modulePath + "/src/test/resources").exists()) {
+			projectSB.append("file.reference.");
+			projectSB.append(moduleName);
+			projectSB.append("-test-unit-resources=");
+			projectSB.append(modulePath);
+			projectSB.append("/src/test/resources\n");
+			projectSB.append("test.");
+			projectSB.append(moduleName);
+			projectSB.append(".unit.resources.dir=${file.reference.");
+			projectSB.append(moduleName);
+			projectSB.append("-test-unit-resources}\n");
+		}
+
 		if (new File(modulePath + "/test/integration").exists()) {
 			projectSB.append("file.reference.");
 			projectSB.append(moduleName);
@@ -435,6 +448,11 @@ public class CreateModule {
 			_createRoots(
 				testRootsElement, projectPath + "/unit/test",
 				"test." + projectInfo.getProjectName() + ".unit.dir");
+		}
+
+		if (new File(projectPath + "/src/test/resources").exists()) {
+			_createRoots(sourceRootsElement, projectPath + "/unit/resources",
+				"test." + projectInfo.getProjectName() + ".unit.resources.dir");
 		}
 
 		if (new File(projectPath + "/test/integration").exists() ||
