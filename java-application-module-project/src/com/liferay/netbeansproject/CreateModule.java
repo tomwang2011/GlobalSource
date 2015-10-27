@@ -385,6 +385,19 @@ public class CreateModule {
 			projectSB.append(moduleName);
 			projectSB.append("-test-integration}\n");
 		}
+
+		if(new File(modulePath + "/src/testIntegration/resources").exists()) {
+			projectSB.append("file.reference.");
+			projectSB.append(moduleName);
+			projectSB.append("-test-integration-resources=");
+			projectSB.append(modulePath);
+			projectSB.append("/src/testIntegration/resources\n");
+			projectSB.append("test.");
+			projectSB.append(moduleName);
+			projectSB.append(".integration.resources.dir=${file.reference.");
+			projectSB.append(moduleName);
+			projectSB.append("-test-integration-resources}\n");
+		}
 	}
 
 	private static void _createConfiguration(
@@ -461,6 +474,13 @@ public class CreateModule {
 			_createRoots(
 				testRootsElement, projectPath + "/integration/test",
 				"test." + projectInfo.getProjectName() + ".integration.dir");
+		}
+
+		if (new File(projectPath + "/src/testIntegration/resources").exists()) {
+			_createRoots(sourceRootsElement,
+				projectPath + "/integration/resources",
+				"test." + projectInfo.getProjectName() +
+					".integration.resources.dir");
 		}
 
 		dataElement.appendChild(testRootsElement);
