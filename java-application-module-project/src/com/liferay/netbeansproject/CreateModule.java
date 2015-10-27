@@ -310,6 +310,19 @@ public class CreateModule {
 		projectSB.append(moduleName);
 		projectSB.append("-src}\n");
 
+		if (new File(modulePath + "/src/main/resources").exists()) {
+			projectSB.append("file.reference.");
+			projectSB.append(moduleName);
+			projectSB.append("-resources=");
+			projectSB.append(modulePath);
+			projectSB.append("/src/main/resources\n");
+			projectSB.append("src.");
+			projectSB.append(moduleName);
+			projectSB.append(".resources.dir=${file.reference.");
+			projectSB.append(moduleName);
+			projectSB.append("-resources}\n");
+		}
+
 		if (new File(modulePath + "/test/unit").exists()) {
 			projectSB.append("file.reference.");
 			projectSB.append(moduleName);
@@ -402,6 +415,11 @@ public class CreateModule {
 
 			_createRoots(sourceRootsElement, projectInfo.getFullPath(),
 				"src." + projectInfo.getProjectName() + ".dir");
+		}
+
+		if (new File(projectPath + "/src/main/resources").exists()) {
+			_createRoots(sourceRootsElement, projectPath + "/resources",
+				"src." + projectInfo.getProjectName() + ".resources.dir");
 		}
 
 		if (projectInfo.getProjectName().equals("portal-impl") ||
