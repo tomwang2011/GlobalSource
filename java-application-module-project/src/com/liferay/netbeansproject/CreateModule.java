@@ -184,6 +184,9 @@ public class CreateModule {
 			StringBuilder testSB = new StringBuilder(
 				"javac.test.classpath=\\\n");
 
+			testSB.append("\t${build.classes.dir}:\\\n");
+			testSB.append("\t${javac.classpath}:\\\n");
+
 			String compileDependencies =
 				dependencyProperties.getProperty("compile");
 
@@ -270,8 +273,7 @@ public class CreateModule {
 
 			printWriter.println(projectSB.toString());
 
-			testSB.append("\t${build.classes.dir}:\\\n");
-			testSB.append("\t${javac.classpath}");
+			testSB.setLength(testSB.length() - 3);
 
 			printWriter.println(testSB.toString());
 		}
