@@ -179,7 +179,7 @@ public class CreateModule {
 				PropertiesUtil.loadProperties(
 					Paths.get(
 						moduleDir, projectInfo.getProjectName(),
-						"GradleDependency.properties"));
+						"dependency.properties"));
 
 			StringBuilder testSB = new StringBuilder(
 				"javac.test.classpath=\\\n");
@@ -226,8 +226,7 @@ public class CreateModule {
 				Properties moduleDependencyProperties =
 					PropertiesUtil.loadProperties(
 						Paths.get(
-							moduleDir, moduleName,
-							"GradleDependency.properties"));
+							moduleDir, moduleName, "dependency.properties"));
 
 				compileDependencies =
 					moduleDependencyProperties.getProperty("compile");

@@ -16,7 +16,7 @@ public class GradleDependencyExtractor {
 		sb.append(args[1]);
 
 		Files.write(
-			Paths.get("GradleDependency.properties"), Arrays.asList(sb),
+			Paths.get("dependency.properties"), Arrays.asList(sb),
 			Charset.defaultCharset());
 	}
 
