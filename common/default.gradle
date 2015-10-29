@@ -19,11 +19,14 @@ configurations {
 
 task createJarDependencies {
 	StringBuilder sb = new StringBuilder();
-	def file = new File(*insert-filepath*)
+
 	sb.append("compile:")
 	sb.append(configurations.compile.asPath)
 	sb.append("\n")
 	sb.append("compileTest:")
 	sb.append(configurations.testConfiguration.asPath)
+
+	def file = new File(*insert-filepath*)
+
 	file.text = sb
 }
