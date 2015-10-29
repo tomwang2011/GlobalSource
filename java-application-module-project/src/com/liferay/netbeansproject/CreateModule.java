@@ -193,15 +193,19 @@ public class CreateModule {
 			Set<String> compileSet = new HashSet<>();
 
 			compileSet.addAll(
-				Arrays.asList(compileDependencies.split(File.pathSeparator)));
+				Arrays.asList(
+					StringUtil.split(
+						compileDependencies, File.pathSeparatorChar)));
 
 			String compileTestDependencies =
 				dependencyProperties.getProperty("compileTest");
 
 			Set<String> compileTestSet = new HashSet<>();
 
-			compileTestSet.addAll(Arrays.asList(
-				compileTestDependencies.split(File.pathSeparator)));
+			compileTestSet.addAll(
+				Arrays.asList(
+					StringUtil.split(
+						compileTestDependencies, File.pathSeparatorChar)));
 
 			Map<String, ModuleInfo> dependenciesModuleMap =
 				_parseModuleDependencies(
@@ -228,14 +232,17 @@ public class CreateModule {
 				compileDependencies =
 					moduleDependencyProperties.getProperty("compile");
 
-				compileSet.addAll(Arrays.asList(
-					compileDependencies.split(File.pathSeparator)));
+				compileSet.addAll(
+					Arrays.asList(
+						StringUtil.split(
+							compileDependencies, File.pathSeparatorChar)));
 
 				compileTestDependencies =
 					moduleDependencyProperties.getProperty("compileTest");
 
 				compileTestSet.addAll(Arrays.asList(
-					compileTestDependencies.split(File.pathSeparator)));
+					StringUtil.split(
+						compileTestDependencies, File.pathSeparatorChar)));
 			}
 
 			_appendLibJars(compileSet, projectSB);
