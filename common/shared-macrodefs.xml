@@ -140,9 +140,7 @@
 				<arg value="module.list=${module.list}" />
 			</java>
 
-			<gradle-execute task="createJarDependencies">
-				<arg value="-PbuildDir=lib" />
-			</gradle-execute>
+			<gradle-execute task="createJarDependencies" />
 		</sequential>
 	</macrodef>
 
