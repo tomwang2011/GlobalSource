@@ -17,11 +17,9 @@ configurations {
 
 *insert-dependencies*
 
-FileCollection javaClasspath = files(*insert-classpath*)
-
 task(createJarDependencies, dependsOn: 'classes', type: JavaExec) {
 	main = "com.liferay.netbeansproject.gradle.GradleDependencyExtractor"
-	classpath = javaClasspath
+	classpath = files(*insert-classpath*)
 	args configurations.compile.asPath
 	args configurations.testConfiguration.asPath
 }
