@@ -105,10 +105,13 @@ public class GradleResolver {
 
 		Matcher portalMatcher = _portalPattern.matcher(dependency);
 
+		Path dependencyPropertiesPath = gradleFilePath.resolveSibling(
+			"dependency.properties");
+
 		defaultGradleContent =
 			StringUtil.replace(
 				defaultGradleContent, "*insert-filepath*",
-				"\"" + gradleFilePath.getParent() + "/dependency.properties\"");
+				"\"" + dependencyPropertiesPath.toString() + "\"");
 
 		String gradleContent = StringUtil.replace(
 			defaultGradleContent, "*insert-dependencies*",
