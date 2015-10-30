@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
  */
 public class GradleUtil {
 
-	public static String getJarDependencies(Path modulePath)
+	public static List<String> getJarDependencies(Path modulePath)
 		throws Exception {
 
 		String dependencies = _extractDependency(modulePath);
@@ -43,8 +43,9 @@ public class GradleUtil {
 
 		dependencies = _replaceKeywords(dependencies);
 
-		return dependencies;
+		return _formatDependency(dependencies);
 	}
+
 	public static List<ModuleDependency> getModuleDependencies(
 			Path modulePath)
 		throws Exception {
@@ -87,13 +88,6 @@ public class GradleUtil {
 
 					String moduleLocation = line.substring(index1 + 1, index2);
 
-					String[] parts = StringUtil.split(moduleLocation, ':');
-
-					if (parts.length == 0) {
-						throw new IllegalStateException(
-							"Broken syntax in " + gradleFilePath);
-					}
-
 					boolean test = false;
 
 					if(line.startsWith("testCompile project") ||
@@ -102,7 +96,7 @@ public class GradleUtil {
 						test = true;
 					}
 
-					moduleInfos.add(new ModuleDependency(parts, test));
+					moduleInfos.add(new ModuleDependency(moduleLocation, test));
 				}
 			}
 		}
@@ -138,6 +132,17 @@ public class GradleUtil {
 		}
 
 		return sb.toString();
+	}
+	
+	private static List<String> _formatDependency(String dependencies) {
+		List<String> dependencyList = new ArrayList<>();
+
+		for (String dependency : StringUtil.split(dependencies, '\n')) {
+			if(!dependency.isEmpty()) {
+				dependencyList.add(dependency.trim());
+			}
+		}
+		return dependencyList;
 	}
 
 	private static String _replaceKeywords(String dependencies) {

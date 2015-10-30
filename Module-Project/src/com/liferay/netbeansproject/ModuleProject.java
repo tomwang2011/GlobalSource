@@ -10,8 +10,8 @@ import com.liferay.netbeansproject.container.Module;
 import com.liferay.netbeansproject.container.Module.ModuleDependency;
 import com.liferay.netbeansproject.util.PropertiesUtil;
 import com.liferay.netbeansproject.util.StringUtil;
-import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -19,6 +19,7 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -34,12 +35,18 @@ import java.util.logging.Logger;
  */
 public class ModuleProject {
 	public static void main(String[] args) throws IOException {
+
 		Properties properties = PropertiesUtil.loadProperties(
 			Paths.get("build.properties"));
 
-		final Set<Path> blackListPaths = new HashSet<>();
+		final Set<String> blackListDirs = new HashSet<>();
 
-		final StringBuilder dependenciesSB = new StringBuilder();
+		blackListDirs.addAll(Arrays.asList(
+			StringUtil.split(properties.getProperty("blackListDirs"), ',')));
+
+		final Set<String> dependenciesSet = new HashSet<>();
+
+		final Map<Path, List<Module>> projectMap = new HashMap<>();
 
 		// TODO 1) populate the blackListPaths from properties
 
@@ -51,82 +58,95 @@ public class ModuleProject {
 				public FileVisitResult preVisitDirectory(
 					Path dir, BasicFileAttributes attrs) throws IOException {
 
-					if (blackListPaths.contains(dir)) {
+					Path dirFileName = dir.getFileName();
+
+					if (blackListDirs.contains(dirFileName.toString())) {
 						return FileVisitResult.SKIP_SUBTREE;
 					}
 
 					if (Files.exists(dir.resolve("src"))) {
 						try {
-							Module module = ModuleProject.createModule(dir, dependenciesSB);
+							Module module = ModuleProject._createModule(
+								dir, dependenciesSet);
+
+							_linkModuletoMap(
+								projectMap, module, dir.getParent());
 						}
 						catch (Exception ex) {
-							Logger.getLogger(ModuleProject.class.getName()).log(Level.SEVERE, null, ex);
+							Logger.getLogger(ModuleProject.class.getName()).
+								log(Level.SEVERE, null, ex);
 						}
 
 						return FileVisitResult.SKIP_SUBTREE;
 					}
 
 					return FileVisitResult.CONTINUE;
-//					if (dir.endsWith(".gradle")) {
-//						return FileVisitResult.SKIP_SUBTREE;
-//					}
-//
-//					else if (dir.endsWith("sample")) {
-//						return FileVisitResult.SKIP_SUBTREE;
-//					}
-//
-//					else if (dir.endsWith("src")) {
-//						Path parentPath = dir.getParent();
-//
-//						try {
-//							Module module = ModuleProject.createModule(parentPath);
-//
-//							linkModuletoMap(module, parentPath.getParent());
-//						}
-//						catch (Exception ex) {
-////							Logger.getLogger(PortalFileVisitor.class.getName()).log(
-////								Level.SEVERE, null, ex);
-//						}
-//						return FileVisitResult.SKIP_SUBTREE;
-//					}
-//					return FileVisitResult.CONTINUE;
 				}
 
 			});
 
-		System.out.println(dependenciesSB);
+		_createBuildGradleFile(
+			dependenciesSet, properties.getProperty("project.dir"));
 	}
 
-	public static Module createModule(Path modulePath, StringBuilder dependenciesSB) throws Exception {
-		Path testUnitPath = _resolveTestPath(modulePath, "unit");
+	private static Module _createModule(
+		Path modulePath, Set<String> dependenciesSet) throws Exception {
 
-		Path testIntegrationPath = _resolveTestPath(modulePath, "integration");
+		List<String> jarDependencyList =
+			GradleUtil.getJarDependencies(modulePath);
 
-		Path sourceResourcePath = _resolveResourcePath(modulePath, "main");
-
-		Path testUnitResourcePath = _resolveResourcePath(modulePath, "test");
-
-		Path testIntegrationResourcePath =
-			_resolveResourcePath(modulePath, "integration");
-
-		List<ModuleDependency> projectDependencyList =
-			GradleUtil.getModuleDependencies(modulePath);
-
-		String dependencies = GradleUtil.getJarDependencies(modulePath);
-
-		_dependenciesSB.append(dependencies);
-
-		List<String> jarDependencyList = _formatDependency(dependencies);
+		dependenciesSet.addAll(jarDependencyList);
 
 		return new Module(
-			modulePath, _resolveSourcePath(modulePath), sourceResourcePath, testUnitPath,
-			testUnitResourcePath, testIntegrationPath,
-			testIntegrationResourcePath, jarDependencyList,
-			projectDependencyList);
+			modulePath, _resolveSourcePath(modulePath),
+			_resolveResourcePath(modulePath, "main"),
+			_resolveTestPath(modulePath, "unit"),
+			_resolveResourcePath(modulePath, "test"),
+			_resolveTestPath(modulePath, "integration"),
+			_resolveResourcePath(modulePath, "integration"), jarDependencyList,
+			GradleUtil.getModuleDependencies(modulePath));
 	}
 
-	public static void linkModuletoMap(Module module, Path path) {
-		List<Module> moduleList = _projectMap.get(path);
+	private static void _createBuildGradleFile(
+			Set<String> dependenciesSet, String projectDir)
+		throws IOException {
+
+		final StringBuilder dependenciesSB =
+			new StringBuilder("dependencies {");
+
+		for (String dependency : dependenciesSet) {
+			dependenciesSB.append("\t");
+			dependenciesSB.append(dependency);
+			dependenciesSB.append("\n");
+		}
+
+		dependenciesSB.append("}");
+
+		String defaultGradleContent = new String(
+			Files.readAllBytes(Paths.get("..", "common", "default.gradle")));
+
+		String gradleContent =
+			StringUtil.replace(
+				defaultGradleContent, "*insert-dependencies*",
+				dependenciesSB.toString());
+
+		Path modulesDir = Paths.get(projectDir, "modules");
+
+		gradleContent =
+			StringUtil.replace(
+				gradleContent, "*insert-filepath*", modulesDir.toString());
+
+		Files.createDirectories(modulesDir);
+
+		Files.write(
+			modulesDir.resolve("build.gradle"), Arrays.asList(gradleContent),
+			Charset.defaultCharset());
+	}
+
+	private static void _linkModuletoMap(
+		Map<Path, List<Module>> projectMap, Module module, Path path) {
+
+		List<Module> moduleList = projectMap.get(path);
 
 		if(moduleList == null) {
 			moduleList = new ArrayList<>();
@@ -134,26 +154,17 @@ public class ModuleProject {
 
 		moduleList.add(module);
 
-		_projectMap.put(path, moduleList);
-	}
-
-	private static List<String> _formatDependency(String dependencies) {
-		List<String> dependencyList = new ArrayList<>();
-
-		for (String dependency : StringUtil.split(dependencies, '\n')) {
-			if(!dependency.isEmpty()) {
-				dependencyList.add(dependency.trim());
-			}
-		}
-		return dependencyList;
+		projectMap.put(path, moduleList);
 	}
 
 	private static Path _resolveResourcePath(Path modulePath, String type) {
-		if (Files.exists(modulePath.resolve(
-			"src" + File.separator + type + File.separator + "resources"))) {
 
-			return modulePath.resolve(
-				"src" + File.separator + type + File.separator + "resources");
+		Path resourcePath =modulePath.resolve(
+			Paths.get("src", type, "resources"));
+
+		if (Files.exists(resourcePath)) {
+
+			return resourcePath;
 		}
 
 		return null;
@@ -166,9 +177,8 @@ public class ModuleProject {
 		if (Files.exists(mainJavaPath)) {
 			return mainJavaPath;
 		}
-		
-		if (Files.exists(modulePath.resolve(
-			"src" + File.separator + "main"))) {
+
+		if (Files.exists(modulePath.resolve(Paths.get("src", "main")))) {
 
 			return null;
 		}
@@ -177,28 +187,35 @@ public class ModuleProject {
 	}
 
 	private static Path _resolveTestPath(Path modulePath, String type) {
-		if (Files.exists(modulePath.resolve(
-			"src" + File.separator + "test" + File.separator + "java")) &&
-			type.equals("unit")) {
 
-			return modulePath.resolve("src" + File.separator + "test");
+		Path testUnitPath = modulePath.resolve(_testUnitPath);
+
+		if (Files.exists(testUnitPath) && type.equals("unit")) {
+
+			return testUnitPath;
 		}
-		else if (Files.exists(modulePath.resolve(
-			"src" + File.separator + "testIntegration" + File.separator +
-				"java")) && type.equals("integration")) {
 
-			return modulePath.resolve("src" + File.separator + "testIntegration");
+		Path testIntegrationPath = modulePath.resolve(_testIntegrationPath);
+
+		if (Files.exists(testIntegrationPath) && type.equals("integration")) {
+
+			return testIntegrationPath;
 		}
-		else if (Files.exists(modulePath.resolve(
-			"test" + File.separator + type))) {
 
-			return modulePath.resolve("test" + File.separator + type);
+		Path testPath = modulePath.resolve(Paths.get("test", type));
+
+		if (Files.exists(testPath)) {
+
+			return testPath;
 		}
 
 		return null;
 	}
 
-	private static final Map<Path, List<Module>> _projectMap = new HashMap<>();
-
 	private static final Path _mainJavaPath = Paths.get("src", "main", "java");
+
+	private static final Path _testUnitPath = Paths.get("src", "test", "java");
+
+	private static final Path _testIntegrationPath =
+		Paths.get("src", "testIntegration", "java");
 }

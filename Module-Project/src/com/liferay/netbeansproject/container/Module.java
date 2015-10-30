@@ -6,6 +6,7 @@
 package com.liferay.netbeansproject.container;
 
 import com.liferay.netbeansproject.GradleDependencyResolver;
+import com.liferay.netbeansproject.ProjectDependencyResolver;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -89,13 +90,15 @@ public class Module {
 
 	public static class ModuleDependency {
 
-		public ModuleDependency(Module module, boolean test) {
-			_module = module;
+		public ModuleDependency(String modulePath, boolean test) {
+			_modulePath = modulePath;
 			_test = test;
 		}
 
-		public Module getModule() {
-			return _module;
+		public Module getModule(
+			ProjectDependencyResolver projectDependencyResolver) {
+
+			return projectDependencyResolver.resolve(_modulePath);
 		}
 
 		public boolean isTest() {
