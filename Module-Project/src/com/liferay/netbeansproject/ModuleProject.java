@@ -15,10 +15,12 @@
 package com.liferay.netbeansproject;
 
 import com.liferay.netbeansproject.container.Module;
+import com.liferay.netbeansproject.container.Module.JarDependency;
 import com.liferay.netbeansproject.util.GradleUtil;
 import com.liferay.netbeansproject.util.PropertiesUtil;
 import com.liferay.netbeansproject.util.StringUtil;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
@@ -104,6 +106,9 @@ public class ModuleProject {
 		_createSettingsGradleFile(settingsSB, projectDir);
 
 		_processGradle(properties);
+
+		final Map<Module, List<JarDependency>> dependenciesMap =
+			_createDependenciesMap(projectMap, projectDir);
 	}
 
 	private static void _clean(String projectDir) throws IOException {
@@ -155,6 +160,33 @@ public class ModuleProject {
 			Charset.defaultCharset());
 	}
 
+	private static Map<Module, List<JarDependency>> _createDependenciesMap(
+			Map<Path, Map<String, Module>> projectMap, String projectDir)
+		throws IOException {
+
+		Map<Module, List<JarDependency>> dependenciesMap = new HashMap<>();
+
+		for (Map<String, Module> projects : projectMap.values()) {
+			for (Module module : projects.values()) {
+				Properties properties = PropertiesUtil.loadProperties(
+					Paths.get(projectDir, "modules", module.getModuleName(),
+					"dependencies.properties"));
+
+				List<JarDependency> jarDependencys = new ArrayList<>();
+
+				jarDependencys.addAll(
+					_getJarDependency(false, properties, "compile"));
+
+				jarDependencys.addAll(
+					_getJarDependency(true, properties, "compileTest"));
+
+				dependenciesMap.put(module, jarDependencys);
+			}
+		}
+
+		return dependenciesMap;
+	}
+
 	private static Module _createModule(
 			Path modulePath, String projectDir, StringBuilder settingsSB)
 		throws Exception {
@@ -196,6 +228,29 @@ public class ModuleProject {
 		Files.write(
 			moduleProjectsDirPath.resolve("settings.gradle"), Arrays.asList(sb),
 			Charset.defaultCharset());
+	}
+
+	private static List<JarDependency> _getJarDependency(
+		boolean isTest, Properties dependenciesProperties, String configuration)
+			{
+
+		List<JarDependency> jarDependencys = new ArrayList<>();
+
+		String compile = dependenciesProperties.getProperty(configuration);
+
+		if (compile != null) {
+			for (
+				String jarPath :
+				StringUtil.split(compile, File.pathSeparatorChar)) {
+
+				JarDependency jarDependency = new JarDependency(
+					Paths.get(jarPath), isTest);
+
+				jarDependencys.add(jarDependency);
+			}
+		}
+
+		return jarDependencys;
 	}
 
 	private static void _linkModuletoMap(
