@@ -27,7 +27,9 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Level;
@@ -54,6 +56,8 @@ public class ModuleProject {
 
 		final String projectDir = properties.getProperty("project.dir");
 
+		final Map<Path, Map<String, Module>> projectMap = new HashMap<>();
+
 		_clean(projectDir);
 
 		Files.walkFileTree(
@@ -75,6 +79,9 @@ public class ModuleProject {
 						try {
 							Module module = ModuleProject._createModule(
 								dir, projectDir, settingsSB);
+
+							_linkModuletoMap(
+								projectMap, module, dir.getParent());
 						}
 						catch (Exception ex) {
 							Logger.getLogger(
@@ -170,6 +177,27 @@ public class ModuleProject {
 			_resolveResourcePath(modulePath, "integration"), jarDependencyList,
 			GradleUtil.getModuleDependencies(modulePath),
 			moduleFileName.toString());
+	}
+
+	private static void _linkModuletoMap(
+		Map<Path, Map<String, Module>> projectMap, Module module,
+		Path parentPath) {
+
+		if (parentPath.endsWith("docroot")) {
+			Path modulePath = parentPath.getParent();
+
+			parentPath = modulePath.getParent();
+		}
+
+		Map<String, Module> moduleMap = projectMap.get(parentPath);
+
+		if (moduleMap == null) {
+			moduleMap = new HashMap<>();
+		}
+
+		moduleMap.put(module.getModuleName(), module);
+
+		projectMap.put(parentPath, moduleMap);
 	}
 
 	private static Path _resolveResourcePath(Path modulePath, String type) {
