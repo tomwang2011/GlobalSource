@@ -18,7 +18,9 @@ import com.liferay.netbeansproject.container.Module;
 import com.liferay.netbeansproject.util.GradleUtil;
 import com.liferay.netbeansproject.util.PropertiesUtil;
 import com.liferay.netbeansproject.util.StringUtil;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -26,9 +28,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -96,6 +100,10 @@ public class ModuleProject {
 				}
 
 			});
+
+		_createSettingsGradleFile(settingsSB, projectDir);
+
+		_processGradle(properties);
 	}
 
 	private static void _clean(String projectDir) throws IOException {
@@ -179,6 +187,17 @@ public class ModuleProject {
 			moduleFileName.toString());
 	}
 
+	private static void _createSettingsGradleFile(
+			StringBuilder sb, String projectDir)
+		throws IOException {
+
+		Path moduleProjectsDirPath = Paths.get(projectDir, "modules");
+
+		Files.write(
+			moduleProjectsDirPath.resolve("settings.gradle"), Arrays.asList(sb),
+			Charset.defaultCharset());
+	}
+
 	private static void _linkModuletoMap(
 		Map<Path, Map<String, Module>> projectMap, Module module,
 		Path parentPath) {
@@ -198,6 +217,35 @@ public class ModuleProject {
 		moduleMap.put(module.getModuleName(), module);
 
 		projectMap.put(parentPath, moduleMap);
+	}
+
+	private static void _processGradle(Properties properties)
+		throws IOException {
+
+		List<String> gradleTask = new ArrayList<>();
+
+		Path gradlewPath = Paths.get(
+			properties.getProperty("portal.dir"), "gradlew");
+
+		gradleTask.add(gradlewPath.toString());
+		gradleTask.add("createJarDependencies");
+		gradleTask.add("-p");
+
+		Path modulesDirPath = Paths.get(
+			properties.getProperty("project.dir"), "modules");
+
+		gradleTask.add(modulesDirPath.toString());
+		gradleTask.add("--info");
+
+		ProcessBuilder processBuilder = new ProcessBuilder(gradleTask);
+
+		Process process = processBuilder.start();
+
+		BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
+
+		String line;
+		while ((line = br.readLine()) != null)
+			 System.out.println(line);
 	}
 
 	private static Path _resolveResourcePath(Path modulePath, String type) {
