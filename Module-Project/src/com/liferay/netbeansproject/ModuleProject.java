@@ -42,12 +42,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
  * @author Tom Wang
  */
 public class ModuleProject {
 
-	public static void main(String[] args) throws Exception, IOException {
+	public static void main(String[] args) throws IOException {
 		Properties properties = PropertiesUtil.loadProperties(
 			Paths.get("build.properties"));
 
@@ -113,24 +112,30 @@ public class ModuleProject {
 
 	private static void _clean(String projectDir) throws IOException {
 		Files.walkFileTree(
-			Paths.get(projectDir), new SimpleFileVisitor<Path>() {
+			Paths.get(projectDir),
+			new SimpleFileVisitor<Path>() {
 
-			@Override
-			public FileVisitResult visitFile(
-				Path file, BasicFileAttributes attrs) throws IOException {
+				@Override
+				public FileVisitResult visitFile(
+						Path filePath, BasicFileAttributes basicFileAttributes)
+					throws IOException {
 
-				Files.delete(file);
-				return FileVisitResult.CONTINUE;
-			}
+					Files.delete(filePath);
 
-			@Override
-			public FileVisitResult postVisitDirectory(Path dir, IOException exc)
-				throws IOException {
+					return FileVisitResult.CONTINUE;
+				}
 
-				Files.delete(dir);
-				return FileVisitResult.CONTINUE;
-			}
-		});
+				@Override
+				public FileVisitResult postVisitDirectory(
+						Path dirPath, IOException ioe)
+					throws IOException {
+
+					Files.delete(dirPath);
+
+					return FileVisitResult.CONTINUE;
+				}
+
+			});
 	}
 
 	private static void _createBuildGradleFile(
