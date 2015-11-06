@@ -22,7 +22,6 @@ import java.nio.file.Path;
 import java.util.List;
 
 /**
- *
  * @author Tom Wang
  */
 public class Module {
@@ -30,7 +29,7 @@ public class Module {
 	public Module(
 		Path modulePath, Path sourcePath, Path sourceResourcePath,
 		Path testUnitPath, Path testUnitResourcePath, Path testIntegrationPath,
-		Path testIntegrationResourcePath, String jarDependencies,
+		Path testIntegrationResourcePath,
 		List<ModuleDependency> moduleDependencies, String moduleName) {
 
 		_modulePath = modulePath;

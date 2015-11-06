@@ -205,9 +205,9 @@ public class ModuleProject {
 			moduleFileName = modulePath.getFileName();
 		}
 
-		String jarDependencyList = GradleUtil.getJarDependencies(modulePath);
-
-		_createBuildGradleFile(moduleFileName, jarDependencyList, projectDir);
+		_createBuildGradleFile(
+			moduleFileName, GradleUtil.getJarDependencies(modulePath),
+			projectDir);
 
 		settingsSB.append("include \"");
 		settingsSB.append(moduleFileName);
@@ -219,7 +219,7 @@ public class ModuleProject {
 			_resolveTestPath(modulePath, "unit"),
 			_resolveResourcePath(modulePath, "test"),
 			_resolveTestPath(modulePath, "integration"),
-			_resolveResourcePath(modulePath, "integration"), jarDependencyList,
+			_resolveResourcePath(modulePath, "integration"),
 			GradleUtil.getModuleDependencies(modulePath),
 			moduleFileName.toString());
 	}
