@@ -42,7 +42,7 @@ public class GradleResolver {
 
 		Pattern unusedConfigPattern = _createUnusedConfigPattern(
 			StringUtil.split(
-				properties.getProperty("ignored.gradle.configs"),','));
+				properties.getProperty("ignored.gradle.configs"), ','));
 
 		for(String module : StringUtil.split(moduleList, ',')) {
 			Path modulePath = Paths.get(module);
@@ -129,11 +129,9 @@ public class GradleResolver {
 	}
 
 	private static Pattern _createUnusedConfigPattern(String[] ignoredConfigs) {
-		List<String> ignoredGradleConfigsList = Arrays.asList(ignoredConfigs);
-
 		StringBuilder ignoredConfigSB = new StringBuilder("\t(");
 
-		for (String ignoredConfig : ignoredGradleConfigsList) {
+		for (String ignoredConfig : ignoredConfigs) {
 			ignoredConfigSB.append(ignoredConfig);
 			ignoredConfigSB.append("|");
 		}
