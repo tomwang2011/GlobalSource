@@ -60,9 +60,10 @@ public class IndividualModuleProjectCreator {
 
 		for (Map<String, Module> moduleMap : projectMap.values()) {
 			for (Module module : moduleMap.values()) {
+
 				_createModuleProject(
-					module, projectDependencyResolver, properties, "modules",
-					portalLibJars);
+					projectMap, module, projectDependencyResolver, properties,
+					"modules", portalLibJars);
 			}
 		}
 	}
@@ -160,7 +161,8 @@ public class IndividualModuleProjectCreator {
 	}
 
 	private static void _createModuleProject(
-			Module module, ProjectDependencyResolver projectDependencyResolver,
+			Map<Path, Map<String, Module>> projectMap, Module module,
+			ProjectDependencyResolver projectDependencyResolver,
 			Properties properties, String moduleFolderName,
 			String portalLibJars)
 		throws IOException {
@@ -183,12 +185,14 @@ public class IndividualModuleProjectCreator {
 					"project-dependency.properties"));
 
 		_prepareProjectPropertyFile(
-			module, modulesDirPath, projectDependencyResolver, properties,
-			projectDependenciesProperties, solvedSet, portalLibJars);
+			projectMap, module, modulesDirPath, projectDependencyResolver,
+			properties, projectDependenciesProperties, solvedSet,
+			portalLibJars);
 	}
 
 	private static void _prepareProjectPropertyFile(
-			Module module, Path moduleDirPath,
+			Map<Path, Map<String, Module>> projectMap, Module module,
+			Path moduleDirPath,
 			ProjectDependencyResolver projectDependencyResolver,
 			Properties properties, Properties projectDependenciesProperties,
 			Set<Module> solvedSet, String portalLibJars)
@@ -264,6 +268,29 @@ public class IndividualModuleProjectCreator {
 			module, projectDependenciesProperties, projectSB, javacSB);
 
 		javacSB.append(portalLibJars);
+
+		Map<String, Module> portalLevelMap = projectMap.get(
+			Paths.get(properties.getProperty("portal.dir")));
+
+		if (moduleName.equals("portal-impl")) {
+			Module portalTestInternalModule = portalLevelMap.get(
+				"portal-test-internal");
+
+			projectSB.append(
+				_appendSourcePathIndividual(
+					portalTestInternalModule.getSourcePath(), "src",
+					portalTestInternalModule.getModuleName(), "src"));
+		}
+
+		if (moduleName.equals("portal-service")) {
+			Module portalTestInternalModule = portalLevelMap.get(
+				"portal-test");
+
+			projectSB.append(
+				_appendSourcePathIndividual(
+					portalTestInternalModule.getSourcePath(), "src",
+					portalTestInternalModule.getModuleName(), "src"));
+		}
 
 		try (BufferedWriter bufferedWriter = Files.newBufferedWriter(
 			projectPropertiesPath, Charset.defaultCharset(),
