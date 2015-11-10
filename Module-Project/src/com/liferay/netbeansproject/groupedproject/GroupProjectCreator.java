@@ -15,8 +15,10 @@
 package com.liferay.netbeansproject.groupedproject;
 
 import com.liferay.netbeansproject.container.Module;
+import com.liferay.netbeansproject.util.StringUtil;
 import com.liferay.netbeansproject.util.ZipUtil;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
@@ -52,5 +54,23 @@ public class GroupProjectCreator {
 
 		ZipUtil.unZip(
 			Paths.get("CleanProject.zip"), modulesDirPath.resolve(groupName));
+
+		_replaceProjectName(groupName, modulesDirPath);
 	}
+
+	private static void _replaceProjectName(Path moduleName, Path modulesDir)
+		throws IOException {
+
+		Path modulePath = modulesDir.resolve(moduleName);
+
+		Path buildXmlPath = modulePath.resolve("build.xml");
+
+		String content = new String(Files.readAllBytes(buildXmlPath));
+
+		content = StringUtil.replace(
+			content, "%placeholder%", moduleName.toString());
+
+		Files.write(buildXmlPath, content.getBytes());
+	}
+
 }
