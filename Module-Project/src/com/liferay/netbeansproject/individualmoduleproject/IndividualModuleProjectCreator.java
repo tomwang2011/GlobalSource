@@ -16,6 +16,9 @@ package com.liferay.netbeansproject.individualmoduleproject;
 
 import com.liferay.netbeansproject.container.Module;
 import com.liferay.netbeansproject.container.Module.JarDependency;
+import com.liferay.netbeansproject.container.Module.ModuleDependency;
+import com.liferay.netbeansproject.resolvers.ProjectDependencyResolver;
+import com.liferay.netbeansproject.resolvers.ProjectDependencyResolverImpl;
 import com.liferay.netbeansproject.util.StringUtil;
 import com.liferay.netbeansproject.util.ZipUtil;
 import java.io.BufferedWriter;
@@ -27,8 +30,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Queue;
+import java.util.Set;
 
 /**
  * @author Tom Wang
@@ -39,9 +46,15 @@ public class IndividualModuleProjectCreator {
 			Map<Path, Map<String, Module>> projectMap, Properties properties)
 		throws IOException {
 
+		ProjectDependencyResolver projectDependencyResolver =
+			new ProjectDependencyResolverImpl(projectMap, Paths.get(
+				properties.getProperty("portal.dir")));
+
 		for (Map<String, Module> moduleMap : projectMap.values()) {
 			for (Module module : moduleMap.values()) {
-				_createModuleProject(module, properties, "modules");
+				_createModuleProject(
+					module, projectDependencyResolver, properties, "modules");
+
 			}
 		}
 	}
@@ -50,6 +63,32 @@ public class IndividualModuleProjectCreator {
 		sb.append("\t");
 		sb.append(jarPath);
 		sb.append(":\\\n");
+	}
+
+	private static void _appendProjectDependencies(
+		String moduleName, StringBuilder sb, StringBuilder javacSB) {
+
+		sb.append("project.");
+		sb.append(moduleName);
+		sb.append("=");
+
+		Path path = Paths.get("..", moduleName);
+
+		sb.append(path);
+		sb.append("\n");
+		sb.append("reference.");
+		sb.append(moduleName);
+		sb.append(".jar=${project.");
+		sb.append(moduleName);
+
+		path = Paths.get("}", "dist", moduleName + ".jar");
+
+		sb.append(path);
+		sb.append("\n");
+
+		javacSB.append("\t${reference.");
+		javacSB.append(moduleName);
+		javacSB.append(".jar}:\\\n");
 	}
 
 	private static void _appendSourcePath(
@@ -113,7 +152,8 @@ public class IndividualModuleProjectCreator {
 	}
 
 	private static void _createModuleProject(
-			Module module, Properties properties, String moduleFolderName)
+			Module module, ProjectDependencyResolver projectDependencyResolver,
+			Properties properties, String moduleFolderName)
 		throws IOException {
 
 		Path projectDirPath = Paths.get(properties.getProperty("project.dir"));
@@ -127,11 +167,17 @@ public class IndividualModuleProjectCreator {
 
 		_replaceProjectName(module.getModuleName(), modulesDirPath);
 
-		_prepareProjectPropertyFile(module, modulesDirPath, properties);
+		Set<Module> solvedSet = new HashSet<>();
+
+		_prepareProjectPropertyFile(
+			module, modulesDirPath, projectDependencyResolver, properties,
+			solvedSet);
 	}
 
 	private static void _prepareProjectPropertyFile(
-			Module module, Path moduleDirPath, Properties properties)
+			Module module, Path moduleDirPath,
+			ProjectDependencyResolver projectDependencyResolver,
+			Properties properties, Set<Module> solvedSet)
 		throws IOException {
 
 		String moduleName = module.getModuleName();
@@ -167,6 +213,38 @@ public class IndividualModuleProjectCreator {
 		Map<Path, Boolean> solvedJars = new HashMap<>();
 
 		_resolveDependencyJarSet(solvedJars, module, javacSB, testSB);
+
+		Queue<ModuleDependency> projectDependencyQueue = new LinkedList<>();
+
+		projectDependencyQueue.addAll(module.getModuleDependencies());
+
+		ModuleDependency moduleDependency = null;
+
+		while ((moduleDependency = projectDependencyQueue.poll()) != null) {
+			Module dependencyModule = moduleDependency.getModule(
+				projectDependencyResolver);
+
+			if (!solvedSet.contains(dependencyModule)) {
+				projectDependencyQueue.addAll(
+					dependencyModule.getModuleDependencies());
+
+				_resolveDependencyJarSet(
+					solvedJars, dependencyModule, javacSB, testSB);
+
+				if (moduleDependency.isTest()) {
+					_appendProjectDependencies(
+						dependencyModule.getModuleName(), projectSB,
+						testSB);
+				}
+				else {
+					_appendProjectDependencies(
+						dependencyModule.getModuleName(), projectSB,
+						javacSB);
+				}
+			}
+
+			solvedSet.add(dependencyModule);
+		}
 
 		try (BufferedWriter bufferedWriter = Files.newBufferedWriter(
 			projectPropertiesPath, Charset.defaultCharset(),
