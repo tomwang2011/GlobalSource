@@ -156,6 +156,8 @@ public class GradleResolver {
 		dependency = StringUtil.replace(dependency, "provided", "compile");
 		dependency = StringUtil.replace(
 			dependency, "testIntegrationCompile", "testCompile");
+		dependency = StringUtil.replace(
+			dependency, "testDownload", "testConfiguration");
 
 		return  StringUtil.replace(
 			dependency, "testCompile", "testConfiguration");
