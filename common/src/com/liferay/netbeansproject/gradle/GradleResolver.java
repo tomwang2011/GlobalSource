@@ -155,7 +155,7 @@ public class GradleResolver {
 			dependency, "jnaerator classifier: \"shaded\",", "compile");
 		dependency = StringUtil.replace(dependency, "provided", "compile");
 		dependency = StringUtil.replace(
-			dependency, "testIntegrationCompile", "testCompile");
+			dependency, "testIntegrationCompile", "testConfiguration");
 		dependency = StringUtil.replace(
 			dependency, "testDownload", "testConfiguration");
 
