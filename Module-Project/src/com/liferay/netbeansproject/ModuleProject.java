@@ -16,6 +16,7 @@ package com.liferay.netbeansproject;
 
 import com.liferay.netbeansproject.container.Module;
 import com.liferay.netbeansproject.container.Module.JarDependency;
+import com.liferay.netbeansproject.individualmoduleproject.IndividualModuleProjectCreator;
 import com.liferay.netbeansproject.util.GradleUtil;
 import com.liferay.netbeansproject.util.PropertiesUtil;
 import com.liferay.netbeansproject.util.StringUtil;
@@ -96,6 +97,9 @@ public class ModuleProject {
 				}
 
 			});
+
+		IndividualModuleProjectCreator.createIndividualModuleProject(
+			projectMap, properties);
 	}
 
 	private static void _clean(Path projectDirPath) throws IOException {
