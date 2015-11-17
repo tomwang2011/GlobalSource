@@ -19,6 +19,7 @@ import com.liferay.netbeansproject.container.Module.JarDependency;
 import com.liferay.netbeansproject.container.Module.ModuleDependency;
 import com.liferay.netbeansproject.resolvers.ProjectDependencyResolver;
 import com.liferay.netbeansproject.resolvers.ProjectDependencyResolverImpl;
+import com.liferay.netbeansproject.util.PropertiesUtil;
 import com.liferay.netbeansproject.util.StringUtil;
 import com.liferay.netbeansproject.util.ZipUtil;
 import java.io.BufferedWriter;
@@ -29,6 +30,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -169,15 +171,20 @@ public class IndividualModuleProjectCreator {
 
 		Set<Module> solvedSet = new HashSet<>();
 
+		Properties projectDependenciesProperties =
+				PropertiesUtil.loadProperties(Paths.get(
+					"project-dependency.properties"));
+
 		_prepareProjectPropertyFile(
 			module, modulesDirPath, projectDependencyResolver, properties,
-			solvedSet);
+			projectDependenciesProperties, solvedSet);
 	}
 
 	private static void _prepareProjectPropertyFile(
 			Module module, Path moduleDirPath,
 			ProjectDependencyResolver projectDependencyResolver,
-			Properties properties, Set<Module> solvedSet)
+			Properties properties, Properties projectDependenciesProperties,
+			Set<Module> solvedSet)
 		throws IOException {
 
 		String moduleName = module.getModuleName();
@@ -246,6 +253,9 @@ public class IndividualModuleProjectCreator {
 			solvedSet.add(dependencyModule);
 		}
 
+		_resolvePortalProjectDependencies(
+			module, projectDependenciesProperties, projectSB, javacSB);
+
 		try (BufferedWriter bufferedWriter = Files.newBufferedWriter(
 			projectPropertiesPath, Charset.defaultCharset(),
 			StandardOpenOption.APPEND)) {
@@ -306,6 +316,40 @@ public class IndividualModuleProjectCreator {
 				_appendDependencyJar(jarPath, projectSB);
 
 				solvedJars.put(jarPath, isTest);
+			}
+		}
+	}
+
+	private static void _resolvePortalProjectDependencies(
+		Module module, Properties properties, StringBuilder sb,
+		StringBuilder javacSB) {
+
+		String dependencies = properties.getProperty(module.getModuleName());
+
+		if (dependencies == null) {
+			dependencies = properties.getProperty(
+				"project.module.dependencies");
+		}
+
+		Queue<String> dependencyQueue = new LinkedList<>();
+
+		dependencyQueue.addAll(
+			Arrays.asList(StringUtil.split(dependencies, ',')));
+
+		String dependency = null;
+
+		while ((dependency = dependencyQueue.poll()) != null) {
+			if (dependency.startsWith("${")) {
+				dependencyQueue.addAll(
+					Arrays.asList(
+						StringUtil.split(
+							properties.getProperty(
+								dependency.substring(
+									2, dependency.length() - 1)),
+							',')));
+			}
+			else {
+				_appendProjectDependencies(dependency, sb, javacSB);
 			}
 		}
 	}
