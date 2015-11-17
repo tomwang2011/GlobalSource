@@ -26,10 +26,13 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardOpenOption;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -48,15 +51,18 @@ public class IndividualModuleProjectCreator {
 			Map<Path, Map<String, Module>> projectMap, Properties properties)
 		throws IOException {
 
+		Path portalDirPath = Paths.get(properties.getProperty("portal.dir"));
+
 		ProjectDependencyResolver projectDependencyResolver =
-			new ProjectDependencyResolverImpl(projectMap, Paths.get(
-				properties.getProperty("portal.dir")));
+			new ProjectDependencyResolverImpl(projectMap, portalDirPath);
+
+		String portalLibJars = _resolvePortalLibJars(portalDirPath);
 
 		for (Map<String, Module> moduleMap : projectMap.values()) {
 			for (Module module : moduleMap.values()) {
 				_createModuleProject(
-					module, projectDependencyResolver, properties, "modules");
-
+					module, projectDependencyResolver, properties, "modules",
+					portalLibJars);
 			}
 		}
 	}
@@ -155,7 +161,8 @@ public class IndividualModuleProjectCreator {
 
 	private static void _createModuleProject(
 			Module module, ProjectDependencyResolver projectDependencyResolver,
-			Properties properties, String moduleFolderName)
+			Properties properties, String moduleFolderName,
+			String portalLibJars)
 		throws IOException {
 
 		Path projectDirPath = Paths.get(properties.getProperty("project.dir"));
@@ -177,14 +184,14 @@ public class IndividualModuleProjectCreator {
 
 		_prepareProjectPropertyFile(
 			module, modulesDirPath, projectDependencyResolver, properties,
-			projectDependenciesProperties, solvedSet);
+			projectDependenciesProperties, solvedSet, portalLibJars);
 	}
 
 	private static void _prepareProjectPropertyFile(
 			Module module, Path moduleDirPath,
 			ProjectDependencyResolver projectDependencyResolver,
 			Properties properties, Properties projectDependenciesProperties,
-			Set<Module> solvedSet)
+			Set<Module> solvedSet, String portalLibJars)
 		throws IOException {
 
 		String moduleName = module.getModuleName();
@@ -256,6 +263,8 @@ public class IndividualModuleProjectCreator {
 		_resolvePortalProjectDependencies(
 			module, projectDependenciesProperties, projectSB, javacSB);
 
+		javacSB.append(portalLibJars);
+
 		try (BufferedWriter bufferedWriter = Files.newBufferedWriter(
 			projectPropertiesPath, Charset.defaultCharset(),
 			StandardOpenOption.APPEND)) {
@@ -318,6 +327,34 @@ public class IndividualModuleProjectCreator {
 				solvedJars.put(jarPath, isTest);
 			}
 		}
+	}
+
+	private static String _resolvePortalLibJars(Path portalDir)
+		throws IOException {
+
+		final StringBuilder sb = new StringBuilder();
+
+		Files.walkFileTree(
+			portalDir.resolve("lib"), new SimpleFileVisitor<Path>() {
+
+				@Override
+				public FileVisitResult visitFile(
+						Path dir, BasicFileAttributes attrs)
+					throws IOException {
+
+					String fileName = dir.toString();
+
+					if (fileName.endsWith(".jar")) {
+						sb.append("\t");
+						sb.append(dir);
+						sb.append(":\\\n");
+					}
+
+					return FileVisitResult.CONTINUE;
+				}
+			});
+
+		return sb.toString();
 	}
 
 	private static void _resolvePortalProjectDependencies(
