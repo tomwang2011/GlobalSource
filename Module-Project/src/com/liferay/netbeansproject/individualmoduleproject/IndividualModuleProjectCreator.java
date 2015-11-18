@@ -15,6 +15,7 @@
 package com.liferay.netbeansproject.individualmoduleproject;
 
 import com.liferay.netbeansproject.container.Module;
+import com.liferay.netbeansproject.container.Module.JarDependency;
 import com.liferay.netbeansproject.util.StringUtil;
 import com.liferay.netbeansproject.util.ZipUtil;
 import java.io.BufferedWriter;
@@ -25,6 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
@@ -42,6 +44,12 @@ public class IndividualModuleProjectCreator {
 				_createModuleProject(module, properties, "modules");
 			}
 		}
+	}
+
+	private static void _appendDependencyJar(Path jarPath, StringBuilder sb) {
+		sb.append("\t");
+		sb.append(jarPath);
+		sb.append(":\\\n");
 	}
 
 	private static void _appendSourcePath(
@@ -149,11 +157,32 @@ public class IndividualModuleProjectCreator {
 
 		_appendSourcePath(module, projectSB);
 
+		StringBuilder javacSB = new StringBuilder("javac.classpath=\\\n");
+		StringBuilder testSB = new StringBuilder(
+			"javac.test.classpath=\\\n");
+
+		testSB.append("\t${build.classes.dir}:\\\n");
+		testSB.append("\t${javac.classpath}:\\\n");
+
+		Map<Path, Boolean> solvedJars = new HashMap<>();
+
+		_resolveDependencyJarSet(solvedJars, module, javacSB, testSB);
+
 		try (BufferedWriter bufferedWriter = Files.newBufferedWriter(
 			projectPropertiesPath, Charset.defaultCharset(),
 			StandardOpenOption.APPEND)) {
 
 			bufferedWriter.append(projectSB);
+			bufferedWriter.newLine();
+
+			javacSB.setLength(javacSB.length() - 3);
+
+			bufferedWriter.append(javacSB);
+			bufferedWriter.newLine();
+
+			testSB.setLength(testSB.length() - 3);
+
+			bufferedWriter.append(testSB);
 			bufferedWriter.newLine();
 		}
 	}
@@ -170,6 +199,37 @@ public class IndividualModuleProjectCreator {
 		content = StringUtil.replace(content, "%placeholder%", moduleName);
 
 		Files.write(buildXmlPath, content.getBytes());
+	}
+
+	private static void _resolveDependencyJarSet(
+		Map<Path, Boolean> solvedJars, Module module, StringBuilder projectSB,
+		StringBuilder testSB) {
+
+		for (JarDependency jarDependency : module.getModuleJarDependencies()) {
+
+			Boolean isTestInSet = solvedJars.get(jarDependency.getJarPath());
+
+			Path jarPath = jarDependency.getJarPath();
+
+			boolean isTest = jarDependency.isTest();
+
+			if (isTestInSet == null) {
+
+				if (isTest) {
+					_appendDependencyJar(jarPath, testSB);
+				}
+				else {
+					_appendDependencyJar(jarPath, projectSB);
+				}
+
+				solvedJars.put(jarPath, isTest);
+			}
+			else if (isTestInSet == true && isTest == false) {
+				_appendDependencyJar(jarPath, projectSB);
+
+				solvedJars.put(jarPath, isTest);
+			}
+		}
 	}
 
 }
