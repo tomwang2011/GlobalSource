@@ -44,6 +44,66 @@ public class IndividualModuleProjectCreator {
 		}
 	}
 
+	private static void _appendSourcePath(
+		Module module, StringBuilder projectSB) {
+
+		String moduleName = module.getModuleName();
+
+		_checkPathExists(
+			module.getSourcePath(), "src", moduleName, "src", projectSB);
+		_checkPathExists(
+			module.getSourceResourcePath(), "src", moduleName, "resources",
+			projectSB);
+		_checkPathExists(
+			module.getTestUnitPath(), "test", moduleName, "test-unit",
+			projectSB);
+		_checkPathExists(
+			module.getTestUnitResourcePath(), "test", moduleName,
+			"test-unit-resources", projectSB);
+		_checkPathExists(
+			module.getTestIntegrationPath(), "test", moduleName,
+			"test-integration", projectSB);
+		_checkPathExists(
+			module.getTestIntegrationPath(), "test", moduleName,
+			"test-integration-resources", projectSB);
+	}
+
+	private static String _appendSourcePathIndividual(
+		Path path, String prefix, String name, String subfix) {
+
+		StringBuilder sb = new StringBuilder();
+
+		sb.append("file.reference.");
+		sb.append(name);
+		sb.append("-");
+		sb.append(subfix);
+		sb.append("=");
+		sb.append(path);
+		sb.append("\n");
+		sb.append(prefix);
+		sb.append(".");
+		sb.append(name);
+		sb.append(".");
+		sb.append(subfix);
+		sb.append(".dir=${file.reference.");
+		sb.append(name);
+		sb.append("-");
+		sb.append(subfix);
+		sb.append("}\n");
+
+		return sb.toString();
+	}
+
+	private static void _checkPathExists(
+		Path path, String prefix, String name, String subfix,
+		StringBuilder projectSB) {
+
+		if (path != null) {
+			projectSB.append(_appendSourcePathIndividual(
+				path, prefix, name, subfix));
+		}
+	}
+
 	private static void _createModuleProject(
 			Module module, Properties properties, String moduleFolderName)
 		throws IOException {
@@ -86,6 +146,8 @@ public class IndividualModuleProjectCreator {
 		projectSB.append(File.separator);
 		projectSB.append(moduleName);
 		projectSB.append(".jar\n");
+
+		_appendSourcePath(module, projectSB);
 
 		try (BufferedWriter bufferedWriter = Files.newBufferedWriter(
 			projectPropertiesPath, Charset.defaultCharset(),
