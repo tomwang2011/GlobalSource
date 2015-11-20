@@ -40,6 +40,15 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Queue;
 import java.util.Set;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 /**
  * @author tom
@@ -48,7 +57,7 @@ public class GroupProjectCreator {
 
 	public static void createGroupProject(
 			Map<Path, Map<String, Module>> projectMap, Properties properties)
-		throws IOException {
+		throws Exception {
 
 		Path portalDirPath = Paths.get(properties.getProperty("portal.dir"));
 
@@ -262,12 +271,109 @@ public class GroupProjectCreator {
 		}
 	}
 
+	private static void _createConfiguration(
+			Element projectElement, Map<Path, Map<String, Module>> projectMap,
+			Map<Path, Boolean> solvedSet, Path groupPath)
+		throws IOException {
+
+		Element configurationElement = _document.createElement("configuration");
+
+		projectElement.appendChild(configurationElement);
+
+		_createData(configurationElement, projectMap, groupPath);
+
+		_createReferences(
+			configurationElement, solvedSet, groupPath);
+	}
+
+	private static void _createData(
+		Element configurationElement, Map<Path, Map<String, Module>> projectMap,
+		Path groupPath) {
+
+		Element dataElement = _document.createElement("data");
+
+		dataElement.setAttribute(
+			"xmlns", "http://www.netbeans.org/ns/j2se-project/3");
+
+		configurationElement.appendChild(dataElement);
+
+		Element nameElement = _document.createElement("name");
+
+		nameElement.appendChild(
+			_document.createTextNode(groupPath.toString()));
+
+		dataElement.appendChild(nameElement);
+
+		Element sourceRootsElement = _document.createElement("source-roots");
+
+		dataElement.appendChild(sourceRootsElement);
+
+		Map<String, Module> moduleMap = projectMap.get(groupPath);
+
+		Element testRootsElement = _document.createElement("test-roots");
+
+		for (Module module : moduleMap.values()) {
+			String moduleName = module.getModuleName();
+
+			if (module.getSourcePath() != null) {
+				_createRoots(
+					sourceRootsElement, Paths.get(moduleName, "src"),
+					"src." + moduleName + ".src.dir");
+			}
+
+			if (module.getSourceResourcePath() != null) {
+				_createRoots(
+					sourceRootsElement, Paths.get(moduleName, "resources"),
+					"src." + moduleName + ".resources.dir");
+			}
+
+			if (module.getTestUnitPath() != null) {
+				_createRoots(
+					testRootsElement, Paths.get(moduleName, "unit"),
+					"test." + moduleName + ".test-unit.dir");
+			}
+
+			if (module.getTestUnitResourcePath() != null) {
+				_createRoots(
+					testRootsElement, Paths.get(moduleName, "unit-resources"),
+					"test." + moduleName + ".test-unit-resources.dir");
+			}
+
+			if (module.getTestIntegrationPath() != null) {
+				_createRoots(
+					testRootsElement, Paths.get(moduleName, "integration"),
+					"test." + moduleName + ".test-integration.dir");
+			}
+
+			if (module.getTestIntegrationResourcePath() != null) {
+				_createRoots(
+					testRootsElement,
+					Paths.get(moduleName, "integration-resources"),
+					"test." + moduleName + ".test-integration-resources.dir");
+			}
+
+			if (moduleName.equals("portal-impl")) {
+				_createRoots(
+					sourceRootsElement, Paths.get("portal-test-internal"),
+					"src.portal-test-internal.src.dir");
+			}
+
+			if (moduleName.equals("portal-service")) {
+				_createRoots(
+					sourceRootsElement, Paths.get("portal-test"),
+					"src.portal-test.src.dir");
+			}
+		}
+
+		dataElement.appendChild(testRootsElement);
+	}
+
 	private static void _createGroupModule(
 			Map<Path, Map<String, Module>> projectMap, Path groupPath,
 			ProjectDependencyResolver projectDependencyResolver,
 			Properties projectDependencyProperties, Properties properties,
 			Set<String> individualProjectSet, String portalLibJars)
-		throws IOException {
+		throws Exception {
 
 		Path projectDirPath = Paths.get(properties.getProperty("project.dir"));
 
@@ -289,6 +395,135 @@ public class GroupProjectCreator {
 			projectMap, solvedSet, groupName, groupPath, modulesDirPath,
 			projectDependencyResolver, projectDependencyProperties, properties,
 			individualProjectSet, portalLibJars);
+
+		DocumentBuilderFactory documentBuilderFactory =
+			DocumentBuilderFactory.newInstance();
+
+		DocumentBuilder documentBuilder =
+			documentBuilderFactory.newDocumentBuilder();
+
+		_document = documentBuilder.newDocument();
+
+		_createProjectElement(projectMap, solvedSet, groupPath);
+
+		TransformerFactory transformerFactory =
+			TransformerFactory.newInstance();
+
+		Transformer transformer = transformerFactory.newTransformer();
+
+		Path filePath = Paths.get(
+			properties.getProperty("project.dir"), "group-modules",
+			groupName.toString(), "nbproject", "project.xml");
+
+		Files.createDirectories(filePath.getParent());
+
+		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+		transformer.setOutputProperty(
+			"{http://xml.apache.org/xslt}indent-amount", "4");
+
+		transformer.transform(
+			new DOMSource(_document), new StreamResult(filePath.toFile()));
+	}
+
+	private static void _createProjectElement(
+			Map<Path, Map<String, Module>> projectMap,
+			Map<Path, Boolean> solvedSet, Path groupPath)
+		throws IOException {
+
+		Element projectElement = _document.createElement("project");
+
+		projectElement.setAttribute(
+			"xmlns", "http://www.netbeans.org/ns/project/1");
+
+		_document.appendChild(projectElement);
+
+		Element typeElement = _document.createElement("type");
+
+		typeElement.appendChild(
+			_document.createTextNode("org.netbeans.modules.java.j2seproject"));
+
+		projectElement.appendChild(typeElement);
+
+		_createConfiguration(
+			projectElement, projectMap, solvedSet, groupPath);
+	}
+
+	private static void _createReference(
+			Element referencesElement, Path referenceNamePath)
+		throws IOException {
+
+		Element referenceElement = _document.createElement("reference");
+
+		referencesElement.appendChild(referenceElement);
+
+		Element foreignProjectElement = _document.createElement(
+			"foreign-project");
+
+		foreignProjectElement.appendChild(_document.createTextNode(
+			referenceNamePath.toString()));
+
+		referenceElement.appendChild(foreignProjectElement);
+
+		Element artifactTypeElement = _document.createElement("artifact-type");
+
+		artifactTypeElement.appendChild(_document.createTextNode("jar"));
+
+		referenceElement.appendChild(artifactTypeElement);
+
+		Element scriptElement = _document.createElement("script");
+
+		scriptElement.appendChild(_document.createTextNode("build.xml"));
+
+		referenceElement.appendChild(scriptElement);
+
+		Element targetElement = _document.createElement("target");
+
+		targetElement.appendChild(_document.createTextNode("jar"));
+
+		referenceElement.appendChild(targetElement);
+
+		Element cleanTargetElement = _document.createElement("clean-target");
+
+		cleanTargetElement.appendChild(_document.createTextNode("clean"));
+
+		referenceElement.appendChild(cleanTargetElement);
+
+		Element idElement = _document.createElement("id");
+
+		idElement.appendChild(_document.createTextNode("jar"));
+
+		referenceElement.appendChild(idElement);
+	}
+
+	private static void _createReferences(
+			Element configurationElement, Map<Path, Boolean> solvedSet,
+			Path groupPath)
+		throws IOException {
+
+		Element referencesElement = _document.createElement("references");
+
+		referencesElement.setAttribute(
+			"xmlns", "http://www.netbeans.org/ns/ant-project-references/1");
+
+		configurationElement.appendChild(referencesElement);
+
+		for (Path path : solvedSet.keySet()) {
+			if (!path.equals(groupPath)) {
+				_createReference(referencesElement, path.getFileName());
+			}
+		}
+	}
+
+	private static void _createRoots(
+		Element sourceRootsElement, Path label, String rootId) {
+
+		Element rootElement = _document.createElement("root");
+
+		rootElement.setAttribute("id", rootId);
+
+		rootElement.setAttribute("name", label.toString());
+
+		sourceRootsElement.appendChild(rootElement);
 	}
 
 	private static void _prepareProjectPropertyFile(
@@ -524,5 +759,7 @@ public class GroupProjectCreator {
 
 		solvedSet.put(Paths.get("registry-api"), true);
 	}
+
+	private static Document _document;
 
 }
