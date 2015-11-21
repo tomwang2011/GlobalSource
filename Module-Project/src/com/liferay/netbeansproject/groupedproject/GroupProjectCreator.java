@@ -40,13 +40,77 @@ public class GroupProjectCreator {
 			if (!groupPath.equals(Paths.get(properties.getProperty(
 				"portal.dir")))) {
 
-				_createGroupModule(groupPath, properties);
+				_createGroupModule(projectMap, groupPath, properties);
 			}
 		}
 	}
 
+	private static void _appendSourcePath(
+		Map<String, Module> moduleMap, StringBuilder projectSB) {
+
+		for (Module module : moduleMap.values()) {
+			String moduleName = module.getModuleName();
+
+			_checkPathExists(
+				module.getSourcePath(), "src", moduleName, "src", projectSB);
+			_checkPathExists(
+				module.getSourceResourcePath(), "src", moduleName, "resources",
+				projectSB);
+			_checkPathExists(
+				module.getTestUnitPath(), "test", moduleName, "test-unit",
+				projectSB);
+			_checkPathExists(
+				module.getTestUnitResourcePath(), "test", moduleName,
+				"test-unit-resources", projectSB);
+			_checkPathExists(
+				module.getTestIntegrationPath(), "test", moduleName,
+				"test-integration", projectSB);
+			_checkPathExists(
+				module.getTestIntegrationPath(), "test", moduleName,
+				"test-integration-resources", projectSB);
+		}
+	}
+
+	private static String _appendSourcePathIndividual(
+		Path path, String prefix, String name, String subfix) {
+
+		StringBuilder sb = new StringBuilder();
+
+		sb.append("file.reference.");
+		sb.append(name);
+		sb.append("-");
+		sb.append(subfix);
+		sb.append("=");
+		sb.append(path);
+		sb.append("\n");
+		sb.append(prefix);
+		sb.append(".");
+		sb.append(name);
+		sb.append(".");
+		sb.append(subfix);
+		sb.append(".dir=${file.reference.");
+		sb.append(name);
+		sb.append("-");
+		sb.append(subfix);
+		sb.append("}\n");
+
+		return sb.toString();
+	}
+
+	private static void _checkPathExists(
+		Path path, String prefix, String name, String subfix,
+		StringBuilder projectSB) {
+
+		if (path != null) {
+			projectSB.append(
+				_appendSourcePathIndividual(
+					path, prefix, name, subfix));
+		}
+	}
+
 	private static void _createGroupModule(
-			Path groupPath, Properties properties)
+			Map<Path, Map<String, Module>> projectMap, Path groupPath,
+			Properties properties)
 		throws IOException {
 
 		Path projectDirPath = Paths.get(properties.getProperty("project.dir"));
@@ -61,12 +125,12 @@ public class GroupProjectCreator {
 		_replaceProjectName(groupName, modulesDirPath);
 
 		_prepareProjectPropertyFile(
-			groupName, groupPath, modulesDirPath, properties);
+			projectMap, groupName, groupPath, modulesDirPath, properties);
 	}
 
 	private static void _prepareProjectPropertyFile(
-			Path groupName, Path groupPath, Path modulesDirPath,
-			Properties properties)
+			Map<Path, Map<String, Module>> projectMap, Path groupName,
+			Path groupPath, Path modulesDirPath, Properties properties)
 		throws IOException {
 
 		StringBuilder projectSB = new StringBuilder();
@@ -87,6 +151,8 @@ public class GroupProjectCreator {
 			Paths.get(
 				modulesDirPath.toString(), groupName.toString(), "nbproject",
 				"project.properties");
+
+		_appendSourcePath(projectMap.get(groupPath), projectSB);
 
 		try (BufferedWriter bufferedWriter = Files.newBufferedWriter(
 			projectPropertiesPath, Charset.defaultCharset(),
