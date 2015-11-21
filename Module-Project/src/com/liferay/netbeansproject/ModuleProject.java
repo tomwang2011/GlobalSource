@@ -16,6 +16,7 @@ package com.liferay.netbeansproject;
 
 import com.liferay.netbeansproject.container.Module;
 import com.liferay.netbeansproject.container.Module.JarDependency;
+import com.liferay.netbeansproject.groupedproject.GroupProjectCreator;
 import com.liferay.netbeansproject.individualmoduleproject.IndividualModuleProjectCreator;
 import com.liferay.netbeansproject.util.GradleUtil;
 import com.liferay.netbeansproject.util.PropertiesUtil;
@@ -100,6 +101,8 @@ public class ModuleProject {
 
 		IndividualModuleProjectCreator.createIndividualModuleProject(
 			projectMap, properties);
+
+		GroupProjectCreator.createGroupProject(projectMap, properties);
 	}
 
 	private static void _clean(Path projectDirPath) throws IOException {
