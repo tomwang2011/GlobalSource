@@ -19,15 +19,19 @@ import com.liferay.netbeansproject.container.Module.JarDependency;
 import com.liferay.netbeansproject.container.Module.ModuleDependency;
 import com.liferay.netbeansproject.resolvers.ProjectDependencyResolver;
 import com.liferay.netbeansproject.resolvers.ProjectDependencyResolverImpl;
+import com.liferay.netbeansproject.util.PropertiesUtil;
 import com.liferay.netbeansproject.util.StringUtil;
 import com.liferay.netbeansproject.util.ZipUtil;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardOpenOption;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -49,11 +53,16 @@ public class GroupProjectCreator {
 		ProjectDependencyResolver projectDependencyResolver =
 			new ProjectDependencyResolverImpl(projectMap, portalDirPath);
 
+		Properties projectDependencyProperties = PropertiesUtil.loadProperties(
+			Paths.get("project-dependency.properties"));
+
+		String portalLibJars = _resolvePortalLibJars(portalDirPath);
+
 		for (Path groupPath : projectMap.keySet()) {
 			if (!groupPath.equals(portalDirPath)) {
 				_createGroupModule(
 					projectMap, groupPath, projectDependencyResolver,
-					properties);
+					projectDependencyProperties, properties, portalLibJars);
 			}
 		}
 	}
@@ -156,7 +165,8 @@ public class GroupProjectCreator {
 	private static void _createGroupModule(
 			Map<Path, Map<String, Module>> projectMap, Path groupPath,
 			ProjectDependencyResolver projectDependencyResolver,
-			Properties properties)
+			Properties projectDependencyProperties, Properties properties,
+			String portalLibJars)
 		throws IOException {
 
 		Path projectDirPath = Paths.get(properties.getProperty("project.dir"));
@@ -176,14 +186,16 @@ public class GroupProjectCreator {
 
 		_prepareProjectPropertyFile(
 			projectMap, groupName, groupPath, modulesDirPath,
-			projectDependencyResolver, properties, solvedSet);
+			projectDependencyResolver, projectDependencyProperties, properties,
+			solvedSet, portalLibJars);
 	}
 
 	private static void _prepareProjectPropertyFile(
 			Map<Path, Map<String, Module>> projectMap, Path groupName,
 			Path groupPath, Path modulesDirPath,
 			ProjectDependencyResolver projectDependencyResolver,
-			Properties properties, Set<Path> solvedSet)
+			Properties projectDependencyProperties, Properties properties,
+			Set<Path> solvedSet, String portalLibJars)
 		throws IOException {
 
 		StringBuilder projectSB = new StringBuilder();
@@ -271,6 +283,11 @@ public class GroupProjectCreator {
 			solvedSet.add(dependencyGroupPath);
 		}
 
+		_resolvePortalProjectDependencies(
+			projectDependencyProperties, javacSB, projectSB);
+
+		javacSB.append(portalLibJars);
+
 		try (BufferedWriter bufferedWriter = Files.newBufferedWriter(
 			projectPropertiesPath, Charset.defaultCharset(),
 			StandardOpenOption.APPEND)) {
@@ -336,6 +353,52 @@ public class GroupProjectCreator {
 				}
 			}
 		}
+	}
+
+	private static String _resolvePortalLibJars(Path portalDir)
+		throws IOException {
+
+		final StringBuilder sb = new StringBuilder();
+
+		Files.walkFileTree(
+			portalDir.resolve("lib"), new SimpleFileVisitor<Path>() {
+
+				@Override
+				public FileVisitResult visitFile(
+						Path dir, BasicFileAttributes attrs)
+					throws IOException {
+
+					String fileName = dir.toString();
+
+					if (fileName.endsWith(".jar")) {
+						sb.append("\t");
+						sb.append(dir);
+						sb.append(":\\\n");
+					}
+
+					return FileVisitResult.CONTINUE;
+				}
+			});
+
+		return sb.toString();
+	}
+
+	private static void _resolvePortalProjectDependencies(
+		Properties projectDependencyProperties, StringBuilder javacSB,
+		StringBuilder projectSB) {
+
+		String projectModuleDependencies =
+			projectDependencyProperties.getProperty(
+				"project.module.dependencies");
+
+		for (
+			String dependency :
+			StringUtil.split(projectModuleDependencies, ',')) {
+
+			_appendProjectDependencies(dependency, projectSB, javacSB);
+		}
+
+		_appendProjectDependencies("registry-api", projectSB, javacSB);
 	}
 
 }
