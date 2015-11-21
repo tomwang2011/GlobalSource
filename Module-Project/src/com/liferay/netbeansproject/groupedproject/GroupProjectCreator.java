@@ -16,6 +16,9 @@ package com.liferay.netbeansproject.groupedproject;
 
 import com.liferay.netbeansproject.container.Module;
 import com.liferay.netbeansproject.container.Module.JarDependency;
+import com.liferay.netbeansproject.container.Module.ModuleDependency;
+import com.liferay.netbeansproject.resolvers.ProjectDependencyResolver;
+import com.liferay.netbeansproject.resolvers.ProjectDependencyResolverImpl;
 import com.liferay.netbeansproject.util.StringUtil;
 import com.liferay.netbeansproject.util.ZipUtil;
 import java.io.BufferedWriter;
@@ -26,9 +29,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Properties;
-
+import java.util.Queue;
+import java.util.Set;
 /**
  * @author tom
  */
@@ -38,11 +44,16 @@ public class GroupProjectCreator {
 			Map<Path, Map<String, Module>> projectMap, Properties properties)
 		throws IOException {
 
-		for (Path groupPath : projectMap.keySet()) {
-			if (!groupPath.equals(Paths.get(properties.getProperty(
-				"portal.dir")))) {
+		Path portalDirPath = Paths.get(properties.getProperty("portal.dir"));
 
-				_createGroupModule(projectMap, groupPath, properties);
+		ProjectDependencyResolver projectDependencyResolver =
+			new ProjectDependencyResolverImpl(projectMap, portalDirPath);
+
+		for (Path groupPath : projectMap.keySet()) {
+			if (!groupPath.equals(portalDirPath)) {
+				_createGroupModule(
+					projectMap, groupPath, projectDependencyResolver,
+					properties);
 			}
 		}
 	}
@@ -51,6 +62,32 @@ public class GroupProjectCreator {
 		sb.append("\t");
 		sb.append(jarPath);
 		sb.append(":\\\n");
+	}
+
+	private static void _appendProjectDependencies(
+		String moduleName, StringBuilder sb, StringBuilder javacSB) {
+
+		sb.append("project.");
+		sb.append(moduleName);
+		sb.append("=");
+
+		Path path = Paths.get("..", moduleName);
+
+		sb.append(path);
+		sb.append("\n");
+		sb.append("reference.");
+		sb.append(moduleName);
+		sb.append(".jar=${project.");
+		sb.append(moduleName);
+
+		path = Paths.get("}", "dist", moduleName + ".jar");
+
+		sb.append(path);
+		sb.append("\n");
+
+		javacSB.append("\t${reference.");
+		javacSB.append(moduleName);
+		javacSB.append(".jar}:\\\n");
 	}
 
 	private static void _appendSourcePath(
@@ -118,6 +155,7 @@ public class GroupProjectCreator {
 
 	private static void _createGroupModule(
 			Map<Path, Map<String, Module>> projectMap, Path groupPath,
+			ProjectDependencyResolver projectDependencyResolver,
 			Properties properties)
 		throws IOException {
 
@@ -132,13 +170,20 @@ public class GroupProjectCreator {
 
 		_replaceProjectName(groupName, modulesDirPath);
 
+		Set<Path> solvedSet = new HashSet<>();
+
+		solvedSet.add(groupPath);
+
 		_prepareProjectPropertyFile(
-			projectMap, groupName, groupPath, modulesDirPath, properties);
+			projectMap, groupName, groupPath, modulesDirPath,
+			projectDependencyResolver, properties, solvedSet);
 	}
 
 	private static void _prepareProjectPropertyFile(
 			Map<Path, Map<String, Module>> projectMap, Path groupName,
-			Path groupPath, Path modulesDirPath, Properties properties)
+			Path groupPath, Path modulesDirPath,
+			ProjectDependencyResolver projectDependencyResolver,
+			Properties properties, Set<Path> solvedSet)
 		throws IOException {
 
 		StringBuilder projectSB = new StringBuilder();
@@ -173,6 +218,58 @@ public class GroupProjectCreator {
 
 		_resolveDependencyJarSet(
 			projectMap.get(groupPath), solvedJars, javacSB, testSB);
+
+		Queue<ModuleDependency> projectDependencyQueue = new LinkedList<>();
+
+		Map<String, Module> moduleMap = projectMap.get(groupPath);
+
+		for (Module module : moduleMap.values()) {
+			projectDependencyQueue.addAll(module.getModuleDependencies());
+		}
+
+		ModuleDependency moduleDependency = null;
+
+		while ((moduleDependency = projectDependencyQueue.poll()) != null) {
+			Module dependencyModule =
+				moduleDependency.getModule(projectDependencyResolver);
+
+			Path dependencyModulePath = dependencyModule.getModulePath();
+
+			Path dependencyGroupPath = dependencyModulePath.getParent();
+
+			if (!solvedSet.contains(dependencyGroupPath)) {
+				Map<String, Module> dependencyGroupModuleMap = projectMap.get(
+					dependencyGroupPath);
+
+				for (
+					Module dependencyGroupModule :
+					dependencyGroupModuleMap.values()) {
+
+					projectDependencyQueue.addAll(
+						dependencyGroupModule.getModuleDependencies());
+				}
+
+				Path dependencyGroupPathName =
+					dependencyGroupPath.getFileName();
+
+				if (moduleDependency.isTest()) {
+					_appendProjectDependencies(
+						dependencyGroupPathName.toString(), projectSB,
+						testSB);
+				}
+				else {
+					_appendProjectDependencies(
+						dependencyGroupPathName.toString(), projectSB,
+						javacSB);
+				}
+
+				_resolveDependencyJarSet(
+					projectMap.get(dependencyGroupPath), solvedJars, javacSB,
+					testSB);
+			}
+
+			solvedSet.add(dependencyGroupPath);
+		}
 
 		try (BufferedWriter bufferedWriter = Files.newBufferedWriter(
 			projectPropertiesPath, Charset.defaultCharset(),
