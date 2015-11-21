@@ -87,6 +87,9 @@ public class GroupProjectCreator {
 					individualProjectSet, portalLibJars);
 			}
 		}
+
+		CreateUmbrellaProject.createUmbrellaProject(
+			projectMap, properties, portalLibJars);
 	}
 
 	private static void _appendDependencyJar(Path jarPath, StringBuilder sb) {
