@@ -182,7 +182,8 @@ public class CreateModule {
 
 			if (!Files.exists(dependenciesPath)) {
 				Files.write(
-					dependenciesPath, Arrays.asList(	"compile:\ncompileTest:"));
+					dependenciesPath, Arrays.asList("compile:\ncompileTest:"),
+					Charset.defaultCharset());
 			}
 
 			Properties dependencyProperties =
@@ -658,7 +659,8 @@ public class CreateModule {
 		content = StringUtil.replace(
 			content, "%placeholder%",projectInfo.getProjectName());
 
-		Files.write(buildXMLPath, content.getBytes());
+		Files.write(
+			buildXMLPath, Arrays.asList(content), Charset.defaultCharset());
 	}
 
 	private static Document _document;
