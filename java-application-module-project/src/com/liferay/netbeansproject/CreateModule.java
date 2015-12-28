@@ -4,14 +4,14 @@ import com.liferay.netbeansproject.ModuleBuildParser.ModuleInfo;
 import com.liferay.netbeansproject.util.ArgumentsUtil;
 import com.liferay.netbeansproject.util.PropertiesUtil;
 import com.liferay.netbeansproject.util.StringUtil;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -147,8 +147,9 @@ public class CreateModule {
 				"nbproject", "project.properties");
 		try (
 			PrintWriter printWriter = new PrintWriter(
-				new BufferedWriter(
-					new FileWriter(projectPropertiesPath.toFile(), true)))) {
+				Files.newBufferedWriter(
+					projectPropertiesPath, Charset.defaultCharset(),
+					StandardOpenOption.APPEND))) {
 
 			StringBuilder projectSB = new StringBuilder();
 
