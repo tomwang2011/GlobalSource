@@ -37,7 +37,7 @@ public class CreateProject {
 			StringUtil.split(arguments.get("module.list"), ','),
 			StringUtil.split(arguments.get("umbrella.source.list"), ','));
 
-		Path projectDir = Paths.get(properties.getProperty("project.dir"));
+		Path projectDir = Paths.get(arguments.get("project.dir"));
 
 		_appendList(projectInfo, projectDir);
 

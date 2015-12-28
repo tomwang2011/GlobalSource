@@ -37,14 +37,13 @@ public class CreateModule {
 		Properties properties = PropertiesUtil.loadProperties(
 			Paths.get("build.properties"));
 
-		String portalDir = properties.getProperty("portal.dir");
-
 		ProjectInfo projectInfo = new ProjectInfo(
-			arguments.get("src.dir.name"), portalDir, arguments.get("src.dir"),
+			arguments.get("src.dir.name"), arguments.get("portal.dir"),
+			arguments.get("src.dir"),
 			StringUtil.split(arguments.get("project.dependencies"), ','),
 			StringUtil.split(arguments.get("module.list"), ','));
 
-		Path projectPath = Paths.get(properties.getProperty("project.dir"));
+		Path projectPath = Paths.get(arguments.get("project.dir"));
 
 		Path moduleDir = projectPath.resolve("modules");
 
