@@ -4,8 +4,6 @@
 	<property file="build-ext.properties" />
 	<property file="build.properties" />
 
-	<property name="sdk.dir" value="${portal.dir}/tools/sdk" />
-
 	<property name="module.list" value="" />
 	<property name="test.list" value="" />
 
