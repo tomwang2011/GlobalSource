@@ -17,7 +17,7 @@ public class ProcessGradle {
 		Map<String, String> arguments = ArgumentsUtil.parseArguments(args);
 
 		Path portalDirPath = Paths.get(arguments.get("portal.dir"));
-		Path projectFilePath = Paths.get(arguments.get("project.dir"));
+		Path projectDirPath = Paths.get(arguments.get("project.dir"));
 
 		Path gradlewPath = portalDirPath.resolve("gradlew");
 
@@ -32,7 +32,7 @@ public class ProcessGradle {
 
 		gradleTask.add(moduleDirPath.toString());
 
-		Path dependenciesDirPath = projectFilePath.resolve("dependencies");
+		Path dependenciesDirPath = projectDirPath.resolve("dependencies");
 
 		Files.createDirectories(dependenciesDirPath);
 
