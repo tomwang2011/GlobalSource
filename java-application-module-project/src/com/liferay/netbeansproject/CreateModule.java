@@ -182,8 +182,7 @@ public class CreateModule {
 
 			if (!Files.exists(dependenciesPath)) {
 				Files.write(
-					dependenciesPath, Arrays.asList(
-						"compile:\ncompileTest:"));
+					dependenciesPath, Arrays.asList(	"compile:\ncompileTest:"));
 			}
 
 			Properties dependencyProperties =
