@@ -1,7 +1,7 @@
 package com.liferay.netbeansproject;
 
 import com.liferay.netbeansproject.util.ArgumentsUtil;
-import java.io.InterruptedIOException;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -42,10 +42,12 @@ public class ProcessGradle {
 
 		Process process = processBuilder.start();
 
-		process.waitFor();
+		int exitCode = process.waitFor();
 
-		if (process.waitFor() != 0) {
-			throw new InterruptedIOException();
+		if (exitCode != 0) {
+			throw new IOException(
+				"Process " + processBuilder.command() + " failed with " +
+					exitCode);
 		}
 	}
 }
