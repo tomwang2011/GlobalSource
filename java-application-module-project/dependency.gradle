@@ -17,6 +17,7 @@ allprojects {
 					sb.append(it)
 					sb.append(':')
 				}
+
 				sb.append('\n')
 			}
 		}
