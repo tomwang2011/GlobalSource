@@ -4,9 +4,9 @@ import com.liferay.netbeansproject.ModuleBuildParser.ModuleInfo;
 import com.liferay.netbeansproject.util.ArgumentsUtil;
 import com.liferay.netbeansproject.util.PropertiesUtil;
 import com.liferay.netbeansproject.util.StringUtil;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -145,11 +145,9 @@ public class CreateModule {
 			Paths.get(
 				modulePath.toString(), projectInfo.getProjectName(),
 				"nbproject", "project.properties");
-		try (
-			PrintWriter printWriter = new PrintWriter(
-				Files.newBufferedWriter(
-					projectPropertiesPath, Charset.defaultCharset(),
-					StandardOpenOption.APPEND))) {
+		try (BufferedWriter bufferedWriter = Files.newBufferedWriter(
+				projectPropertiesPath, Charset.defaultCharset(),
+				StandardOpenOption.APPEND)) {
 
 			StringBuilder projectSB = new StringBuilder();
 
@@ -172,7 +170,8 @@ public class CreateModule {
 
 			for (String module : projectInfo.getProjectLibs()) {
 				if (!module.equals("")) {
-					_appendReferenceProperties(printWriter, module, projectSB);
+					_appendReferenceProperties(
+						bufferedWriter, module, projectSB);
 				}
 			}
 
@@ -229,11 +228,11 @@ public class CreateModule {
 
 				if(moduleInfo.isTest()) {
 					_appendReferenceProperties(
-						printWriter, moduleName, testSB);
+						bufferedWriter, moduleName, testSB);
 				}
 				else {
 					_appendReferenceProperties(
-						printWriter, moduleName, projectSB);
+						bufferedWriter, moduleName, projectSB);
 				}
 
 				Path inheritedDependenciesPath = dependenciesDirPath.resolve(
@@ -291,16 +290,19 @@ public class CreateModule {
 					"src.test.dir=${file.reference.portal-test-src}");
 			}
 
-			printWriter.println(projectSB.toString());
+			bufferedWriter.append(projectSB);
+			bufferedWriter.newLine();
 
 			testSB.setLength(testSB.length() - 3);
 
-			printWriter.println(testSB.toString());
+			bufferedWriter.append(testSB);
+			bufferedWriter.newLine();
 		}
 	}
 
 	private static void _appendReferenceProperties(
-		PrintWriter printWriter, String module, StringBuilder javacSB) {
+			BufferedWriter bufferedWriter, String module, StringBuilder javacSB)
+		throws IOException {
 
 		StringBuilder sb = new StringBuilder("project.");
 
@@ -316,7 +318,8 @@ public class CreateModule {
 		sb.append(module);
 		sb.append(".jar");
 
-		printWriter.println(sb.toString());
+		bufferedWriter.append(sb);
+		bufferedWriter.newLine();
 
 		javacSB.append("\t${reference.");
 		javacSB.append(module);
