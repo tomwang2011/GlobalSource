@@ -15,9 +15,9 @@ allprojects {
 
 				configuration.files.each {
 					sb.append(it)
-					sb.append(":")
+					sb.append(':')
 				}
-				sb.append("\n")
+				sb.append('\n')
 			}
 		}
 
