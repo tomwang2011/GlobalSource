@@ -21,7 +21,7 @@ allprojects {
 			}
 		}
 
-		if (!sb.toString().equals("")) {
+		if (sb.length() != 0) {
 			def file = new File(dependencyDirectory + File.separator + project.getName())
 
 			file.text = sb
