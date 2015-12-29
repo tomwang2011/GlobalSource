@@ -4,6 +4,7 @@ import com.liferay.netbeansproject.util.ArgumentsUtil;
 import com.liferay.netbeansproject.util.PropertiesUtil;
 import com.liferay.netbeansproject.util.StringUtil;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -34,7 +35,7 @@ public class CreateProject {
 			StringUtil.split(arguments.get("module.list"), ','),
 			StringUtil.split(arguments.get("umbrella.source.list"), ','));
 
-		Path projectDir = Paths.get(arguments.get("project.dir"));
+		String projectDir = arguments.get("project.dir");
 
 		_appendList(projectInfo, projectDir);
 
@@ -55,12 +56,8 @@ public class CreateProject {
 
 		DOMSource source = new DOMSource(_document);
 
-		StreamResult streamResult = null;
-
-		Path projectXMLPath = Paths.get(
-			projectDir.toString(), "nbproject", "project.xml");
-
-		streamResult = new StreamResult(projectXMLPath.toFile());
+		StreamResult streamResult = new StreamResult(
+			new File(projectDir, "nbproject/project.xml"));
 
 		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 		transformer.setOutputProperty(
@@ -68,11 +65,11 @@ public class CreateProject {
 		transformer.transform(source, streamResult);
 	}
 
-	private static void _appendList(ProjectInfo projectInfo, Path projectDir)
+	private static void _appendList(ProjectInfo projectInfo, String projectDir)
 		throws IOException {
 
 		Path projectPropertiesPath = Paths.get(
-			projectDir.toString(), "nbproject", "project.properties");
+			projectDir, "nbproject", "project.properties");
 
 		try (BufferedWriter bufferedWriter = Files.newBufferedWriter(
 						projectPropertiesPath, Charset.defaultCharset(),
