@@ -10,8 +10,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Properties;
 import javax.xml.parsers.DocumentBuilder;
@@ -82,10 +80,7 @@ public class CreateProject {
 
 			StringBuilder sb = new StringBuilder("javac.classpath=\\\n");
 
-			for (
-				String modulePath :
-				new LinkedHashSet<>(Arrays.asList(projectInfo.getModules()))) {
-
+			for (String modulePath : projectInfo.getModules()) {
 				Path path = Paths.get(modulePath);
 
 				Path moduleName = path.getFileName();
