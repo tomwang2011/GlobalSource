@@ -68,21 +68,18 @@ public class CreateModule {
 
 		Transformer transformer = transformerFactory.newTransformer();
 
-		DOMSource source = new DOMSource(_document);
-
-		StreamResult streamResult = null;
-
 		Path fileNamePath =
 			Paths.get(
 				moduleDir.toString(), projectInfo.getProjectName(), "nbproject",
 				"project.xml");
 
-		streamResult = new StreamResult(fileNamePath.toFile());
+		StreamResult streamResult = new StreamResult(fileNamePath.toFile());
 
 		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 		transformer.setOutputProperty(
 			"{http://xml.apache.org/xslt}indent-amount", "4");
-		transformer.transform(source, streamResult);
+
+		transformer.transform(new DOMSource(_document), streamResult);
 	}
 
 	private static Map<String, ModuleInfo> _parseModuleDependencies(
