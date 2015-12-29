@@ -173,7 +173,7 @@ public class CreateModule {
 			projectSB.append("javac.classpath=\\\n");
 
 			for (String module : projectInfo.getProjectLibs()) {
-				if (!module.equals("")) {
+				if (!module.isEmpty()) {
 					_appendReferenceProperties(
 						bufferedWriter, module, projectSB);
 				}
