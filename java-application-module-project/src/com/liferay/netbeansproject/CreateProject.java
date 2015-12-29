@@ -54,26 +54,22 @@ public class CreateProject {
 
 		Transformer transformer = transformerFactory.newTransformer();
 
-		DOMSource source = new DOMSource(_document);
-
 		StreamResult streamResult = new StreamResult(
 			new File(projectDir, "nbproject/project.xml"));
 
 		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 		transformer.setOutputProperty(
 			"{http://xml.apache.org/xslt}indent-amount", "4");
-		transformer.transform(source, streamResult);
+
+		transformer.transform(new DOMSource(_document), streamResult);
 	}
 
 	private static void _appendList(ProjectInfo projectInfo, String projectDir)
 		throws IOException {
 
-		Path projectPropertiesPath = Paths.get(
-			projectDir, "nbproject", "project.properties");
-
 		try (BufferedWriter bufferedWriter = Files.newBufferedWriter(
-						projectPropertiesPath, Charset.defaultCharset(),
-						StandardOpenOption.APPEND)) {
+				Paths.get(projectDir, "nbproject", "project.properties"),
+				Charset.defaultCharset(), StandardOpenOption.APPEND)) {
 
 			StringBuilder sb = new StringBuilder("javac.classpath=\\\n");
 
@@ -89,7 +85,7 @@ public class CreateProject {
 
 			sb.setLength(sb.length() - 3);
 
-			bufferedWriter.append(sb.toString());
+			bufferedWriter.append(sb);
 			bufferedWriter.newLine();
 		}
 	}
