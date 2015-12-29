@@ -4,7 +4,6 @@ import com.liferay.netbeansproject.util.ArgumentsUtil;
 import com.liferay.netbeansproject.util.PropertiesUtil;
 import com.liferay.netbeansproject.util.StringUtil;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -60,8 +59,10 @@ public class CreateProject {
 
 		StreamResult streamResult = null;
 
-		streamResult = new StreamResult(
-			new File(projectDir + "/nbproject/project.xml"));
+		Path projectXMLPath = Paths.get(
+			projectDir.toString(), "nbproject", "project.xml");
+
+		streamResult = new StreamResult(projectXMLPath.toFile());
 
 		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 		transformer.setOutputProperty(
