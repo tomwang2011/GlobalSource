@@ -34,9 +34,6 @@ public class CreateModule {
 	public static void main(String[] args) throws Exception {
 		Map<String, String> arguments = ArgumentsUtil.parseArguments(args);
 
-		Properties properties = PropertiesUtil.loadProperties(
-			Paths.get("build.properties"));
-
 		ProjectInfo projectInfo = new ProjectInfo(
 			arguments.get("src.dir.name"), arguments.get("portal.dir"),
 			Paths.get(arguments.get("src.dir")),
@@ -49,7 +46,12 @@ public class CreateModule {
 
 		_replaceProjectName(projectInfo, moduleDir);
 
-		_appendProperties(projectInfo, properties, moduleDir, projectPath);
+		Properties properties = PropertiesUtil.loadProperties(
+			Paths.get("build.properties"));
+
+		_appendProperties(
+			projectInfo, properties.getProperty("exclude.types"), moduleDir,
+			projectPath);
 
 		DocumentBuilderFactory documentBuilderFactory =
 			DocumentBuilderFactory.newInstance();
@@ -137,7 +139,7 @@ public class CreateModule {
 	}
 
 	private static void _appendProperties(
-		ProjectInfo projectInfo, Properties properties, Path modulePath,
+			ProjectInfo projectInfo, String excludeTypes, Path modulePath,
 			Path projectPath)
 		throws Exception {
 
@@ -154,7 +156,7 @@ public class CreateModule {
 			StringBuilder projectSB = new StringBuilder();
 
 			projectSB.append("excludes=");
-			projectSB.append(properties.getProperty("exclude.types"));
+			projectSB.append(excludeTypes);
 			projectSB.append("\n");
 
 			projectSB.append("application.title=");
