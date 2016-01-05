@@ -17,6 +17,7 @@ package com.liferay.netbeansproject.individualmoduleproject;
 import com.liferay.netbeansproject.container.Module;
 import com.liferay.netbeansproject.container.Module.JarDependency;
 import com.liferay.netbeansproject.container.Module.ModuleDependency;
+import static com.liferay.netbeansproject.individualmoduleproject.CreateUmbrellaProject.createUmbrellaProject;
 import com.liferay.netbeansproject.resolvers.ProjectDependencyResolver;
 import com.liferay.netbeansproject.resolvers.ProjectDependencyResolverImpl;
 import com.liferay.netbeansproject.util.PropertiesUtil;
@@ -75,6 +76,8 @@ public class IndividualModuleProjectCreator {
 					"modules", portalLibJars);
 			}
 		}
+
+		createUmbrellaProject(projectMap, properties, portalLibJars);
 	}
 
 	private static void _appendDependencyJar(Path jarPath, StringBuilder sb) {
