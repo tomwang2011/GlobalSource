@@ -286,12 +286,7 @@ public class CreateModule {
 			if (projectName.equals("portal-impl")) {
 				projectSB.append("\nfile.reference.portal-test-internal-src=");
 				projectSB.append(projectInfo.getPortalDir());
-
-				Path portalTestInternalSrcPath = Paths.get(
-					"portal-test-internal", "src");
-
-				projectSB.append(portalTestInternalSrcPath.toString());
-				projectSB.append("\n");
+				projectSB.append("/portal-test-internal/src\n");
 				projectSB.append(
 					"src.test.dir=${file.reference.portal-test-internal-src}");
 			}
@@ -299,12 +294,7 @@ public class CreateModule {
 			if (projectName.equals("portal-service")) {
 				projectSB.append("\nfile.reference.portal-test-src=");
 				projectSB.append(projectInfo.getPortalDir());
-
-				Path portalTestSrcPath = Paths.get(
-					"portal-test", "src");
-
-				projectSB.append(portalTestSrcPath.toString());
-				projectSB.append("\n");
+				projectSB.append("/portal-test/src\n");
 				projectSB.append(
 					"src.test.dir=${file.reference.portal-test-src}");
 			}
@@ -327,7 +317,7 @@ public class CreateModule {
 
 		sb.append(module);
 		sb.append("=..");
-		sb.append(File.pathSeparatorChar);
+		sb.append(File.separatorChar);
 		sb.append(module);
 		sb.append("\n");
 		sb.append("reference.");
@@ -335,9 +325,9 @@ public class CreateModule {
 		sb.append(".jar=${project.");
 		sb.append(module);
 		sb.append("}");
-		sb.append(File.pathSeparatorChar);
+		sb.append(File.separatorChar);
 		sb.append("dist");
-		sb.append(File.pathSeparatorChar);
+		sb.append(File.separatorChar);
 		sb.append(module);
 		sb.append(".jar");
 
@@ -359,11 +349,11 @@ public class CreateModule {
 			projectSB.append(moduleName);
 			projectSB.append("-src=");
 			projectSB.append(modulePath);
-			projectSB.append(File.pathSeparatorChar);
+			projectSB.append(File.separatorChar);
 			projectSB.append("docroot");
-			projectSB.append(File.pathSeparatorChar);
+			projectSB.append(File.separatorChar);
 			projectSB.append("WEB-INF");
-			projectSB.append(File.pathSeparatorChar);
+			projectSB.append(File.separatorChar);
 			projectSB.append("src\n");
 		}
 		else if (Files.exists(moduleSrcPath)) {
@@ -371,14 +361,14 @@ public class CreateModule {
 			projectSB.append(moduleName);
 			projectSB.append("-src=");
 			projectSB.append(modulePath);
-			projectSB.append(File.pathSeparatorChar);
+			projectSB.append(File.separatorChar);
 			projectSB.append("src");
 
 
 			if(Files.exists(moduleSrcPath.resolve("main"))) {
-				projectSB.append(File.pathSeparatorChar);
+				projectSB.append(File.separatorChar);
 				projectSB.append("main");
-				projectSB.append(File.pathSeparatorChar);
+				projectSB.append(File.separatorChar);
 				projectSB.append("java\n");
 			}
 			else {
@@ -546,7 +536,7 @@ public class CreateModule {
 
 			_createRoots(
 				sourceRootsElement,
-				projectPath + File.pathSeparator + "java",
+				projectPath + File.separator + "java",
 				"src." + projectName + ".dir");
 		}
 
@@ -555,7 +545,7 @@ public class CreateModule {
 		if (Files.exists(mainResourcesPath)) {
 			_createRoots(
 				sourceRootsElement,
-				projectPath + File.pathSeparator + "resources",
+				projectPath + File.separator + "resources",
 				"src." + projectName + ".resources.dir");
 		}
 
@@ -574,7 +564,7 @@ public class CreateModule {
 		if (Files.exists(testUnitPath) || Files.exists(srcTestPath)) {
 			_createRoots(
 				testRootsElement,
-				projectPath + File.pathSeparator + "unit" + File.pathSeparator +
+				projectPath + File.separator + "unit" + File.separator +
 					"test",
 				"test." + projectName + ".unit.dir");
 		}
@@ -584,7 +574,7 @@ public class CreateModule {
 		if (Files.exists(testResourcesPath)) {
 			_createRoots(
 				sourceRootsElement,
-				projectPath + File.pathSeparator + "unit" + File.pathSeparator +
+				projectPath + File.separator + "unit" + File.separator +
 					"resources",
 				"test." + projectName + ".unit.resources.dir");
 		}
@@ -597,8 +587,8 @@ public class CreateModule {
 
 			_createRoots(
 				testRootsElement,
-				projectPath + File.pathSeparator + "integration" +
-					File.pathSeparator + "test",
+				projectPath + File.separator + "integration" +
+					File.separator + "test",
 				"test." + projectName + ".integration.dir");
 		}
 
@@ -608,8 +598,8 @@ public class CreateModule {
 		if (Files.exists(testIntegrationResources)) {
 			_createRoots(
 				sourceRootsElement,
-				projectPath + File.pathSeparator + "integration" +
-					File.pathSeparator + "resources",
+				projectPath + File.separator + "integration" +
+					File.separator + "resources",
 				"test." + projectName + ".integration.resources.dir");
 		}
 
