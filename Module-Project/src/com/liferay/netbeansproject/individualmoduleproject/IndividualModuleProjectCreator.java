@@ -17,10 +17,14 @@ package com.liferay.netbeansproject.individualmoduleproject;
 import com.liferay.netbeansproject.container.Module;
 import com.liferay.netbeansproject.util.StringUtil;
 import com.liferay.netbeansproject.util.ZipUtil;
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.Map;
 import java.util.Properties;
 
@@ -54,6 +58,42 @@ public class IndividualModuleProjectCreator {
 			Paths.get("CleanProject.zip"), modulesDirPath.resolve(moduleName));
 
 		_replaceProjectName(module.getModuleName(), modulesDirPath);
+
+		_prepareProjectPropertyFile(module, modulesDirPath, properties);
+	}
+
+	private static void _prepareProjectPropertyFile(
+			Module module, Path moduleDirPath, Properties properties)
+		throws IOException {
+
+		String moduleName = module.getModuleName();
+
+		Path projectPropertiesPath = Paths.get(
+			moduleDirPath.toString(), moduleName, "nbproject",
+			"project.properties");
+
+		StringBuilder projectSB = new StringBuilder();
+
+		projectSB.append("excludes=");
+		projectSB.append(properties.getProperty("exclude.types"));
+		projectSB.append("\n");
+
+		projectSB.append("application.title=");
+		projectSB.append(module.getModulePath());
+		projectSB.append("\n");
+
+		projectSB.append("dist.jar=${dist.dir}");
+		projectSB.append(File.separator);
+		projectSB.append(moduleName);
+		projectSB.append(".jar\n");
+
+		try (BufferedWriter bufferedWriter = Files.newBufferedWriter(
+			projectPropertiesPath, Charset.defaultCharset(),
+			StandardOpenOption.APPEND)) {
+
+			bufferedWriter.append(projectSB);
+			bufferedWriter.newLine();
+		}
 	}
 
 	private static void _replaceProjectName(String moduleName, Path modulesDir)
