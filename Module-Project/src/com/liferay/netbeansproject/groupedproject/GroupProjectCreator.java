@@ -17,10 +17,13 @@ package com.liferay.netbeansproject.groupedproject;
 import com.liferay.netbeansproject.container.Module;
 import com.liferay.netbeansproject.util.StringUtil;
 import com.liferay.netbeansproject.util.ZipUtil;
+import java.io.BufferedWriter;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.Map;
 import java.util.Properties;
 
@@ -56,6 +59,42 @@ public class GroupProjectCreator {
 			Paths.get("CleanProject.zip"), modulesDirPath.resolve(groupName));
 
 		_replaceProjectName(groupName, modulesDirPath);
+
+		_prepareProjectPropertyFile(
+			groupName, groupPath, modulesDirPath, properties);
+	}
+
+	private static void _prepareProjectPropertyFile(
+			Path groupName, Path groupPath, Path modulesDirPath,
+			Properties properties)
+		throws IOException {
+
+		StringBuilder projectSB = new StringBuilder();
+
+		projectSB.append("excludes=");
+		projectSB.append(properties.getProperty("exclude.types"));
+		projectSB.append("\n");
+
+		projectSB.append("application.title=");
+		projectSB.append(groupPath);
+		projectSB.append("\n");
+
+		projectSB.append("dist.jar=${dist.dir}/");
+		projectSB.append(groupName);
+		projectSB.append(".jar\n");
+
+		Path projectPropertiesPath =
+			Paths.get(
+				modulesDirPath.toString(), groupName.toString(), "nbproject",
+				"project.properties");
+
+		try (BufferedWriter bufferedWriter = Files.newBufferedWriter(
+			projectPropertiesPath, Charset.defaultCharset(),
+			StandardOpenOption.APPEND)) {
+
+			bufferedWriter.append(projectSB);
+			bufferedWriter.newLine();
+		}
 	}
 
 	private static void _replaceProjectName(Path moduleName, Path modulesDir)
