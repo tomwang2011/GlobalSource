@@ -29,6 +29,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 /**
  * @author Tom Wang
@@ -52,6 +61,32 @@ public class CreateUmbrellaProject {
 		_appendList(
 			referenceProjects, projectMap, projectPath, properties,
 			portalLibJars);
+
+		DocumentBuilderFactory documentBuilderFactory =
+			DocumentBuilderFactory.newInstance();
+
+		DocumentBuilder documentBuilder =
+			documentBuilderFactory.newDocumentBuilder();
+
+		_document = documentBuilder.newDocument();
+
+		_createProjectElement(referenceProjects, properties);
+
+		TransformerFactory transformerFactory =
+			TransformerFactory.newInstance();
+
+		Transformer transformer = transformerFactory.newTransformer();
+
+		Path projectXMLPath = Paths.get(
+			projectPath.toString(), "nbproject", "project.xml");
+
+		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+		transformer.setOutputProperty(
+			"{http://xml.apache.org/xslt}indent-amount", "4");
+
+		transformer.transform(
+			new DOMSource(_document),
+			new StreamResult(projectXMLPath.toFile()));
 	}
 
 	private static void _appendList(
@@ -157,6 +192,144 @@ public class CreateUmbrellaProject {
 		javacSB.append(".jar}:\\\n");
 	}
 
+	private static void _createConfiguration(
+		Element projectElement, List<Path> referenceProjects,
+		Properties properties) {
+
+		Element configurationElement = _document.createElement("configuration");
+
+		projectElement.appendChild(configurationElement);
+
+		_createData(configurationElement, properties);
+
+		_createReferences(configurationElement, referenceProjects);
+	}
+
+	private static void _createData(
+		Element configurationElement, Properties properties) {
+
+		Element dataElement = _document.createElement("data");
+
+		dataElement.setAttribute(
+			"xmlns", "http://www.netbeans.org/ns/j2se-project/3");
+
+		configurationElement.appendChild(dataElement);
+
+		Element nameElement = _document.createElement("name");
+
+		nameElement.appendChild(
+			_document.createTextNode(properties.getProperty("project.name")));
+
+		dataElement.appendChild(nameElement);
+
+		Element sourceRootsElement = _document.createElement("source-roots");
+
+		dataElement.appendChild(sourceRootsElement);
+
+		for (
+			String module :
+			StringUtil.split(
+				properties.getProperty("umbrella.source.list"), ',')) {
+
+			_createRoots(sourceRootsElement, "src." + module + ".dir");
+		}
+
+		Element testRootsElement = _document.createElement("test-roots");
+
+		dataElement.appendChild(testRootsElement);
+	}
+
+	private static void _createProjectElement(
+		List<Path> referenceProjects, Properties properties) {
+
+		Element projectElement = _document.createElement("project");
+
+		projectElement.setAttribute(
+			"xmlns", "http://www.netbeans.org/ns/project/1");
+
+		_document.appendChild(projectElement);
+
+		Element typeElement = _document.createElement("type");
+
+		typeElement.appendChild(
+			_document.createTextNode("org.netbeans.modules.java.j2seproject"));
+
+		projectElement.appendChild(typeElement);
+
+		_createConfiguration(
+			projectElement, referenceProjects, properties);
+	}
+
+	private static void _createReference(
+		Element referencesElement, String moduleName) {
+
+		Element referenceElement = _document.createElement("reference");
+
+		referencesElement.appendChild(referenceElement);
+
+		Element foreignProjectElement = _document.createElement(
+			"foreign-project");
+
+		foreignProjectElement.appendChild(_document.createTextNode(moduleName));
+
+		referenceElement.appendChild(foreignProjectElement);
+
+		Element artifactTypeElement = _document.createElement("artifact-type");
+
+		artifactTypeElement.appendChild(_document.createTextNode("jar"));
+
+		referenceElement.appendChild(artifactTypeElement);
+
+		Element scriptElement = _document.createElement("script");
+
+		scriptElement.appendChild(_document.createTextNode("build.xml"));
+
+		referenceElement.appendChild(scriptElement);
+
+		Element targetElement = _document.createElement("target");
+
+		targetElement.appendChild(_document.createTextNode("jar"));
+
+		referenceElement.appendChild(targetElement);
+
+		Element cleanTargetElement = _document.createElement("clean-target");
+
+		cleanTargetElement.appendChild(_document.createTextNode("clean"));
+
+		referenceElement.appendChild(cleanTargetElement);
+
+		Element idElement = _document.createElement("id");
+
+		idElement.appendChild(_document.createTextNode("jar"));
+
+		referenceElement.appendChild(idElement);
+	}
+
+	private static void _createReferences(
+		Element configurationElement, List<Path> referenceProjects) {
+
+		Element referencesElement = _document.createElement("references");
+
+		referencesElement.setAttribute(
+			"xmlns", "http://www.netbeans.org/ns/ant-project-references/1");
+
+		configurationElement.appendChild(referencesElement);
+
+		for (Path groupPathName : referenceProjects) {
+			_createReference(referencesElement, groupPathName.toString());
+		}
+	}
+
+	private static void _createRoots(
+		Element sourceRootsElement, String moduleName) {
+
+		Element rootElement = _document.createElement("root");
+
+		rootElement.setAttribute("id", moduleName);
+
+		sourceRootsElement.appendChild(rootElement);
+	}
+
 	private static void _replaceProjectName(Path modulesDir)
 		throws IOException {
 
@@ -170,4 +343,5 @@ public class CreateUmbrellaProject {
 		Files.write(buildXmlPath, content.getBytes());
 	}
 
+	private static Document _document;
 }
