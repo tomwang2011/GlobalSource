@@ -32,6 +32,7 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -39,6 +40,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Queue;
 import java.util.Set;
+
 /**
  * @author tom
  */
@@ -58,11 +60,22 @@ public class GroupProjectCreator {
 
 		String portalLibJars = _resolvePortalLibJars(portalDirPath);
 
+		Set<String> individualProjectSet = new HashSet<>();
+
+		String individualProjectList = properties.getProperty(
+			"individual.modules");
+
+		individualProjectSet.addAll(Arrays.asList(StringUtil.split(
+			individualProjectList, ',')));
+
 		for (Path groupPath : projectMap.keySet()) {
 			if (!groupPath.equals(portalDirPath)) {
+				System.out.println("Processing: " + groupPath);
+
 				_createGroupModule(
 					projectMap, groupPath, projectDependencyResolver,
-					projectDependencyProperties, properties, portalLibJars);
+					projectDependencyProperties, properties,
+					individualProjectSet, portalLibJars);
 			}
 		}
 	}
@@ -73,14 +86,98 @@ public class GroupProjectCreator {
 		sb.append(":\\\n");
 	}
 
-	private static void _appendProjectDependencies(
-		String moduleName, StringBuilder sb, StringBuilder javacSB) {
+	private static void _appendIndividualProjectDependencies(
+		Path path, String moduleName, StringBuilder sb,
+		StringBuilder javacSB) {
 
 		sb.append("project.");
 		sb.append(moduleName);
 		sb.append("=");
 
-		Path path = Paths.get("..", moduleName);
+		sb.append(path);
+		sb.append("\n");
+		sb.append("reference.");
+		sb.append(moduleName);
+		sb.append(".jar=${project.");
+		sb.append(moduleName);
+
+		path = Paths.get("}", "dist", moduleName + ".jar");
+
+		sb.append(path);
+		sb.append("\n");
+
+		javacSB.append("\t${reference.");
+		javacSB.append(moduleName);
+		javacSB.append(".jar}:\\\n");
+	}
+
+	private static void _appendGroupedProjectDependency(
+		Map<Path, Map<String, Module>> projectMap,
+		ModuleDependency moduleDependency, Path dependencyPath,
+		Queue<ModuleDependency> projectDependencyQueue,
+		StringBuilder javacProjectSB, StringBuilder projectSB,
+		StringBuilder testSB) {
+
+		Map<String, Module> dependencyGroupModuleMap = projectMap.get(
+			dependencyPath);
+
+		for (
+			Module dependencyGroupModule :
+			dependencyGroupModuleMap.values()) {
+
+			projectDependencyQueue.addAll(
+				dependencyGroupModule.getModuleDependencies());
+		}
+
+		Path dependencyGroupPathName =
+			dependencyPath.getFileName();
+
+		if (moduleDependency.isTest()) {
+			_appendProjectDependencies(
+				Paths.get("..", dependencyGroupPathName.toString()),
+				dependencyGroupPathName.toString(), projectSB,
+				testSB);
+		}
+		else {
+			_appendProjectDependencies(
+				Paths.get("..", dependencyGroupPathName.toString()),
+				dependencyGroupPathName.toString(), projectSB,
+				javacProjectSB);
+		}
+	}
+
+	private static void _appendIndividualProjectDependency(
+		Module dependencyModule,
+		ModuleDependency moduleDependency,
+		Queue<ModuleDependency> projectDependencyQueue,
+		StringBuilder javacProjectSB,
+		StringBuilder projectSB, StringBuilder testSB) {
+
+		projectDependencyQueue.addAll(
+			dependencyModule.getModuleDependencies());
+
+		if (moduleDependency.isTest()) {
+			_appendProjectDependencies(
+				Paths.get(
+					"..", "..", "modules", dependencyModule.getModuleName()),
+				dependencyModule.getModuleName(), projectSB,
+				testSB);
+		}
+		else {
+			_appendProjectDependencies(
+				Paths.get(
+					"..", "..", "modules", dependencyModule.getModuleName()),
+				dependencyModule.getModuleName(), projectSB,
+				javacProjectSB);
+		}
+	}
+
+	private static void _appendProjectDependencies(
+		Path path, String moduleName, StringBuilder sb, StringBuilder javacSB) {
+
+		sb.append("project.");
+		sb.append(moduleName);
+		sb.append("=");
 
 		sb.append(path);
 		sb.append("\n");
@@ -100,28 +197,31 @@ public class GroupProjectCreator {
 	}
 
 	private static void _appendSourcePath(
-		Map<String, Module> moduleMap, StringBuilder projectSB) {
+		Map<String, Module> moduleMap, Set<String> individualProjectSet,
+		StringBuilder projectSB) {
 
 		for (Module module : moduleMap.values()) {
 			String moduleName = module.getModuleName();
 
-			_checkPathExists(
+			if (!individualProjectSet.contains(moduleName)) {
+				_checkPathExists(
 				module.getSourcePath(), "src", moduleName, "src", projectSB);
-			_checkPathExists(
-				module.getSourceResourcePath(), "src", moduleName, "resources",
-				projectSB);
-			_checkPathExists(
-				module.getTestUnitPath(), "test", moduleName, "test-unit",
-				projectSB);
-			_checkPathExists(
-				module.getTestUnitResourcePath(), "test", moduleName,
-				"test-unit-resources", projectSB);
-			_checkPathExists(
-				module.getTestIntegrationPath(), "test", moduleName,
-				"test-integration", projectSB);
-			_checkPathExists(
-				module.getTestIntegrationPath(), "test", moduleName,
-				"test-integration-resources", projectSB);
+				_checkPathExists(
+					module.getSourceResourcePath(), "src", moduleName,
+					"resources", projectSB);
+				_checkPathExists(
+					module.getTestUnitPath(), "test", moduleName, "test-unit",
+					projectSB);
+				_checkPathExists(
+					module.getTestUnitResourcePath(), "test", moduleName,
+					"test-unit-resources", projectSB);
+				_checkPathExists(
+					module.getTestIntegrationPath(), "test", moduleName,
+					"test-integration", projectSB);
+				_checkPathExists(
+					module.getTestIntegrationPath(), "test", moduleName,
+					"test-integration-resources", projectSB);
+			}
 		}
 	}
 
@@ -166,7 +266,7 @@ public class GroupProjectCreator {
 			Map<Path, Map<String, Module>> projectMap, Path groupPath,
 			ProjectDependencyResolver projectDependencyResolver,
 			Properties projectDependencyProperties, Properties properties,
-			String portalLibJars)
+			Set<String> individualProjectSet, String portalLibJars)
 		throws IOException {
 
 		Path projectDirPath = Paths.get(properties.getProperty("project.dir"));
@@ -180,22 +280,24 @@ public class GroupProjectCreator {
 
 		_replaceProjectName(groupName, modulesDirPath);
 
-		Set<Path> solvedSet = new HashSet<>();
+		//if compile time then true, if test time then false
+		Map<Path, Boolean> solvedSet = new HashMap<>();
 
-		solvedSet.add(groupPath);
+		solvedSet.put(groupPath, true);
 
 		_prepareProjectPropertyFile(
-			projectMap, groupName, groupPath, modulesDirPath,
+			projectMap, solvedSet, groupName, groupPath, modulesDirPath,
 			projectDependencyResolver, projectDependencyProperties, properties,
-			solvedSet, portalLibJars);
+			individualProjectSet, portalLibJars);
 	}
 
 	private static void _prepareProjectPropertyFile(
-			Map<Path, Map<String, Module>> projectMap, Path groupName,
-			Path groupPath, Path modulesDirPath,
+			Map<Path, Map<String, Module>> projectMap,
+			Map<Path, Boolean> solvedSet, Path groupName, Path groupPath,
+			Path modulesDirPath,
 			ProjectDependencyResolver projectDependencyResolver,
 			Properties projectDependencyProperties, Properties properties,
-			Set<Path> solvedSet, String portalLibJars)
+			Set<String> individualProjectSet, String portalLibJars)
 		throws IOException {
 
 		StringBuilder projectSB = new StringBuilder();
@@ -217,9 +319,10 @@ public class GroupProjectCreator {
 				modulesDirPath.toString(), groupName.toString(), "nbproject",
 				"project.properties");
 
-		_appendSourcePath(projectMap.get(groupPath), projectSB);
+		_appendSourcePath(
+			projectMap.get(groupPath), individualProjectSet, projectSB);
 
-		StringBuilder javacSB = new StringBuilder("javac.classpath=\\\n");
+		StringBuilder javacSB = new StringBuilder();
 		StringBuilder testSB = new StringBuilder(
 			"javac.test.classpath=\\\n");
 
@@ -230,6 +333,12 @@ public class GroupProjectCreator {
 
 		_resolveDependencyJarSet(
 			projectMap.get(groupPath), solvedJars, javacSB, testSB);
+
+		StringBuilder javacProjectSB = new StringBuilder(
+			"javac.classpath=\\\n");
+
+		_resolvePortalProjectDependencies(
+			solvedSet, projectDependencyProperties, javacProjectSB, projectSB);
 
 		Queue<ModuleDependency> projectDependencyQueue = new LinkedList<>();
 
@@ -245,46 +354,51 @@ public class GroupProjectCreator {
 			Module dependencyModule =
 				moduleDependency.getModule(projectDependencyResolver);
 
-			Path dependencyModulePath = dependencyModule.getModulePath();
+			Path dependencyPath = dependencyModule.getModulePath();
 
-			Path dependencyGroupPath = dependencyModulePath.getParent();
-
-			if (!solvedSet.contains(dependencyGroupPath)) {
-				Map<String, Module> dependencyGroupModuleMap = projectMap.get(
-					dependencyGroupPath);
-
-				for (
-					Module dependencyGroupModule :
-					dependencyGroupModuleMap.values()) {
-
-					projectDependencyQueue.addAll(
-						dependencyGroupModule.getModuleDependencies());
-				}
-
-				Path dependencyGroupPathName =
-					dependencyGroupPath.getFileName();
-
-				if (moduleDependency.isTest()) {
-					_appendProjectDependencies(
-						dependencyGroupPathName.toString(), projectSB,
+			if (individualProjectSet.contains(dependencyModule.getModuleName())) {
+				if (!solvedSet.containsKey(dependencyPath)) {
+					_appendIndividualProjectDependency(
+						dependencyModule, moduleDependency,
+						projectDependencyQueue, javacProjectSB, projectSB,
 						testSB);
+
+					solvedSet.put(dependencyPath, !moduleDependency.isTest());
 				}
-				else {
-					_appendProjectDependencies(
-						dependencyGroupPathName.toString(), projectSB,
-						javacSB);
+				else if(!solvedSet.get(dependencyPath) && !moduleDependency.isTest()) {
+					_appendIndividualProjectDependency(
+						dependencyModule, moduleDependency,
+						projectDependencyQueue, javacProjectSB, projectSB,
+						testSB);
+
+					solvedSet.put(dependencyPath, true);
+				}
+			}
+			else {
+				dependencyPath = dependencyPath.getParent();
+
+				if (!solvedSet.containsKey(dependencyPath)) {
+					_appendGroupedProjectDependency(
+						projectMap, moduleDependency, dependencyPath,
+						projectDependencyQueue, javacProjectSB, projectSB,
+						testSB);
+
+					solvedSet.put(dependencyPath, !moduleDependency.isTest());
+				}
+				else if(!solvedSet.get(dependencyPath) && !moduleDependency.isTest()) {
+					_appendGroupedProjectDependency(
+						projectMap, moduleDependency, dependencyPath,
+						projectDependencyQueue, javacProjectSB, projectSB,
+						testSB);
+
+					solvedSet.put(dependencyPath, true);
 				}
 
 				_resolveDependencyJarSet(
-					projectMap.get(dependencyGroupPath), solvedJars, javacSB,
+					projectMap.get(dependencyPath), solvedJars, javacSB,
 					testSB);
 			}
-
-			solvedSet.add(dependencyGroupPath);
 		}
-
-		_resolvePortalProjectDependencies(
-			projectDependencyProperties, javacSB, projectSB);
 
 		javacSB.append(portalLibJars);
 
@@ -294,6 +408,8 @@ public class GroupProjectCreator {
 
 			bufferedWriter.append(projectSB);
 			bufferedWriter.newLine();
+
+			bufferedWriter.append(javacProjectSB);
 
 			javacSB.setLength(javacSB.length() - 3);
 
@@ -384,8 +500,8 @@ public class GroupProjectCreator {
 	}
 
 	private static void _resolvePortalProjectDependencies(
-		Properties projectDependencyProperties, StringBuilder javacSB,
-		StringBuilder projectSB) {
+		Map<Path, Boolean> solvedSet, Properties projectDependencyProperties,
+		StringBuilder javacSB, StringBuilder projectSB) {
 
 		String projectModuleDependencies =
 			projectDependencyProperties.getProperty(
@@ -395,10 +511,18 @@ public class GroupProjectCreator {
 			String dependency :
 			StringUtil.split(projectModuleDependencies, ',')) {
 
-			_appendProjectDependencies(dependency, projectSB, javacSB);
+			_appendIndividualProjectDependencies(
+				Paths.get("..", "..","modules", dependency), dependency,
+				projectSB, javacSB);
+
+			solvedSet.put(Paths.get(dependency), true);
 		}
 
-		_appendProjectDependencies("registry-api", projectSB, javacSB);
+		_appendIndividualProjectDependencies(
+			Paths.get("..", "..","modules", "registry-api"), "registry-api",
+			projectSB, javacSB);
+
+		solvedSet.put(Paths.get("registry-api"), true);
 	}
 
 }
