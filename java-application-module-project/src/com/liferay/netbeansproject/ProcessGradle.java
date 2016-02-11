@@ -45,6 +45,10 @@ public class ProcessGradle {
 
 		ProcessBuilder processBuilder = new ProcessBuilder(gradleTask);
 
+		Map<String, String> env = processBuilder.environment();
+
+		env.put("GRADLE_OPTS", "-Xmx2g");
+
 		Process process = processBuilder.start();
 
 		if (displayGradleOutput) {
