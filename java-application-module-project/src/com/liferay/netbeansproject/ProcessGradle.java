@@ -29,6 +29,7 @@ public class ProcessGradle {
 		List<String> gradleTask = new ArrayList<>();
 
 		gradleTask.add(gradlewPath.toString());
+		gradleTask.add("--parallel");
 		gradleTask.add("--init-script=dependency.gradle");
 		gradleTask.add("printDependencies");
 		gradleTask.add("-p");
