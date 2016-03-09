@@ -291,7 +291,7 @@ public class CreateModule {
 					"src.test.dir=${file.reference.portal-test-internal-src}");
 			}
 
-			if (projectName.equals("portal-service")) {
+			if (projectName.equals("portal-kernel")) {
 				projectSB.append("\nfile.reference.portal-test-src=");
 				projectSB.append(projectInfo.getPortalDir());
 				projectSB.append("/portal-test/src\n");
@@ -550,7 +550,7 @@ public class CreateModule {
 		}
 
 		if (projectName.equals("portal-impl") ||
-			projectName.equals("portal-service")) {
+			projectName.equals("portal-kernel")) {
 
 			_createRoots(sourceRootsElement, "src.test.dir");
 		}
