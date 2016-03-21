@@ -14,7 +14,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Properties;
@@ -198,7 +198,7 @@ public class CreateModule {
 			String compileDependencies =
 				dependencyProperties.getProperty("compile");
 
-			Set<String> compileSet = new HashSet<>();
+			Set<String> compileSet = new LinkedHashSet<>();
 
 			compileSet.addAll(
 				Arrays.asList(
@@ -212,7 +212,7 @@ public class CreateModule {
 				compileTestDependencies = "";
 			}
 
-			Set<String> compileTestSet = new HashSet<>();
+			Set<String> compileTestSet = new LinkedHashSet<>();
 
 			compileTestSet.addAll(
 				Arrays.asList(
