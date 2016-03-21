@@ -356,7 +356,11 @@ public class CreateModule {
 			projectSB.append(File.separatorChar);
 			projectSB.append("src\n");
 		}
-		else if (Files.exists(moduleSrcPath)) {
+		else if (
+			Files.exists(
+				moduleSrcPath.resolve("com")) ||
+				Files.exists(moduleSrcPath.resolve("main"))) {
+
 			projectSB.append("file.reference.");
 			projectSB.append(moduleName);
 			projectSB.append("-src=");
@@ -374,13 +378,13 @@ public class CreateModule {
 			else {
 				projectSB.append("\n");
 			}
-		}
 
-		projectSB.append("src.");
-		projectSB.append(moduleName);
-		projectSB.append(".dir=${file.reference.");
-		projectSB.append(moduleName);
-		projectSB.append("-src}\n");
+			projectSB.append("src.");
+			projectSB.append(moduleName);
+			projectSB.append(".dir=${file.reference.");
+			projectSB.append(moduleName);
+			projectSB.append("-src}\n");
+		}
 
 		Path mainResourcesPath = Paths.get(
 			moduleSrcPath.toString(), "main", "resources");
