@@ -356,9 +356,7 @@ public class CreateModule {
 			projectSB.append(File.separatorChar);
 			projectSB.append("src\n");
 		}
-		else if (
-			Files.exists(
-				moduleSrcPath.resolve("com")) ||
+		else if (Files.exists(moduleSrcPath.resolve("com")) ||
 				Files.exists(moduleSrcPath.resolve("main"))) {
 
 			projectSB.append("file.reference.");
