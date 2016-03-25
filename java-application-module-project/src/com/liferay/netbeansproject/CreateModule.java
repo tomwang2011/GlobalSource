@@ -545,7 +545,7 @@ public class CreateModule {
 		if (!Files.exists(mainPath) || Files.exists(mainJavaPath)) {
 
 			_createRoots(
-				sourceRootsElement,  "src", "src." + projectName + ".dir");
+				sourceRootsElement, "src", "src." + projectName + ".dir");
 		}
 
 		Path mainResourcesPath = mainPath.resolve("resources");
@@ -556,16 +556,12 @@ public class CreateModule {
 				"src." + projectName + ".resources.dir");
 		}
 
-		if (projectName.equals("portal-impl") ||
-			projectName.equals("portal-kernel")) {
-
-			if (projectName.equals("portal-impl")) {
-				_createRoots(
-					sourceRootsElement,"portal-test-internal","src.test.dir");
-			}
-			else {
-				_createRoots(sourceRootsElement,"portal-test", "src.test.dir");
-			}
+		if (projectName.equals("portal-impl")) {
+			_createRoots(
+				sourceRootsElement,"portal-test-internal","src.test.dir");
+		}
+		else if (projectName.equals("portal-kernel")) {
+			_createRoots(sourceRootsElement,"portal-test", "src.test.dir");
 		}
 
 		Element testRootsElement = _document.createElement("test-roots");
