@@ -61,7 +61,7 @@ public class CreateModule {
 
 		_document = documentBuilder.newDocument();
 
-		_createProjectElement(projectInfo);
+		_createProjectElement(projectInfo, properties);
 
 		TransformerFactory transformerFactory =
 			TransformerFactory.newInstance();
@@ -493,20 +493,22 @@ public class CreateModule {
 	}
 
 	private static void _createConfiguration(
-			Element projectElement, ProjectInfo projectInfo)
+			Element projectElement, ProjectInfo projectInfo,
+			Properties properties)
 		throws IOException {
 
 		Element configurationElement = _document.createElement("configuration");
 
 		projectElement.appendChild(configurationElement);
 
-		_createData(configurationElement, projectInfo);
+		_createData(configurationElement, projectInfo, properties);
 
 		_createReferences(configurationElement, projectInfo);
 	}
 
 	private static void _createData(
-		Element configurationElement, ProjectInfo projectInfo) {
+		Element configurationElement, ProjectInfo projectInfo,
+		Properties properties) {
 
 		Element dataElement = _document.createElement("data");
 
@@ -519,8 +521,14 @@ public class CreateModule {
 
 		Path projectPath = projectInfo.getFullPath();
 
+		Path portalPath = Paths.get(properties.getProperty("portal.dir"));
+
+		Path portalParentPath = portalPath.getParent();
+
+		Path projectNamePath = portalParentPath.relativize(projectPath);
+
 		nameElement.appendChild(
-			_document.createTextNode(projectPath.toString()));
+			_document.createTextNode(projectNamePath.toString()));
 
 		dataElement.appendChild(nameElement);
 
@@ -608,7 +616,8 @@ public class CreateModule {
 		dataElement.appendChild(testRootsElement);
 	}
 
-	private static void _createProjectElement(ProjectInfo projectInfo)
+	private static void _createProjectElement(
+			ProjectInfo projectInfo, Properties properties)
 		throws IOException {
 
 		Element projectElement = _document.createElement("project");
@@ -625,7 +634,7 @@ public class CreateModule {
 
 		projectElement.appendChild(typeElement);
 
-		_createConfiguration(projectElement, projectInfo);
+		_createConfiguration(projectElement, projectInfo, properties);
 	}
 
 	private static void _createReference(
