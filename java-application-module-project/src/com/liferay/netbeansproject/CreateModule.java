@@ -12,13 +12,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Queue;
@@ -116,20 +113,16 @@ public class CreateModule {
 		return dependenciesModuleMap;
 	}
 
-	private static void _appendJavacClasspath(
-		File directory, StringBuilder sb) {
+	private static void _appendJavacClasspath(File directory, StringBuilder sb)
+		throws IOException {
 
-		List<Path> jarList = new ArrayList<>();
+		File[] files = directory.listFiles();
 
-        for (File jar : directory.listFiles()) {
-			jarList.add(jar.toPath());
-		}
+		Arrays.sort(files);
 
-		Collections.sort(jarList);
-
-		for (Path path : jarList) {
+		for (File file : files) {
 			sb.append("\t");
-			sb.append(path);
+			sb.append(file.getCanonicalPath());
 			sb.append(":\\\n");
 		}
 	}
