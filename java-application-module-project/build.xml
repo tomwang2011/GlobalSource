@@ -22,14 +22,13 @@ reference.@{src.dir.name}.jar=$${project.@{src.dir.name}}/dist/@{src.dir.name}.j
 	<target name="build">
 		<for list="${portal.dir}" param="portal.dir">
 			<sequential>
+				<local name="portal.name" />
 				<basename property="portal.name" file="@{portal.dir}" />
 
 				<build-modules
 					portal.dir="@{portal.dir}"
 					project.dir="${project.dir}/${portal.name}"
 				/>
-
-				<var name="portal.name" unset="true" />
 			</sequential>
 		</for>
 	</target>
