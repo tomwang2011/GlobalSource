@@ -37,20 +37,22 @@ public class CreateModule {
 		createModule(
 			Paths.get(arguments.get("project.dir")),
 			Paths.get(arguments.get("src.dir")),
-			arguments.get("src.dir.name"), arguments.get("portal.dir"),
+			arguments.get("portal.dir"),
 			StringUtil.split(arguments.get("module.list"), ','));
 	}
 
 	public static void createModule(
-			Path projectPath, Path srcDirPath, String srcDirName,
-			String portalDir, String[] moduleList)
+			Path projectPath, Path modulePath, String portalDir,
+			String[] moduleList)
 		throws Exception {
 
 		Properties projectDependencyProperties = PropertiesUtil.loadProperties(
 			Paths.get("project-dependency.properties"));
 
+		Path moduleName = modulePath.getFileName();
+
 		String projectDependencies = projectDependencyProperties.getProperty(
-			srcDirName);
+			moduleName.toString());
 
 		if (projectDependencies == null) {
 			projectDependencies = projectDependencyProperties.getProperty(
@@ -58,7 +60,7 @@ public class CreateModule {
 		}
 
 		ProjectInfo projectInfo = new ProjectInfo(
-			srcDirName, portalDir, srcDirPath,
+			moduleName.toString(), portalDir, modulePath,
 			StringUtil.split(projectDependencies, ','), moduleList);
 
 		Path moduleDir = projectPath.resolve("modules");

@@ -82,7 +82,6 @@ reference.@{src.dir.name}.jar=$${project.@{src.dir.name}}/dist/@{src.dir.name}.j
 						</and>
 						<then>
 							<java classname="com.liferay.netbeansproject.CreateModule" classpath="classes">
-								<arg value="src.dir.name=${src.dir.name}" />
 								<arg value="src.dir=${src.dir}" />
 								<arg value="module.list=${module.list}" />
 								<arg value="portal.dir=@{portal.dir}" />
