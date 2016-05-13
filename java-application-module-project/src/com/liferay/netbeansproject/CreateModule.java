@@ -309,7 +309,8 @@ public class CreateModule {
 				projectSB.append(projectInfo.getPortalDir());
 				projectSB.append("/portal-test-integration/src\n");
 				projectSB.append(
-					"src.test.dir=${file.reference.portal-test-integration-src}");
+					"src.test.dir=${file.reference.portal-test-integration-" +
+						"src}");
 			}
 
 			if (projectName.equals("portal-kernel")) {
