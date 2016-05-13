@@ -128,7 +128,6 @@ src.portal-web-functional.dir=$${file.reference.portal-web-functional.src}
 		<attribute name="project.dir" />
 
 		<sequential>
-			<delete file="settings.gradle" />
 			<delete dir="classes" />
 			<delete dir="@{project.dir}" />
 		</sequential>
