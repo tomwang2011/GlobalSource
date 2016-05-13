@@ -126,11 +126,9 @@ src.portal-web-functional.dir=$${file.reference.portal-web-functional.src}
 	</macrodef>
 
 	<macrodef name="clean">
-		<attribute name="project.dir" />
-
 		<sequential>
 			<delete dir="classes" />
-			<delete dir="@{project.dir}" />
+			<delete dir="${project.dir}" />
 		</sequential>
 	</macrodef>
 </project>

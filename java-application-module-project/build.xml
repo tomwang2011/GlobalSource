@@ -38,8 +38,7 @@ reference.@{src.dir.name}.jar=$${project.@{src.dir.name}}/dist/@{src.dir.name}.j
 		<attribute name="project.dir" />
 
 		<sequential>
-			<clean
-				project.dir="@{project.dir}" />
+			<clean />
 
 			<common-build
 				portal.dir="@{portal.dir}"
@@ -121,7 +120,6 @@ reference.@{src.dir.name}.jar=$${project.@{src.dir.name}}/dist/@{src.dir.name}.j
 	</macrodef>
 
 	<target name="clean">
-		<clean
-			project.dir="${project.dir}" />
+		<clean />
 	</target>
 </project>
