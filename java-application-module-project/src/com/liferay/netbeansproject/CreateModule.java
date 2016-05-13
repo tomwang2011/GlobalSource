@@ -36,12 +36,13 @@ public class CreateModule {
 
 		createModule(
 			Paths.get(arguments.get("project.dir")),
-			Paths.get(arguments.get("src.dir")), arguments.get("portal.dir"),
+			Paths.get(arguments.get("src.dir")),
+			Paths.get(arguments.get("portal.dir")),
 			StringUtil.split(arguments.get("module.list"), ','));
 	}
 
 	public static void createModule(
-			Path projectPath, Path modulePath, String portalDir,
+			Path projectPath, Path modulePath, Path portalDir,
 			String[] moduleList)
 		throws Exception {
 
@@ -288,18 +289,17 @@ public class CreateModule {
 
 			projectInfo.setDependenciesModuleMap(dependenciesModuleMap);
 
-			Path developmentPath = Paths.get(
-				projectInfo.getPortalDir(),"lib", "development");
+			Path portalDir = projectInfo.getPortalDir();
+
+			Path developmentPath = portalDir.resolve("lib/development");
 
 			_appendJavacClasspath(developmentPath.toFile(), projectSB);
 
-			Path globalPath = Paths.get(
-				projectInfo.getPortalDir(),"lib", "global");
+			Path globalPath = portalDir.resolve("lib/global");
 
 			_appendJavacClasspath(globalPath.toFile(), projectSB);
 
-			Path portalPath = Paths.get(
-				projectInfo.getPortalDir(),"lib", "portal");
+			Path portalPath = portalDir.resolve("lib/portal");
 
 			_appendJavacClasspath(portalPath.toFile(), projectSB);
 
@@ -541,7 +541,7 @@ public class CreateModule {
 
 		Path projectPath = projectInfo.getFullPath();
 
-		Path portalPath = Paths.get(projectInfo.getPortalDir());
+		Path portalPath = projectInfo.getPortalDir();
 
 		Path portalParentPath = portalPath.getParent();
 
@@ -775,7 +775,7 @@ public class CreateModule {
 			return _moduleMap;
 		}
 
-		public String getPortalDir() {
+		public Path getPortalDir() {
 			return _portalDir;
 		}
 
@@ -794,7 +794,7 @@ public class CreateModule {
 		}
 
 		private ProjectInfo(
-			String projectName, String portalDir, Path fullPath,
+			String projectName, Path portalDir, Path fullPath,
 			String[] projectLibs, String[] moduleList) {
 
 			_projectName = projectName;
@@ -819,7 +819,7 @@ public class CreateModule {
 		private final Path _fullPath;
 		private Map<String, ModuleInfo> _dependenciesModuleMap;
 		private final Map<String, Path> _moduleMap;
-		private final String _portalDir;
+		private final Path _portalDir;
 		private final String[] _projectLib;
 		private final String _projectName;
 
