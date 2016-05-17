@@ -43,7 +43,7 @@ public class CreateModule {
 	}
 
 	public static void createModule(
-			Path projectPath, Path modulePath, Path portalDir,
+			Path projectPath, Path modulePath, Path portalPath,
 			String[] moduleList)
 		throws Exception {
 
@@ -63,7 +63,7 @@ public class CreateModule {
 		}
 
 		ProjectInfo projectInfo = new ProjectInfo(
-			moduleName, portalDir, modulePath,
+			moduleName, portalPath, modulePath,
 			StringUtil.split(projectDependencies, ','), moduleList);
 
 		Path moduleDir = projectPath.resolve("modules");
@@ -293,26 +293,26 @@ public class CreateModule {
 
 			projectInfo.setDependenciesModuleMap(dependenciesModuleMap);
 
-			Path portalDir = projectInfo.getPortalDir();
+			Path portalPath = projectInfo.getPortalPath();
 
-			Path developmentPath = portalDir.resolve("lib/development");
+			Path libDevelopmentPath = portalPath.resolve("lib/development");
 
-			_appendJavacClasspath(developmentPath.toFile(), projectSB);
+			_appendJavacClasspath(libDevelopmentPath.toFile(), projectSB);
 
-			Path globalPath = portalDir.resolve("lib/global");
+			Path libGlobalPath = portalPath.resolve("lib/global");
 
-			_appendJavacClasspath(globalPath.toFile(), projectSB);
+			_appendJavacClasspath(libGlobalPath.toFile(), projectSB);
 
-			Path portalPath = portalDir.resolve("lib/portal");
+			Path libPortalPath = portalPath.resolve("lib/portal");
 
-			_appendJavacClasspath(portalPath.toFile(), projectSB);
+			_appendJavacClasspath(libPortalPath.toFile(), projectSB);
 
 			projectSB.setLength(projectSB.length() - 3);
 
 			if (projectName.equals("portal-impl")) {
 				projectSB.append(
 					"\nfile.reference.portal-test-integration-src=");
-				projectSB.append(projectInfo.getPortalDir());
+				projectSB.append(projectInfo.getPortalPath());
 				projectSB.append("/portal-test-integration/src\n");
 				projectSB.append(
 					"src.test.dir=${file.reference.portal-test-integration-" +
@@ -321,7 +321,7 @@ public class CreateModule {
 
 			if (projectName.equals("portal-kernel")) {
 				projectSB.append("\nfile.reference.portal-test-src=");
-				projectSB.append(projectInfo.getPortalDir());
+				projectSB.append(projectInfo.getPortalPath());
 				projectSB.append("/portal-test/src\n");
 				projectSB.append(
 					"src.test.dir=${file.reference.portal-test-src}");
@@ -546,7 +546,7 @@ public class CreateModule {
 
 		Path projectPath = projectInfo.getFullPath();
 
-		Path portalPath = projectInfo.getPortalDir();
+		Path portalPath = projectInfo.getPortalPath();
 
 		Path portalParentPath = portalPath.getParent();
 
@@ -780,8 +780,8 @@ public class CreateModule {
 			return _moduleMap;
 		}
 
-		public Path getPortalDir() {
-			return _portalDir;
+		public Path getPortalPath() {
+			return _portalPath;
 		}
 
 		public String[] getProjectLibs() {
@@ -799,12 +799,12 @@ public class CreateModule {
 		}
 
 		private ProjectInfo(
-			String projectName, Path portalDir, Path fullPath,
+			String projectName, Path portalPath, Path fullPath,
 			String[] projectLibs, String[] moduleList) {
 
 			_projectName = projectName;
 
-			_portalDir = portalDir;
+			_portalPath = portalPath;
 
 			_fullPath = fullPath;
 
@@ -824,7 +824,7 @@ public class CreateModule {
 		private Map<String, ModuleInfo> _dependenciesModuleMap;
 		private final Path _fullPath;
 		private final Map<String, Path> _moduleMap;
-		private final Path _portalDir;
+		private final Path _portalPath;
 		private final String[] _projectLib;
 		private final String _projectName;
 
