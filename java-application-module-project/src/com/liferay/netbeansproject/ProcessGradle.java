@@ -34,9 +34,6 @@ public class ProcessGradle {
 			Path portalDirPath, Path projectDirPath, Path workDirPath)
 		throws Exception {
 
-		Properties properties = PropertiesUtil.loadProperties(
-			Paths.get("build.properties"));
-
 		Path gradlewPath = portalDirPath.resolve("gradlew");
 
 		List<String> gradleTask = new ArrayList<>();
@@ -69,6 +66,9 @@ public class ProcessGradle {
 		}
 
 		Process process = processBuilder.start();
+
+		Properties properties = PropertiesUtil.loadProperties(
+			Paths.get("build.properties"));
 
 		if (Boolean.valueOf(
 				properties.getProperty("display.gradle.process.output"))) {
