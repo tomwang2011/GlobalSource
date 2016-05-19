@@ -1,7 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="Liferay-Source-Netbeans-Project" default="build" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
+<project name="Liferay-Source-Netbeans-Project" default="add" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
 
 	<import file="../common/shared-macrodefs.xml" />
+
+	<target name="add">
+		<compile />
+
+		<for-each-portal>
+			<steps>
+				<if>
+					<available file="${project.dir}/${portal.name}" type="dir" />
+					<then>
+						<mkdir dir="classes" />
+
+						<javac
+							debug="true"
+							destdir="classes"
+							includeantruntime="false" >
+
+							<src path="../common/src" />
+							<src path="src" />
+						</javac>
+
+						<java classname="com.liferay.netbeansproject.AddModule" classpath="classes">
+							<arg value="portal.dir=@{portal.dir}" />
+						</java>
+
+						<delete dir="${project.dir}/${portal.name}/dependencies" />
+					</then>
+					<else>
+						<build-modules
+							portal.dir="@{portal.dir}"
+							project.dir="${project.dir}/${portal.name}"
+						/>
+					</else>
+				</if>
+			</steps>
+		</for-each-portal>
+	</target>
 
 	<target name="build" depends="clean">
 		<compile />
