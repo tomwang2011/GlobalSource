@@ -50,10 +50,11 @@ public class ProcessGradle {
 
 		Path relativeWorkPath = modulesPath.relativize(workDirPath);
 
-		String relativeWorkString = StringUtil.replace(
-			relativeWorkPath.toString(), "/", ":");
+		String relativeWorkString = relativeWorkPath.toString();
 
-		if (!relativeWorkString.equals("")) {
+		if (!relativeWorkString.isEmpty()) {
+			relativeWorkString = relativeWorkString.replace('/', ':');
+
 			relativeWorkString += ":";
 		}
 
