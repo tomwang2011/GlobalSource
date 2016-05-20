@@ -3,28 +3,20 @@
 
 	<import file="../common/shared-macrodefs.xml" />
 
-	<target name="build">
-		<for list="${portal.dirs}" param="portal.dir">
-			<sequential>
-				<local name="portal.name" />
-				<basename property="portal.name" file="@{portal.dir}" />
+	<target name="build" depends="clean">
+		<compile />
 
+		<for-each-portal>
+			<steps>
 				<build-modules
 					portal.dir="@{portal.dir}"
 					project.dir="${project.dir}/${portal.name}"
 				/>
-			</sequential>
-		</for>
+			</steps>
+		</for-each-portal>
 	</target>
 
 	<target name="clean">
-		<for list="${portal.dirs}" param="portal.dir">
-			<sequential>
-				<local name="portal.name" />
-				<basename property="portal.name" file="@{portal.dir}" />
-
-				<clean project.dir="${project.dir}/${portal.name}" />
-			</sequential>
-		</for>
+		<clean project.dir="${project.dir}" />
 	</target>
 </project>
