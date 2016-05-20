@@ -162,12 +162,20 @@ public class CreateModule {
 	}
 
 	private static void _appendLibJars(
-		Set<Path> dependencies, StringBuilder sb) {
+		Set<Path> dependencies, StringBuilder classpathSB,
+		StringBuilder projectSB) {
 
 		for (Path jar : dependencies) {
-			sb.append('\t');
-			sb.append(jar);
-			sb.append(":\\\n");
+			projectSB.append("file.reference.");
+			projectSB.append(jar.getFileName());
+			projectSB.append('=');
+			projectSB.append(jar);
+			projectSB.append('\n');
+
+			classpathSB.append('\t');
+			classpathSB.append("${file.reference.");
+			classpathSB.append(jar.getFileName());
+			classpathSB.append("}:\\\n");
 		}
 	}
 
@@ -276,8 +284,8 @@ public class CreateModule {
 				}
 			}
 
-			_appendLibJars(compileSet, javacSB);
-			_appendLibJars(compileTestSet, testSB);
+			_appendLibJars(compileSet, javacSB, projectSB);
+			_appendLibJars(compileTestSet, testSB, projectSB);
 
 			projectInfo.setDependenciesModuleMap(dependenciesModuleMap);
 
