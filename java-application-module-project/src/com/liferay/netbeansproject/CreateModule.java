@@ -137,6 +137,16 @@ public class CreateModule {
 		return dependenciesModuleMap;
 	}
 
+	private static Set<Path> _addDependenciesToSet(String[] dependencies) {
+		Set<Path> set = new LinkedHashSet<>();
+
+		for (String dependency : dependencies) {
+			set.add(Paths.get(dependency));
+		}
+
+		return set;
+	}
+
 	private static void _appendJavacClasspath(File directory, StringBuilder sb)
 		throws IOException {
 
@@ -152,14 +162,12 @@ public class CreateModule {
 	}
 
 	private static void _appendLibJars(
-		Set<String> dependencies, StringBuilder sb) {
+		Set<Path> dependencies, StringBuilder sb) {
 
-		for (String jar : dependencies) {
-			if (!jar.isEmpty()) {
-				sb.append('\t');
-				sb.append(jar);
-				sb.append(":\\\n");
-			}
+		for (Path jar : dependencies) {
+			sb.append('\t');
+			sb.append(jar);
+			sb.append(":\\\n");
 		}
 	}
 
@@ -230,10 +238,10 @@ public class CreateModule {
 			String compileDependencies = dependencyProperties.getProperty(
 				"compile");
 
-			Set<String> compileSet = new LinkedHashSet<>();
+			Set<Path> compileSet = new LinkedHashSet<>();
 
 			compileSet.addAll(
-				Arrays.asList(
+				_addDependenciesToSet(
 					StringUtil.split(
 						compileDependencies, File.pathSeparatorChar)));
 
@@ -244,10 +252,10 @@ public class CreateModule {
 				compileTestDependencies = "";
 			}
 
-			Set<String> compileTestSet = new LinkedHashSet<>();
+			Set<Path> compileTestSet = new LinkedHashSet<>();
 
 			compileTestSet.addAll(
-				Arrays.asList(
+				_addDependenciesToSet(
 					StringUtil.split(
 						compileTestDependencies, File.pathSeparatorChar)));
 
