@@ -266,27 +266,6 @@ public class CreateModule {
 					_appendReferenceProperties(
 						bufferedWriter, moduleName, projectSB);
 				}
-
-				Path inheritedDependenciesPath = dependenciesDirPath.resolve(
-					moduleName);
-
-				Properties moduleDependencyProperties =
-					PropertiesUtil.loadProperties(inheritedDependenciesPath);
-
-				compileDependencies = moduleDependencyProperties.getProperty(
-					"compile");
-
-				compileSet.addAll(
-					Arrays.asList(
-						StringUtil.split(
-							compileDependencies, File.pathSeparatorChar)));
-
-				compileTestDependencies =
-					moduleDependencyProperties.getProperty("compileTest");
-
-				compileTestSet.addAll(Arrays.asList(
-					StringUtil.split(
-						compileTestDependencies, File.pathSeparatorChar)));
 			}
 
 			_appendLibJars(compileSet, projectSB);
