@@ -195,12 +195,12 @@ public class CreateModule {
 			_appendSourcePath(
 				projectName, projectInfo.getFullPath(), projectSB);
 
-			projectSB.append("javac.classpath=\\\n");
+			StringBuilder javacSB = new StringBuilder("javac.classpath=\\\n");
 
 			for (String module : projectInfo.getProjectLibs()) {
 				if (!module.isEmpty()) {
 					_appendReferenceProperties(
-						bufferedWriter, module, projectSB);
+						bufferedWriter, module, javacSB);
 				}
 			}
 
@@ -264,11 +264,11 @@ public class CreateModule {
 				}
 				else {
 					_appendReferenceProperties(
-						bufferedWriter, moduleName, projectSB);
+						bufferedWriter, moduleName, javacSB);
 				}
 			}
 
-			_appendLibJars(compileSet, projectSB);
+			_appendLibJars(compileSet, javacSB);
 			_appendLibJars(compileTestSet, testSB);
 
 			projectInfo.setDependenciesModuleMap(dependenciesModuleMap);
@@ -277,17 +277,15 @@ public class CreateModule {
 
 			Path libDevelopmentPath = portalPath.resolve("lib/development");
 
-			_appendJavacClasspath(libDevelopmentPath.toFile(), projectSB);
+			_appendJavacClasspath(libDevelopmentPath.toFile(), javacSB);
 
 			Path libGlobalPath = portalPath.resolve("lib/global");
 
-			_appendJavacClasspath(libGlobalPath.toFile(), projectSB);
+			_appendJavacClasspath(libGlobalPath.toFile(), javacSB);
 
 			Path libPortalPath = portalPath.resolve("lib/portal");
 
-			_appendJavacClasspath(libPortalPath.toFile(), projectSB);
-
-			projectSB.setLength(projectSB.length() - 3);
+			_appendJavacClasspath(libPortalPath.toFile(), javacSB);
 
 			if (projectName.equals("portal-impl")) {
 				projectSB.append(
@@ -308,6 +306,11 @@ public class CreateModule {
 			}
 
 			bufferedWriter.append(projectSB);
+			bufferedWriter.newLine();
+
+			javacSB.setLength(javacSB.length() - 3);
+
+			bufferedWriter.append(javacSB);
 			bufferedWriter.newLine();
 
 			testSB.setLength(testSB.length() - 3);
