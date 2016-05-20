@@ -20,6 +20,7 @@ import com.liferay.netbeansproject.util.ZipUtil;
 
 import java.io.IOException;
 
+import java.nio.file.FileVisitOption;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,6 +29,7 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -38,9 +40,9 @@ import java.util.Properties;
 public class AddModule {
 
 	public static void main(String[] args) throws IOException {
-		Map<String, String> arguments = ArgumentsUtil.parseArguments(args);
-
 		AddModule addModule = new AddModule();
+
+		Map<String, String> arguments = ArgumentsUtil.parseArguments(args);
 
 		addModule.addModule(Paths.get(arguments.get("portal.dir")));
 	}
@@ -64,6 +66,8 @@ public class AddModule {
 
 		Files.walkFileTree(
 			portalPath,
+			EnumSet.allOf(FileVisitOption.class),
+			Integer.MAX_VALUE,
 			new SimpleFileVisitor<Path>() {
 
 				@Override
@@ -77,33 +81,33 @@ public class AddModule {
 						return FileVisitResult.SKIP_SUBTREE;
 					}
 
-					if (Files.exists(path.resolve("src"))) {
-						try {
-							Path moduleName = _getModuleName(path);
-
-							String moduleNameString = moduleName.toString();
-
-							if (!moduleNames.contains(moduleNameString)) {
-								ProcessGradle.processGradle(
-									portalPath, projectRootPath, path);
-
-								ZipUtil.unZip(
-									Paths.get("CleanModule.zip"),
-									projectRootPath.resolve(
-										"modules/" + moduleNameString));
-
-								CreateModule.createModule(
-									projectRootPath, path, portalPath,
-									moduleNames.toArray(new String[0]));
-							}
-						}
-						catch (Exception ex) {
-						}
-
-						return FileVisitResult.SKIP_SUBTREE;
+					if (!Files.exists(path.resolve("src"))) {
+						return FileVisitResult.CONTINUE;
 					}
 
-					return FileVisitResult.CONTINUE;
+					String moduleName = _getModuleName(path);
+
+					if (!moduleNames.contains(moduleName)) {
+						try {
+							ProcessGradle.processGradle(
+								portalPath, projectRootPath, path);
+
+							ZipUtil.unZip(
+								projectRootPath.resolve(
+									Paths.get("modules", moduleName)));
+
+							CreateModule.createModule(
+								projectRootPath, path, portalPath, moduleNames);
+						}
+						catch (IOException ioe) {
+							throw ioe;
+						}
+						catch (Exception e) {
+							throw new IOException(e);
+						}
+					}
+
+					return FileVisitResult.SKIP_SUBTREE;
 				}
 
 		});
@@ -125,7 +129,7 @@ public class AddModule {
 		return moduleNames;
 	}
 
-	private Path _getModuleName(Path modulePath) {
+	private String _getModuleName(Path modulePath) {
 		Path moduleName = modulePath.getFileName();
 
 		if ("WEB-INF".equals(moduleName.toString())) {
@@ -134,7 +138,7 @@ public class AddModule {
 			moduleName = moduleName.getFileName();
 		}
 
-		return moduleName;
+		return moduleName.toString();
 	}
 
 }

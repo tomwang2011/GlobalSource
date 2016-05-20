@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Queue;
@@ -39,12 +40,12 @@ public class CreateModule {
 			Paths.get(arguments.get("project.dir")),
 			Paths.get(arguments.get("src.dir")),
 			Paths.get(arguments.get("portal.dir")),
-			StringUtil.split(arguments.get("module.list"), ','));
+			Arrays.asList(StringUtil.split(arguments.get("module.list"), ',')));
 	}
 
 	public static void createModule(
 			Path projectPath, Path modulePath, Path portalPath,
-			String[] moduleList)
+			List<String> moduleList)
 		throws Exception {
 
 		Properties projectDependencyProperties = PropertiesUtil.loadProperties(
@@ -800,7 +801,7 @@ public class CreateModule {
 
 		private ProjectInfo(
 			String projectName, Path portalPath, Path fullPath,
-			String[] projectLibs, String[] moduleList) {
+			String[] projectLibs, List<String> moduleList) {
 
 			_projectName = projectName;
 

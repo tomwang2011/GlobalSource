@@ -20,6 +20,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -29,38 +30,54 @@ import java.nio.file.attribute.BasicFileAttributes;
  */
 public class ZipUtil {
 
-	public static void unZip(Path zipPath, final Path destinationPath)
+	public static void unZip(final Path destinationPath)
 		throws IOException {
 
-		FileSystem fileSystem = FileSystems.newFileSystem(zipPath,null);
+		Files.createDirectories(destinationPath);
+
+		FileSystem fileSystem = FileSystems.newFileSystem(
+			Paths.get("CleanModule.zip"), null);
 
 		for (final Path path : fileSystem.getRootDirectories()) {
 			Files.walkFileTree(
 				path,
 				new SimpleFileVisitor<Path>() {
 
-				@Override
-				public FileVisitResult visitFile(
-					Path vistFilePath, BasicFileAttributes basicFileAttributes)
-					throws IOException {
+					@Override
+					public FileVisitResult preVisitDirectory(
+							Path dirPath,
+							BasicFileAttributes basicFileAttributes)
+						throws IOException {
 
-					Path relativeDir = path.relativize(vistFilePath);
+						Path relativePath = path.relativize(dirPath);
 
-					Path pastePath = destinationPath.resolve(
-						relativeDir.toString());
+						dirPath = destinationPath.resolve(
+							relativePath.toString());
 
-					if (!Files.exists(pastePath)) {
-						Files.createDirectories(pastePath);
+						if (Files.notExists(dirPath)) {
+							Files.createDirectory(dirPath);
+						}
+
+						return FileVisitResult.CONTINUE;
 					}
 
-					Files.copy(
-						vistFilePath, pastePath,
-						StandardCopyOption.REPLACE_EXISTING);
+					@Override
+					public FileVisitResult visitFile(
+							Path filePath,
+							BasicFileAttributes basicFileAttributes)
+						throws IOException {
 
-					return FileVisitResult.CONTINUE;
-				}
+						Path relativePath = path.relativize(filePath);
 
-			});
+						Files.copy(
+							filePath,
+							destinationPath.resolve(relativePath.toString()),
+							StandardCopyOption.REPLACE_EXISTING);
+
+						return FileVisitResult.CONTINUE;
+					}
+
+				});
 		}
 	}
 
