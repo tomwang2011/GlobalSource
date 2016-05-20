@@ -145,7 +145,7 @@ public class CreateModule {
 		Arrays.sort(files);
 
 		for (File file : files) {
-			sb.append("\t");
+			sb.append('\t');
 			sb.append(file.getCanonicalPath());
 			sb.append(":\\\n");
 		}
@@ -156,7 +156,7 @@ public class CreateModule {
 
 		for (String jar : dependencies) {
 			if (!jar.isEmpty()) {
-				sb.append("\t");
+				sb.append('\t');
 				sb.append(jar);
 				sb.append(":\\\n");
 			}
@@ -182,11 +182,11 @@ public class CreateModule {
 
 			projectSB.append("excludes=");
 			projectSB.append(excludeTypes);
-			projectSB.append("\n");
+			projectSB.append('\n');
 
 			projectSB.append("application.title=");
 			projectSB.append(projectInfo.getFullPath());
-			projectSB.append("\n");
+			projectSB.append('\n');
 
 			projectSB.append("dist.jar=${dist.dir}/");
 			projectSB.append(projectName);
@@ -327,12 +327,12 @@ public class CreateModule {
 		sb.append("=..");
 		sb.append(File.separatorChar);
 		sb.append(module);
-		sb.append("\n");
+		sb.append('\n');
 		sb.append("reference.");
 		sb.append(module);
 		sb.append(".jar=${project.");
 		sb.append(module);
-		sb.append("}");
+		sb.append('}');
 		sb.append(File.separatorChar);
 		sb.append("dist");
 		sb.append(File.separatorChar);
@@ -381,7 +381,7 @@ public class CreateModule {
 				projectSB.append("java\n");
 			}
 			else {
-				projectSB.append("\n");
+				projectSB.append('\n');
 			}
 
 			projectSB.append("src.");
@@ -399,7 +399,7 @@ public class CreateModule {
 			projectSB.append(moduleName);
 			projectSB.append("-resources=");
 			projectSB.append(mainResourcesPath);
-			projectSB.append("\n");
+			projectSB.append('\n');
 			projectSB.append("src.");
 			projectSB.append(moduleName);
 			projectSB.append(".resources.dir=${file.reference.");
@@ -417,7 +417,7 @@ public class CreateModule {
 			projectSB.append(moduleName);
 			projectSB.append("-test-unit=");
 			projectSB.append(testUnitPath);
-			projectSB.append("\n");
+			projectSB.append('\n');
 			projectSB.append("test.");
 			projectSB.append(moduleName);
 			projectSB.append(".unit.dir=${file.reference.");
@@ -429,7 +429,7 @@ public class CreateModule {
 			projectSB.append(moduleName);
 			projectSB.append("-test-unit=");
 			projectSB.append(testJavaPath);
-			projectSB.append("\n");
+			projectSB.append('\n');
 			projectSB.append("test.");
 			projectSB.append(moduleName);
 			projectSB.append(".unit.dir=${file.reference.");
@@ -445,7 +445,7 @@ public class CreateModule {
 			projectSB.append(moduleName);
 			projectSB.append("-test-unit-resources=");
 			projectSB.append(testResourcesPath);
-			projectSB.append("\n");
+			projectSB.append('\n');
 			projectSB.append("test.");
 			projectSB.append(moduleName);
 			projectSB.append(".unit.resources.dir=${file.reference.");
@@ -462,7 +462,7 @@ public class CreateModule {
 			projectSB.append(moduleName);
 			projectSB.append("-test-integration=");
 			projectSB.append(testIntegrationPath);
-			projectSB.append("\n");
+			projectSB.append('\n');
 			projectSB.append("test.");
 			projectSB.append(moduleName);
 			projectSB.append(".integration.dir=${file.reference.");
@@ -474,7 +474,7 @@ public class CreateModule {
 			projectSB.append(moduleName);
 			projectSB.append("-test-integration=");
 			projectSB.append(testIntegrationJavaPath);
-			projectSB.append("\n");
+			projectSB.append('\n');
 			projectSB.append("test.");
 			projectSB.append(moduleName);
 			projectSB.append(".integration.dir=${file.reference.");
@@ -490,7 +490,7 @@ public class CreateModule {
 			projectSB.append(moduleName);
 			projectSB.append("-test-integration-resources=");
 			projectSB.append(testIntegrationResourcesPath);
-			projectSB.append("\n");
+			projectSB.append('\n');
 			projectSB.append("test.");
 			projectSB.append(moduleName);
 			projectSB.append(".integration.resources.dir=${file.reference.");
