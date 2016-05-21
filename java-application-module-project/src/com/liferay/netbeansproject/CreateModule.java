@@ -686,16 +686,6 @@ public class CreateModule {
 	}
 
 	private static void _createRoots(
-		Element sourceRootsElement, String rootId) {
-
-		Element rootElement = _document.createElement("root");
-
-		rootElement.setAttribute("id", rootId);
-
-		sourceRootsElement.appendChild(rootElement);
-	}
-
-	private static void _createRoots(
 		Element sourceRootsElement, String label, String rootId) {
 
 		Element rootElement = _document.createElement("root");
