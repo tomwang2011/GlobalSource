@@ -8,12 +8,16 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -147,18 +151,23 @@ public class CreateModule {
 		return set;
 	}
 
-	private static void _appendJavacClasspath(File directory, StringBuilder sb)
+	private static Set<Path> _getDependencySet(Path directory)
 		throws IOException {
 
-		File[] files = directory.listFiles();
+		DirectoryStream<Path> directoryStream = Files.newDirectoryStream(
+			directory);
 
-		Arrays.sort(files);
+		List<Path> jarList = new ArrayList<>();
 
-		for (File file : files) {
-			sb.append('\t');
-			sb.append(file.getCanonicalPath());
-			sb.append(":\\\n");
+		for (Path jarPath : directoryStream) {
+			jarList.add(jarPath);
 		}
+
+		Collections.sort(jarList);
+
+		directoryStream.close();
+
+		return new HashSet<Path>(jarList);
 	}
 
 	private static void _appendLibJars(
@@ -293,15 +302,18 @@ public class CreateModule {
 
 			Path libDevelopmentPath = portalPath.resolve("lib/development");
 
-			_appendJavacClasspath(libDevelopmentPath.toFile(), javacSB);
+			_appendLibJars(
+				_getDependencySet(libDevelopmentPath), javacSB, projectSB);
 
 			Path libGlobalPath = portalPath.resolve("lib/global");
 
-			_appendJavacClasspath(libGlobalPath.toFile(), javacSB);
+			_appendLibJars(
+				_getDependencySet(libGlobalPath), javacSB, projectSB);
 
 			Path libPortalPath = portalPath.resolve("lib/portal");
 
-			_appendJavacClasspath(libPortalPath.toFile(), javacSB);
+			_appendLibJars(
+				_getDependencySet(libPortalPath), javacSB, projectSB);
 
 			if (projectName.equals("portal-impl")) {
 				projectSB.append(
