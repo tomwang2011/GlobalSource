@@ -110,37 +110,6 @@ public class CreateModule {
 		transformer.transform(new DOMSource(_document), streamResult);
 	}
 
-	private static Map<String, ModuleInfo> _parseModuleDependencies(
-			ProjectInfo projectInfo, Path modulePath)
-		throws Exception {
-
-		Map<String, ModuleInfo> dependenciesModuleMap = new HashMap<>();
-
-		Map<String, Path> moduleMap = projectInfo.getModuleMap();
-
-		Queue<ModuleInfo> moduleInfoQueue = new LinkedList<>();
-
-		moduleInfoQueue.addAll(ModuleBuildParser.parseBuildFile(modulePath));
-
-		ModuleInfo moduleInfo = null;
-
-		while ((moduleInfo = moduleInfoQueue.poll()) != null) {
-			String moduleName = moduleInfo.getModuleName();
-
-			if (!moduleMap.containsKey(moduleName)) {
-				continue;
-			}
-
-			if (dependenciesModuleMap.put(moduleName, moduleInfo) == null) {
-				moduleInfoQueue.addAll(
-					ModuleBuildParser.parseBuildFile(
-						moduleMap.get(moduleName)));
-			}
-		}
-
-		return dependenciesModuleMap;
-	}
-
 	private static Set<Path> _addDependenciesToSet(String[] dependencies) {
 		Set<Path> set = new LinkedHashSet<>();
 
@@ -149,25 +118,6 @@ public class CreateModule {
 		}
 
 		return set;
-	}
-
-	private static Set<Path> _getDependencySet(Path directory)
-		throws IOException {
-
-		DirectoryStream<Path> directoryStream = Files.newDirectoryStream(
-			directory);
-
-		List<Path> jarList = new ArrayList<>();
-
-		for (Path jarPath : directoryStream) {
-			jarList.add(jarPath);
-		}
-
-		Collections.sort(jarList);
-
-		directoryStream.close();
-
-		return new HashSet<Path>(jarList);
 	}
 
 	private static void _appendLibJars(
@@ -755,6 +705,56 @@ public class CreateModule {
 		rootElement.setAttribute("name", label);
 
 		sourceRootsElement.appendChild(rootElement);
+	}
+
+	private static Set<Path> _getDependencySet(Path directory)
+		throws IOException {
+
+		DirectoryStream<Path> directoryStream = Files.newDirectoryStream(
+			directory);
+
+		List<Path> jarList = new ArrayList<>();
+
+		for (Path jarPath : directoryStream) {
+			jarList.add(jarPath);
+		}
+
+		Collections.sort(jarList);
+
+		directoryStream.close();
+
+		return new HashSet<Path>(jarList);
+	}
+
+	private static Map<String, ModuleInfo> _parseModuleDependencies(
+			ProjectInfo projectInfo, Path modulePath)
+		throws Exception {
+
+		Map<String, ModuleInfo> dependenciesModuleMap = new HashMap<>();
+
+		Map<String, Path> moduleMap = projectInfo.getModuleMap();
+
+		Queue<ModuleInfo> moduleInfoQueue = new LinkedList<>();
+
+		moduleInfoQueue.addAll(ModuleBuildParser.parseBuildFile(modulePath));
+
+		ModuleInfo moduleInfo = null;
+
+		while ((moduleInfo = moduleInfoQueue.poll()) != null) {
+			String moduleName = moduleInfo.getModuleName();
+
+			if (!moduleMap.containsKey(moduleName)) {
+				continue;
+			}
+
+			if (dependenciesModuleMap.put(moduleName, moduleInfo) == null) {
+				moduleInfoQueue.addAll(
+					ModuleBuildParser.parseBuildFile(
+						moduleMap.get(moduleName)));
+			}
+		}
+
+		return dependenciesModuleMap;
 	}
 
 	private static void _replaceProjectName(
