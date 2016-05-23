@@ -127,18 +127,20 @@ public class CreateModule {
 		Path sdkPath = portalPath.resolve("tools/sdk");
 
 		for (Path jar : dependencies) {
-			if (!jar.startsWith(sdkPath)) {
-				projectSB.append("file.reference.");
-				projectSB.append(jar.getFileName());
-				projectSB.append('=');
-				projectSB.append(jar);
-				projectSB.append('\n');
-
-				classpathSB.append('\t');
-				classpathSB.append("${file.reference.");
-				classpathSB.append(jar.getFileName());
-				classpathSB.append("}:\\\n");
+			if (jar.startsWith(sdkPath)) {
+				continue;
 			}
+
+			projectSB.append("file.reference.");
+			projectSB.append(jar.getFileName());
+			projectSB.append('=');
+			projectSB.append(jar);
+			projectSB.append('\n');
+
+			classpathSB.append('\t');
+			classpathSB.append("${file.reference.");
+			classpathSB.append(jar.getFileName());
+			classpathSB.append("}:\\\n");
 		}
 	}
 
