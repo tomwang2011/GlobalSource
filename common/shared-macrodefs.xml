@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project name="macro-definitions" default="default" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
+<project
+	basedir="."
+	name="macro-definitions"
+	xmlns:if="ant:if"
+	xmlns:ivy="antlib:org.apache.ivy.ant"
+>
+
 	<property file="build-ext.properties" />
 	<property file="build.properties" />
 
@@ -90,7 +96,8 @@ reference.@{src.dir.name}.jar=$${project.@{src.dir.name}}/dist/@{src.dir.name}.j
 							</or>
 						</and>
 						<then>
-							<java classname="com.liferay.netbeansproject.CreateModule" classpath="classes">
+							<java fork="${jvm.debug}" classname="com.liferay.netbeansproject.CreateModule" classpath="classes">
+								<jvmarg if:true="${jvm.debug}" line="${jpda.settings}" />
 								<arg value="src.dir=${src.dir}" />
 								<arg value="module.list=${module.list}" />
 								<arg value="portal.dir=@{portal.dir}" />
@@ -103,7 +110,8 @@ reference.@{src.dir.name}.jar=$${project.@{src.dir.name}}/dist/@{src.dir.name}.j
 
 			<delete dir="@{project.dir}/dependencies" />
 
-			<java classname="com.liferay.netbeansproject.CreateProject" classpath="classes">
+			<java fork="${jvm.debug}" classname="com.liferay.netbeansproject.CreateProject" classpath="classes">
+				<jvmarg if:true="${jvm.debug}" line="${jpda.settings}" />
 				<arg value="module.list=${module.list}" />
 				<arg value="project.dir=@{project.dir}" />
 				<arg value="umbrella.source.list=${umbrella.source.list}" />
@@ -170,7 +178,8 @@ src.portal-web-functional.dir=$${file.reference.portal-web-functional.src}
 				</sequential>
 			</for>
 
-			<java classname="com.liferay.netbeansproject.ProcessGradle" classpath="classes">
+			<java fork="${jvm.debug}" classname="com.liferay.netbeansproject.ProcessGradle" classpath="classes">
+				<jvmarg if:true="${jvm.debug}" line="${jpda.settings}" />
 				<arg value="portal.dir=@{portal.dir}" />
 				<arg value="project.dir=@{project.dir}" />
 				<arg value="work.dir=@{portal.dir}/modules" />
