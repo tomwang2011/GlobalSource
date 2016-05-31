@@ -21,11 +21,10 @@
 		<attribute name="project.dir" />
 
 		<sequential>
-			<common-build
-				portal.dir="@{portal.dir}"
-				project.dir="@{project.dir}"
-			>
-			</common-build>
+			<java fork="${jvm.debug}" classname="com.liferay.netbeansproject.PortalScanner" classpath="classes">
+				<jvmarg if:true="${jvm.debug}" line="${jpda.settings}" />
+				<arg value="portal.dir=@{portal.dir}" />
+			</java>
 
 			<for param="module">
 				<path>
@@ -82,53 +81,6 @@
 		<sequential>
 			<delete dir="classes" />
 			<delete dir="@{project.dir}" />
-		</sequential>
-	</macrodef>
-
-	<macrodef name="common-build">
-		<attribute name="project.dir" />
-		<attribute name="portal.dir" />
-		<element name="build.diff" />
-
-		<sequential>
-			<java fork="${jvm.debug}" classname="com.liferay.netbeansproject.PortalScanner" classpath="classes">
-				<jvmarg if:true="${jvm.debug}" line="${jpda.settings}" />
-				<arg value="portal.dir=@{portal.dir}" />
-			</java>
-
-			<for param="module">
-				<path>
-					<dirset dir="@{portal.dir}">
-						<include name="**/src"/>
-						<exclude name="**/build/**" />
-						<exclude name="**/standalone/**" />
-						<exclude name="**/samples/**" />
-					</dirset>
-				</path>
-
-				<sequential>
-					<var name="src.dir" unset="true" />
-					<var name="src.dir.name" unset="true" />
-
-					<set-module-source-directory module="@{module}" />
-
-					<if>
-						<and>
-							<not>
-								<contains string="${exclude.modules}" substring="${src.dir.name}" />
-							</not>
-							<or>
-								<available file="${src.dir}/build.gradle" />
-								<available file="${src.dir}/build.xml" />
-								<available file="${src.dir}/web.xml" />
-							</or>
-						</and>
-						<then>
-							<build.diff />
-						</then>
-					</if>
-				</sequential>
-			</for>
 		</sequential>
 	</macrodef>
 
