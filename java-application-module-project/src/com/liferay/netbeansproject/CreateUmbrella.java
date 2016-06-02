@@ -72,7 +72,7 @@ public class CreateUmbrella {
 		sb.append(buildProperties.getProperty("exclude.types"));
 		sb.append('\n');
 
-		Map<String, String> umbrellaSourceMap = PropertiesUtil.getSubProperties(
+		Map<String, String> umbrellaSourceMap = PropertiesUtil.getProperties(
 			buildProperties, "umbrella.source.list");
 
 		for (Entry<String, String> source : umbrellaSourceMap.entrySet()) {

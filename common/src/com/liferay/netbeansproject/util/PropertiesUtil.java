@@ -44,20 +44,21 @@ public class PropertiesUtil {
 		return properties;
 	}
 
-	public static Map<String, String> getSubProperties(
-		Properties properties, String propertyName) {
+	public static Map<String, String> getProperties(
+		Properties properties, String prefix) {
 
 		Map<String, String> map = new HashMap<>();
 
-		Enumeration e = properties.propertyNames();
+		for (String curName : properties.stringPropertyNames()) {
+			if ((curName.length() >= (prefix.length() + 2)) &&
+					curName.startsWith(prefix) &&
+						(curName.charAt(prefix.length()) == '[') &&
+							(curName.charAt(curName.length() - 1) == ']')) {
 
-		while (e.hasMoreElements()) {
-			String property = (String) e.nextElement();
-
-			if (property.contains(propertyName)) {
 				map.put(
-					StringUtil.extract(property, '[', ']'),
-					properties.getProperty(property));
+					curName.substring(
+						prefix.length() + 1, curName.length() - 1),
+					properties.getProperty(curName));
 			}
 		}
 
