@@ -21,20 +21,20 @@ import java.nio.file.Path;
  */
 public class JarDependency {
 
-		public JarDependency(Path jarPath, boolean test) {
-			_jarPath = jarPath;
-			_test = test;
-		}
-
-		public Path getJarPath() {
-			return _jarPath;
-		}
-
-		public boolean isTest() {
-			return _test;
-		}
-
-		private final Path _jarPath;
-		private final boolean _test;
-
+	public JarDependency(Path jarPath, boolean test) {
+		_jarPath = jarPath;
+		_test = test;
 	}
+
+	public Path getJarPath() {
+		return _jarPath;
+	}
+
+	public boolean isTest() {
+		return _test;
+	}
+
+	private final Path _jarPath;
+	private final boolean _test;
+
+}
