@@ -33,6 +33,8 @@ public class Module {
 	public Module(Path modulePath, List<JarDependency> jarDependencies)
 		throws Exception {
 
+		_modulePath = modulePath;
+
 		if (jarDependencies == null) {
 			jarDependencies = new ArrayList<>();
 		}
@@ -40,7 +42,6 @@ public class Module {
 		Path moduleLibPath = modulePath.resolve("lib");
 
 		if (Files.exists(moduleLibPath)) {
-
 			DirectoryStream<Path> moduleLibFiles = Files.newDirectoryStream(
 				moduleLibPath);
 
@@ -49,7 +50,8 @@ public class Module {
 			}
 		}
 
-		_modulePath = modulePath;
+		_jarDependencies = jarDependencies;
+
 		_sourcePath =  _resolveSourcePath(modulePath);
 		_sourceResourcePath = _resolveResourcePath(
 			modulePath.resolve(Paths.get("src", "main", "resources")));
@@ -63,7 +65,6 @@ public class Module {
 				modulePath.resolve(
 					Paths.get("src", "testIntegration", "resources")));
 		_moduleDependencies = GradleUtil.getModuleDependencies(modulePath);
-		_jarDependencies = jarDependencies;
 	}
 
 	public List<JarDependency> getJarDependencies() {
