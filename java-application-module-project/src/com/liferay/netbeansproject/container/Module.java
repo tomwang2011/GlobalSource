@@ -30,11 +30,11 @@ import java.util.List;
  */
 public class Module {
 
-	public Module(Path modulePath, List<JarDependency> jarDependencys)
+	public Module(Path modulePath, List<JarDependency> jarDependencies)
 		throws Exception {
 
-		if (jarDependencys == null) {
-			jarDependencys = new ArrayList<>();
+		if (jarDependencies == null) {
+			jarDependencies = new ArrayList<>();
 		}
 
 		Path moduleLibPath = modulePath.resolve("lib");
@@ -45,7 +45,7 @@ public class Module {
 				moduleLibPath);
 
 			for (Path jar : moduleLibFiles) {
-				jarDependencys.add(new JarDependency(jar, false));
+				jarDependencies.add(new JarDependency(jar, false));
 			}
 		}
 
@@ -63,15 +63,15 @@ public class Module {
 				modulePath.resolve(
 					Paths.get("src", "testIntegration", "resources")));
 		_moduleDependencies = GradleUtil.getModuleDependencies(modulePath);
-		_moduleJarDependencies = jarDependencys;
+		_jarDependencies = jarDependencies;
+	}
+
+	public List<JarDependency> getJarDependencies() {
+		return _jarDependencies;
 	}
 
 	public List<ModuleDependency> getModuleDependencies() {
 		return _moduleDependencies;
-	}
-
-	public List<JarDependency> getModuleJarDependencies() {
-		return _moduleJarDependencies;
 	}
 
 	public String getModuleName() {
@@ -188,7 +188,7 @@ public class Module {
 	private static final Path _srcTestJavaPath = Paths.get("src", "test", "java");
 
 	private final List<ModuleDependency> _moduleDependencies;
-	private final List<JarDependency> _moduleJarDependencies;
+	private final List<JarDependency> _jarDependencies;
 	private final Path _modulePath;
 	private final Path _sourcePath;
 	private final Path _sourceResourcePath;
