@@ -14,8 +14,7 @@
 
 package com.liferay.netbeansproject.util;
 
-import com.liferay.netbeansproject.container.Module.ModuleDependency;
-
+import com.liferay.netbeansproject.container.ModuleDependency;
 import java.io.BufferedReader;
 
 import java.io.IOException;

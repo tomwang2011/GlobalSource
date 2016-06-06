@@ -14,7 +14,6 @@
 
 package com.liferay.netbeansproject.container;
 
-import com.liferay.netbeansproject.resolvers.ProjectDependencyResolver;
 import com.liferay.netbeansproject.util.GradleUtil;
 import com.liferay.netbeansproject.util.ModuleUtil;
 import java.io.IOException;
@@ -54,19 +53,14 @@ public class Module {
 		_jarDependencies = jarDependencies;
 
 		_sourcePath =  _resolveSourcePath(modulePath);
+		_sourceResourcePath = _resolveResourcePath(modulePath, "main");
 
-		_sourceResourcePath = _resolveResourcePath(
-			modulePath, Paths.get("src", "main", "resources"));
-		_testUnitResourcePath = _resolveResourcePath(
-			modulePath, Paths.get("src", "test", "resources"));
-		_testIntegrationResourcePath =
-			_resolveResourcePath(
-				modulePath, Paths.get("src", "testIntegration", "resources"));
+		_testUnitPath = _resolveTestPath(modulePath, true);
+		_testUnitResourcePath = _resolveResourcePath(modulePath, "test");
 
-		_testUnitPath = _resolveTestPath(
-			modulePath, Paths.get("src", "test", "java"), "unit");
-		_testIntegrationPath = _resolveTestPath(
-			modulePath, Paths.get("src", "testIntegration", "java"), "integration");
+		_testIntegrationPath = _resolveTestPath(modulePath, false);
+		_testIntegrationResourcePath = _resolveResourcePath(
+			modulePath, "testIntegration");
 
 		_moduleDependencies = GradleUtil.getModuleDependencies(modulePath);
 	}
@@ -111,32 +105,11 @@ public class Module {
 		return _testUnitResourcePath;
 	}
 
-	public static class ModuleDependency {
-
-		public ModuleDependency(String modulePath, boolean test) {
-			_modulePath = modulePath;
-			_test = test;
-		}
-
-		public Module getModule(
-			ProjectDependencyResolver projectDependencyResolver) {
-
-			return projectDependencyResolver.resolve(_modulePath);
-		}
-
-		public boolean isTest() {
-			return _test;
-		}
-
-		private final String _modulePath;
-		private final boolean _test;
-
-	}
-
-	private static Path _resolveResourcePath(Path modulePath, Path resourcePath)
+	private static Path _resolveResourcePath(Path modulePath, String type)
 		throws IOException {
 
-		Path resolvedResourcePath = modulePath.resolve(resourcePath);
+		Path resolvedResourcePath = modulePath.resolve(
+			Paths.get("src", type, "resources"));
 
 		if (Files.exists(resolvedResourcePath)) {
 			return resolvedResourcePath;
@@ -146,13 +119,14 @@ public class Module {
 	}
 
 	private static Path _resolveSourcePath(Path modulePath) {
-		Path sourcePath = modulePath.resolve(_docrootWebInfSrcPath);
+		Path sourcePath = modulePath.resolve(
+			Paths.get("docroot", "WEB-INF", "src"));
 
 		if (Files.exists(sourcePath)) {
 			return sourcePath;
 		}
 
-		sourcePath = modulePath.resolve(_srcMainJavaPath);
+		sourcePath = modulePath.resolve(Paths.get("src", "main", "java"));
 
 		if (Files.exists(sourcePath)) {
 			return sourcePath;
@@ -169,16 +143,27 @@ public class Module {
 		return sourcePath;
 	}
 
-	private static Path _resolveTestPath(
-		Path modulePath, Path mavenModel, String type) {
+	private static Path _resolveTestPath(Path modulePath, boolean unit) {
+		Path testPath;
 
-		Path testPath = modulePath.resolve(mavenModel);
+		if (unit) {
+			testPath = modulePath.resolve(Paths.get("src", "test", "java"));
+		}
+		else {
+			testPath = modulePath.resolve(
+				Paths.get("src", "testIntegration", "java"));
+		}
 
 		if (Files.exists(testPath)) {
 			return testPath;
 		}
 
-		testPath = modulePath.resolve(Paths.get("test", type));
+		if (unit) {
+			testPath = modulePath.resolve(Paths.get("test", "unit"));
+		}
+		else {
+			testPath = modulePath.resolve(Paths.get("test", "integration"));
+		}
 
 		if (Files.exists(testPath)) {
 			return testPath;
@@ -186,11 +171,6 @@ public class Module {
 
 		return null;
 	}
-
-	private static final Path _docrootWebInfSrcPath = Paths.get(
-		"docroot", "WEB-INF", "src");
-	private static final Path _srcMainJavaPath = Paths.get(
-		"src", "main", "java");
 
 	private final List<ModuleDependency> _moduleDependencies;
 	private final List<JarDependency> _jarDependencies;
