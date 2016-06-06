@@ -14,29 +14,25 @@
 
 package com.liferay.netbeansproject.container;
 
-import com.liferay.netbeansproject.resolvers.ProjectDependencyResolver;
-
 /**
  * @author Tom Wang
  */
 public class ModuleDependency {
 
-	public ModuleDependency(String modulePath, boolean test) {
-		_modulePath = modulePath;
+	public ModuleDependency(String moduleLocation, boolean test) {
+		_moduleLocation = moduleLocation;
 		_test = test;
 	}
 
-	public Module getModule(
-		ProjectDependencyResolver projectDependencyResolver) {
-
-		return projectDependencyResolver.resolve(_modulePath);
+	public String getModulePath() {
+		return _moduleLocation;
 	}
 
 	public boolean isTest() {
 		return _test;
 	}
 
-	private final String _modulePath;
+	private final String _moduleLocation;
 	private final boolean _test;
 
 }
