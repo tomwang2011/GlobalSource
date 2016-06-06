@@ -51,7 +51,7 @@ public class ModuleTest {
 		Files.createDirectories(classicIntegrationPath);
 
 		Module module = new Module(
-			new ArrayList<JarDependency>(), _testRootPath);
+			_testRootPath, new ArrayList<JarDependency>());
 
 		Assert.assertEquals(classicModelSrcPath, module.getSourcePath());
 
@@ -79,7 +79,7 @@ public class ModuleTest {
 		Files.createDirectories(mavenModelIntegrationPath);
 
 		Module module = new Module(
-			new ArrayList<JarDependency>(), _testRootPath);
+			_testRootPath, new ArrayList<JarDependency>());
 
 		Assert.assertEquals(mavenModelSrcPath, module.getSourcePath());
 
@@ -97,7 +97,7 @@ public class ModuleTest {
 		Files.createDirectories(srcTestPath);
 
 		Module module = new Module(
-			new ArrayList<JarDependency>(), _testRootPath);
+			_testRootPath, new ArrayList<JarDependency>());
 
 		Assert.assertNull(module.getSourcePath());
 
@@ -112,7 +112,7 @@ public class ModuleTest {
 		Files.createDirectories(portletModelSrcPath);
 
 		Module module = new Module(
-			new ArrayList<JarDependency>(), _testRootPath);
+			_testRootPath, new ArrayList<JarDependency>());
 
 		Assert.assertEquals(portletModelSrcPath, module.getSourcePath());
 	}
@@ -135,7 +135,7 @@ public class ModuleTest {
 		Files.createDirectories(testIntegrationResourcesPath);
 
 		Module module = new Module(
-			new ArrayList<JarDependency>(), _testRootPath);
+			_testRootPath, new ArrayList<JarDependency>());
 
 		Assert.assertEquals(
 			srcResourcesPath, module.getSourceResourcePath());

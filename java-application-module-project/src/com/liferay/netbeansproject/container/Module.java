@@ -30,7 +30,7 @@ import java.util.List;
  */
 public class Module {
 
-	public Module(List<JarDependency> jarDependencys, Path modulePath)
+	public Module(Path modulePath, List<JarDependency> jarDependencys)
 		throws Exception {
 
 		if (jarDependencys == null) {
