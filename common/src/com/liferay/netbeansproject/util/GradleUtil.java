@@ -18,7 +18,8 @@ import com.liferay.netbeansproject.container.Module.ModuleDependency;
 
 import java.io.BufferedReader;
 
-import java.nio.charset.Charset;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -32,7 +33,7 @@ import java.util.List;
 public class GradleUtil {
 
 	public static List<ModuleDependency> getModuleDependencies(Path modulePath)
-		throws Exception {
+		throws IOException {
 
 		Path gradleFilePath = modulePath.resolve("build.gradle");
 
@@ -40,23 +41,18 @@ public class GradleUtil {
 			return Collections.emptyList();
 		}
 
-		List<ModuleDependency> moduleInfos = new ArrayList<>();
+		List<ModuleDependency> moduleDependencies = new ArrayList<>();
 
 		try(
 			BufferedReader bufferedReader = Files.newBufferedReader(
-				gradleFilePath, Charset.defaultCharset())) {
+				gradleFilePath, StandardCharsets.UTF_8)) {
 
 			String line = null;
 
 			while ((line = bufferedReader.readLine()) != null) {
 				line = line.trim();
 
-				if (line.startsWith("compile project") ||
-					line.startsWith("provided project") ||
-					line.startsWith("frontendThemes project") ||
-					line.startsWith("testCompile project") ||
-					line.startsWith("testIntegrationCompile project")) {
-
+				if (line.contains(" project(")) {
 					int index1 = line.indexOf('\"');
 
 					if (index1 < 0) {
@@ -71,22 +67,14 @@ public class GradleUtil {
 							"Broken syntax in " + gradleFilePath);
 					}
 
-					String moduleLocation = line.substring(index1 + 1, index2);
-
-					boolean test = false;
-
-					if (line.startsWith("testCompile project") ||
-						line.startsWith("testIntegrationCompile project")) {
-
-						test = true;
-					}
-
-					moduleInfos.add(new ModuleDependency(moduleLocation, test));
+					moduleDependencies.add(
+						new ModuleDependency(line.substring(index1 + 1, index2),
+						line.startsWith("test")));
 				}
 			}
 		}
 
-		return moduleInfos;
+		return moduleDependencies;
 	}
 
 }

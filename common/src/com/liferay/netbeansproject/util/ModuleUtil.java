@@ -20,6 +20,7 @@ import java.nio.file.Path;
  * @author Tom Wang
  */
 public class ModuleUtil {
+
 	public static String getModuleName(Path modulePath) {
 		Path moduleName = modulePath.getFileName();
 
@@ -29,4 +30,5 @@ public class ModuleUtil {
 
 		return moduleName.toString();
 	}
+
 }
