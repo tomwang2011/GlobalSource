@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
@@ -35,117 +34,91 @@ public class ModuleTest {
 	}
 
 	@Test
-	public void testClassicModel() throws Exception {
-		Path classicModelSrcPath = _rootPath.resolve("src");
-
-		Files.createDirectories(classicModelSrcPath);
-
-		Path classicUnitPath = _rootPath.resolve(Paths.get("test", "unit"));
-
-		Files.createDirectories(classicUnitPath);
-
-		Path classicIntegrationPath = _rootPath.resolve(
+	public void testClassicModule() throws IOException {
+		Path srcPath = _rootPath.resolve("src");
+		Path unitPath = _rootPath.resolve(Paths.get("test", "unit"));
+		Path integrationPath = _rootPath.resolve(
 			Paths.get("test", "integration"));
 
-		Files.createDirectories(classicIntegrationPath);
+		_createDirectories(srcPath, unitPath, integrationPath);
 
-		Module module = new Module(
-			_rootPath, new ArrayList<JarDependency>());
+		Module module = new Module(_rootPath, null);
 
-		Assert.assertEquals(classicModelSrcPath, module.getSourcePath());
-
-		Assert.assertEquals(classicUnitPath, module.getTestUnitPath());
-
-		Assert.assertEquals(
-			classicIntegrationPath, module.getTestIntegrationPath());
+		Assert.assertEquals(srcPath, module.getSourcePath());
+		Assert.assertEquals(unitPath, module.getTestUnitPath());
+		Assert.assertEquals(integrationPath, module.getTestIntegrationPath());
 	}
 
 	@Test
-	public void testMavenModel() throws Exception {
-		Path mavenModelSrcPath = _rootPath.resolve(
-			Paths.get("src", "main", "java"));
-
-		Files.createDirectories(mavenModelSrcPath);
-
-		Path mavenModelUnitPath = _rootPath.resolve(
-			Paths.get("src", "test", "java"));
-
-		Files.createDirectories(mavenModelUnitPath);
-
-		Path mavenModelIntegrationPath = _rootPath.resolve(
+	public void testMavenModule() throws IOException {
+		Path srcPath = _rootPath.resolve(Paths.get("src", "main", "java"));
+		Path unitPath = _rootPath.resolve(Paths.get("src", "test", "java"));
+		Path integrationPath = _rootPath.resolve(
 			Paths.get("src", "testIntegration", "java"));
 
-		Files.createDirectories(mavenModelIntegrationPath);
+		_createDirectories(srcPath, unitPath, integrationPath);
 
-		Module module = new Module(
-			_rootPath, new ArrayList<JarDependency>());
+		Module module = new Module(_rootPath, null);
 
-		Assert.assertEquals(mavenModelSrcPath, module.getSourcePath());
-
-		Assert.assertEquals(mavenModelUnitPath, module.getTestUnitPath());
-
-		Assert.assertEquals(
-			mavenModelIntegrationPath, module.getTestIntegrationPath());
+		Assert.assertEquals(srcPath, module.getSourcePath());
+		Assert.assertEquals(unitPath, module.getTestUnitPath());
+		Assert.assertEquals(	integrationPath, module.getTestIntegrationPath());
 	}
 
 	@Test
-	public void testNoSourceModel() throws Exception {
-		Path srcTestPath = _rootPath.resolve(
-			Paths.get("src", "test", "java"));
+	public void testMavenTestModule() throws IOException {
+		Path unitTestPath = _rootPath.resolve(Paths.get("src", "test", "java"));
 
-		Files.createDirectories(srcTestPath);
+		Files.createDirectories(unitTestPath);
 
-		Module module = new Module(
-			_rootPath, new ArrayList<JarDependency>());
+		Module module = new Module(_rootPath, null);
 
 		Assert.assertNull(module.getSourcePath());
-
-		Assert.assertEquals(srcTestPath, module.getTestUnitPath());
+		Assert.assertEquals(unitTestPath, module.getTestUnitPath());
 	}
 
 	@Test
-	public void testPortletModel() throws Exception {
-		Path portletModelSrcPath = _rootPath.resolve(
+	public void testWarModule() throws IOException {
+		Path srcPath = _rootPath.resolve(
 			Paths.get("docroot", "WEB-INF", "src"));
 
-		Files.createDirectories(portletModelSrcPath);
+		Files.createDirectories(srcPath);
 
-		Module module = new Module(
-			_rootPath, new ArrayList<JarDependency>());
+		Module module = new Module(_rootPath, null);
 
-		Assert.assertEquals(portletModelSrcPath, module.getSourcePath());
+		Assert.assertEquals(srcPath, module.getSourcePath());
 	}
 
 	@Test
-	public void testResource() throws Exception {
+	public void testResources() throws IOException {
 		Path srcResourcesPath = _rootPath.resolve(
 			Paths.get("src", "main", "resources"));
-
-		Files.createDirectories(srcResourcesPath);
-
 		Path testUnitResourcesPath = _rootPath.resolve(
 			Paths.get("src", "test", "resources"));
-
-		Files.createDirectories(testUnitResourcesPath);
-
 		Path testIntegrationResourcesPath = _rootPath.resolve(
 			Paths.get("src", "testIntegration", "resources"));
 
-		Files.createDirectories(testIntegrationResourcesPath);
+		_createDirectories(
+			srcResourcesPath, testUnitResourcesPath,
+			testIntegrationResourcesPath);
 
-		Module module = new Module(
-			_rootPath, new ArrayList<JarDependency>());
+		Module module = new Module(_rootPath, null);
 
 		Assert.assertEquals(
 			srcResourcesPath, module.getSourceResourcePath());
-
 		Assert.assertEquals(
 			testUnitResourcesPath, module.getTestUnitResourcePath());
-
 		Assert.assertEquals(
 			testIntegrationResourcesPath,
 			module.getTestIntegrationResourcePath());
 	}
 
+	private static void _createDirectories(Path... paths) throws IOException {
+		for (Path path : paths) {
+			Files.createDirectories(path);
+		}
+	}
+
 	private static Path _rootPath = Paths.get("Unit-Test-Model");
+
 }
