@@ -30,7 +30,7 @@ import java.util.List;
 public class Module {
 
 	public Module(Path modulePath, List<JarDependency> jarDependencies)
-		throws Exception {
+		throws IOException {
 
 		_modulePath = modulePath;
 
@@ -105,9 +105,7 @@ public class Module {
 		return _testUnitResourcePath;
 	}
 
-	private static Path _resolveResourcePath(Path modulePath, String type)
-		throws IOException {
-
+	private static Path _resolveResourcePath(Path modulePath, String type) {
 		Path resolvedResourcePath = modulePath.resolve(
 			Paths.get("src", type, "resources"));
 
