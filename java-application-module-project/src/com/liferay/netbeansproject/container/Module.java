@@ -43,7 +43,7 @@ public class Module {
 
 		if (Files.exists(moduleLibPath)) {
 			DirectoryStream<Path> moduleLibFiles = Files.newDirectoryStream(
-				moduleLibPath);
+				moduleLibPath, "*.jar");
 
 			for (Path jar : moduleLibFiles) {
 				jarDependencies.add(new JarDependency(jar, false));
