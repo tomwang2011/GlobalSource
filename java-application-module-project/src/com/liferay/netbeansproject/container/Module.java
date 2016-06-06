@@ -54,17 +54,20 @@ public class Module {
 		_jarDependencies = jarDependencies;
 
 		_sourcePath =  _resolveSourcePath(modulePath);
+
 		_sourceResourcePath = _resolveResourcePath(
-			modulePath.resolve(Paths.get("src", "main", "resources")));
-		_testUnitPath = _resolveTestPath(modulePath, _srcTestJavaPath, "unit");
+			modulePath, Paths.get("src", "main", "resources"));
 		_testUnitResourcePath = _resolveResourcePath(
-			modulePath.resolve(Paths.get("src", "test", "resources")));
-		_testIntegrationPath = _resolveTestPath(
-			modulePath, _srcTestIntegrationPath, "integration");
+			modulePath, Paths.get("src", "test", "resources"));
 		_testIntegrationResourcePath =
 			_resolveResourcePath(
-				modulePath.resolve(
-					Paths.get("src", "testIntegration", "resources")));
+				modulePath, Paths.get("src", "testIntegration", "resources"));
+
+		_testUnitPath = _resolveTestPath(
+			modulePath, Paths.get("src", "test", "java"), "unit");
+		_testIntegrationPath = _resolveTestPath(
+			modulePath, Paths.get("src", "testIntegration", "java"), "integration");
+
 		_moduleDependencies = GradleUtil.getModuleDependencies(modulePath);
 	}
 
@@ -130,18 +133,20 @@ public class Module {
 
 	}
 
-	private static Path _resolveResourcePath(Path resourcePath)
+	private static Path _resolveResourcePath(Path modulePath, Path resourcePath)
 		throws IOException {
 
-		if (Files.exists(resourcePath)) {
-			return resourcePath;
+		Path resolvedResourcePath = modulePath.resolve(resourcePath);
+
+		if (Files.exists(resolvedResourcePath)) {
+			return resolvedResourcePath;
 		}
 
 		return null;
 	}
 
 	private static Path _resolveSourcePath(Path modulePath) {
-		Path sourcePath = modulePath.resolve(_docrootPath);
+		Path sourcePath = modulePath.resolve(_docrootWebInfSrcPath);
 
 		if (Files.exists(sourcePath)) {
 			return sourcePath;
@@ -157,6 +162,7 @@ public class Module {
 
 		if (Files.exists(sourcePath.resolve("test")) ||
 				Files.exists(sourcePath.resolve("testIntegration"))) {
+
 			return null;
 		}
 
@@ -181,13 +187,10 @@ public class Module {
 		return null;
 	}
 
-	private static final Path _docrootPath = Paths.get(
+	private static final Path _docrootWebInfSrcPath = Paths.get(
 		"docroot", "WEB-INF", "src");
 	private static final Path _srcMainJavaPath = Paths.get(
 		"src", "main", "java");
-	private static final Path _srcTestIntegrationPath = Paths.get(
-		"src", "testIntegration", "java");
-	private static final Path _srcTestJavaPath = Paths.get("src", "test", "java");
 
 	private final List<ModuleDependency> _moduleDependencies;
 	private final List<JarDependency> _jarDependencies;

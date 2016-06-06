@@ -27,10 +27,13 @@ import java.nio.file.attribute.BasicFileAttributes;
 public class ProjectUtil {
 
 	public static void clean(Path projectDirPath) throws IOException {
-		if (Files.exists(projectDirPath)) {
-			Files.walkFileTree(
-				projectDirPath,
-				new SimpleFileVisitor<Path>() {
+		if (!Files.exists(projectDirPath)) {
+			return;
+		}
+
+		Files.walkFileTree(
+			projectDirPath,
+			new SimpleFileVisitor<Path>() {
 
 				@Override
 				public FileVisitResult visitFile(
@@ -52,8 +55,6 @@ public class ProjectUtil {
 					return FileVisitResult.CONTINUE;
 				}
 			});
-
-		}
 	}
 
 }

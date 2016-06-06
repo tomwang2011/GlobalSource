@@ -22,7 +22,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -30,28 +29,28 @@ import org.junit.Test;
  */
 public class ModuleTest {
 
-	@BeforeClass
-	public static void setUpTest() throws Exception {
-		_testRootPath = Paths.get("Unit-Test-Model");
+	@After
+	public void cleanup() throws IOException {
+		ProjectUtil.clean(_rootPath);
 	}
 
 	@Test
 	public void testClassicModel() throws Exception {
-		Path classicModelSrcPath = _testRootPath.resolve("src");
+		Path classicModelSrcPath = _rootPath.resolve("src");
 
 		Files.createDirectories(classicModelSrcPath);
 
-		Path classicUnitPath = _testRootPath.resolve(Paths.get("test", "unit"));
+		Path classicUnitPath = _rootPath.resolve(Paths.get("test", "unit"));
 
 		Files.createDirectories(classicUnitPath);
 
-		Path classicIntegrationPath = _testRootPath.resolve(
+		Path classicIntegrationPath = _rootPath.resolve(
 			Paths.get("test", "integration"));
 
 		Files.createDirectories(classicIntegrationPath);
 
 		Module module = new Module(
-			_testRootPath, new ArrayList<JarDependency>());
+			_rootPath, new ArrayList<JarDependency>());
 
 		Assert.assertEquals(classicModelSrcPath, module.getSourcePath());
 
@@ -63,23 +62,23 @@ public class ModuleTest {
 
 	@Test
 	public void testMavenModel() throws Exception {
-		Path mavenModelSrcPath = _testRootPath.resolve(
+		Path mavenModelSrcPath = _rootPath.resolve(
 			Paths.get("src", "main", "java"));
 
 		Files.createDirectories(mavenModelSrcPath);
 
-		Path mavenModelUnitPath = _testRootPath.resolve(
+		Path mavenModelUnitPath = _rootPath.resolve(
 			Paths.get("src", "test", "java"));
 
 		Files.createDirectories(mavenModelUnitPath);
 
-		Path mavenModelIntegrationPath = _testRootPath.resolve(
+		Path mavenModelIntegrationPath = _rootPath.resolve(
 			Paths.get("src", "testIntegration", "java"));
 
 		Files.createDirectories(mavenModelIntegrationPath);
 
 		Module module = new Module(
-			_testRootPath, new ArrayList<JarDependency>());
+			_rootPath, new ArrayList<JarDependency>());
 
 		Assert.assertEquals(mavenModelSrcPath, module.getSourcePath());
 
@@ -91,13 +90,13 @@ public class ModuleTest {
 
 	@Test
 	public void testNoSourceModel() throws Exception {
-		Path srcTestPath = _testRootPath.resolve(
+		Path srcTestPath = _rootPath.resolve(
 			Paths.get("src", "test", "java"));
 
 		Files.createDirectories(srcTestPath);
 
 		Module module = new Module(
-			_testRootPath, new ArrayList<JarDependency>());
+			_rootPath, new ArrayList<JarDependency>());
 
 		Assert.assertNull(module.getSourcePath());
 
@@ -106,36 +105,36 @@ public class ModuleTest {
 
 	@Test
 	public void testPortletModel() throws Exception {
-		Path portletModelSrcPath = _testRootPath.resolve(
+		Path portletModelSrcPath = _rootPath.resolve(
 			Paths.get("docroot", "WEB-INF", "src"));
 
 		Files.createDirectories(portletModelSrcPath);
 
 		Module module = new Module(
-			_testRootPath, new ArrayList<JarDependency>());
+			_rootPath, new ArrayList<JarDependency>());
 
 		Assert.assertEquals(portletModelSrcPath, module.getSourcePath());
 	}
 
 	@Test
 	public void testResource() throws Exception {
-		Path srcResourcesPath = _testRootPath.resolve(
+		Path srcResourcesPath = _rootPath.resolve(
 			Paths.get("src", "main", "resources"));
 
 		Files.createDirectories(srcResourcesPath);
 
-		Path testUnitResourcesPath = _testRootPath.resolve(
+		Path testUnitResourcesPath = _rootPath.resolve(
 			Paths.get("src", "test", "resources"));
 
 		Files.createDirectories(testUnitResourcesPath);
 
-		Path testIntegrationResourcesPath = _testRootPath.resolve(
+		Path testIntegrationResourcesPath = _rootPath.resolve(
 			Paths.get("src", "testIntegration", "resources"));
 
 		Files.createDirectories(testIntegrationResourcesPath);
 
 		Module module = new Module(
-			_testRootPath, new ArrayList<JarDependency>());
+			_rootPath, new ArrayList<JarDependency>());
 
 		Assert.assertEquals(
 			srcResourcesPath, module.getSourceResourcePath());
@@ -148,10 +147,5 @@ public class ModuleTest {
 			module.getTestIntegrationResourcePath());
 	}
 
-	@After
-	public void cleanup() throws IOException {
-		ProjectUtil.clean(_testRootPath);
-	}
-
-	private static Path _testRootPath;
+	private static Path _rootPath = Paths.get("Unit-Test-Model");
 }
