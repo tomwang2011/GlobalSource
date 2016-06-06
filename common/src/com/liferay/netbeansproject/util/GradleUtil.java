@@ -34,9 +34,9 @@ public class GradleUtil {
 	public static List<ModuleDependency> getModuleDependencies(Path modulePath)
 		throws IOException {
 
-		Path gradleFilePath = modulePath.resolve("build.gradle");
+		Path buildGradlePath = modulePath.resolve("build.gradle");
 
-		if (!Files.exists(gradleFilePath)) {
+		if (!Files.exists(buildGradlePath)) {
 			return Collections.emptyList();
 		}
 
@@ -44,32 +44,34 @@ public class GradleUtil {
 
 		try(
 			BufferedReader bufferedReader = Files.newBufferedReader(
-				gradleFilePath, StandardCharsets.UTF_8)) {
+				buildGradlePath, StandardCharsets.UTF_8)) {
 
 			String line = null;
 
 			while ((line = bufferedReader.readLine()) != null) {
 				line = line.trim();
 
-				if (line.contains(" project(")) {
-					int index1 = line.indexOf('\"');
-
-					if (index1 < 0) {
-						throw new IllegalStateException(
-							"Broken syntax in " + gradleFilePath);
-					}
-
-					int index2 = line.indexOf('\"', index1 + 1);
-
-					if (index2 < 0) {
-						throw new IllegalStateException(
-							"Broken syntax in " + gradleFilePath);
-					}
-
-					moduleDependencies.add(
-						new ModuleDependency(line.substring(index1 + 1, index2),
-						line.startsWith("test")));
+				if (!line.contains(" project(")) {
+					continue;
 				}
+
+				int index1 = line.indexOf('\"');
+
+				if (index1 < 0) {
+					throw new IllegalStateException(
+						"Broken syntax in " + buildGradlePath);
+				}
+
+				int index2 = line.indexOf('\"', index1 + 1);
+
+				if (index2 < 0) {
+					throw new IllegalStateException(
+						"Broken syntax in " + buildGradlePath);
+				}
+
+				moduleDependencies.add(
+					new ModuleDependency(line.substring(index1 + 1, index2),
+					line.startsWith("test")));
 			}
 		}
 
