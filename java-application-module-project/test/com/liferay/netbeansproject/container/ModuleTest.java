@@ -66,7 +66,7 @@ public class ModuleTest {
 	}
 
 	@Test
-	public void testMavenTestModule() throws IOException {
+	public void testMavenTestModuleUnit() throws IOException {
 		Path unitTestPath = _rootPath.resolve(Paths.get("src", "test", "java"));
 
 		Files.createDirectories(unitTestPath);
@@ -75,6 +75,36 @@ public class ModuleTest {
 
 		Assert.assertNull(module.getSourcePath());
 		Assert.assertEquals(unitTestPath, module.getTestUnitPath());
+	}
+
+	@Test
+	public void testMavenTestModuleIntegration() throws IOException {
+		Path integrationTestPath = _rootPath.resolve(
+			Paths.get("src", "testIntegration", "java"));
+
+		Files.createDirectories(integrationTestPath);
+
+		Module module = new Module(_rootPath, null);
+
+		Assert.assertNull(module.getSourcePath());
+		Assert.assertEquals(
+			integrationTestPath, module.getTestIntegrationPath());
+	}
+
+	@Test
+	public void testMavenTestModuleUnitAndIntegration() throws IOException {
+		Path unitTestPath = _rootPath.resolve(Paths.get("src", "test", "java"));
+		Path integrationTestPath = _rootPath.resolve(
+			Paths.get("src", "testIntegration", "java"));
+
+		_createDirectories(unitTestPath, integrationTestPath);
+
+		Module module = new Module(_rootPath, null);
+
+		Assert.assertNull(module.getSourcePath());
+		Assert.assertEquals(unitTestPath, module.getTestUnitPath());
+		Assert.assertEquals(
+			integrationTestPath, module.getTestIntegrationPath());
 	}
 
 	@Test
