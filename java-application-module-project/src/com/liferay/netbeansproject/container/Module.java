@@ -42,11 +42,12 @@ public class Module {
 		Path moduleLibPath = modulePath.resolve("lib");
 
 		if (Files.exists(moduleLibPath)) {
-			DirectoryStream<Path> moduleLibFiles = Files.newDirectoryStream(
-				moduleLibPath, "*.jar");
+			try (DirectoryStream<Path> directoryStream =
+					Files.newDirectoryStream(moduleLibPath, "*.jar")) {
 
-			for (Path jar : moduleLibFiles) {
-				jarDependencies.add(new JarDependency(jar, false));
+				for (Path jarPath : directoryStream) {
+					jarDependencies.add(new JarDependency(jarPath, false));
+				}
 			}
 		}
 
