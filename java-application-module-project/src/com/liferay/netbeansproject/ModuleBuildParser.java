@@ -31,46 +31,36 @@ public class ModuleBuildParser {
 			while ((line = bufferedReader.readLine()) != null) {
 				line = line.trim();
 
-				if (line.startsWith("compile project") ||
-					line.startsWith("provided project") ||
-					line.startsWith("frontendThemes project") ||
-					line.startsWith("testCompile project") ||
-					line.startsWith("testIntegrationCompile project")) {
-
-					int index1 = line.indexOf('\"');
-
-					if (index1 < 0) {
-						throw new IllegalStateException(
-							"Broken syntax in " + gradleFilePath);
-					}
-
-					int index2 = line.indexOf('\"', index1 + 1);
-
-					if (index2 < 0) {
-						throw new IllegalStateException(
-							"Broken syntax in " + gradleFilePath);
-					}
-
-					String moduleLocation = line.substring(index1 + 1, index2);
-
-					String[] parts = StringUtil.split(moduleLocation, ':');
-
-					if (parts.length == 0) {
-						throw new IllegalStateException(
-							"Broken syntax in " + gradleFilePath);
-					}
-
-					boolean test = false;
-
-					if(line.startsWith("testCompile project") ||
-						line.startsWith("testIntegrationCompile project")) {
-
-						test = true;
-					}
-
-					moduleInfos.add(
-						new ModuleInfo(parts[parts.length - 1], test));
+				if (!line.contains(" project(")) {
+					continue;
 				}
+
+				int index1 = line.indexOf('\"');
+
+				if (index1 < 0) {
+					throw new IllegalStateException(
+						"Broken syntax in " + gradleFilePath);
+				}
+
+				int index2 = line.indexOf('\"', index1 + 1);
+
+				if (index2 < 0) {
+					throw new IllegalStateException(
+						"Broken syntax in " + gradleFilePath);
+				}
+
+				String moduleLocation = line.substring(index1 + 1, index2);
+
+				String[] parts = StringUtil.split(moduleLocation, ':');
+
+				if (parts.length == 0) {
+					throw new IllegalStateException(
+						"Broken syntax in " + gradleFilePath);
+				}
+
+				moduleInfos.add(
+					new ModuleInfo(
+						parts[parts.length - 1], line.startsWith("test")));
 			}
 		}
 
