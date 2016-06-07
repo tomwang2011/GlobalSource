@@ -4,7 +4,6 @@
 	basedir="."
 	name="macro-definitions"
 	xmlns:if="ant:if"
-	xmlns:ivy="antlib:org.apache.ivy.ant"
 	xmlns:unless="ant:unless"
 >
 
