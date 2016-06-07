@@ -24,9 +24,9 @@ import java.nio.file.attribute.BasicFileAttributes;
 /**
  * @author Tom Wang
  */
-public class ProjectUtil {
+public class PathUtil {
 
-	public static void clean(Path projectDirPath) throws IOException {
+	public static void delete(Path projectDirPath) throws IOException {
 		if (!Files.exists(projectDirPath)) {
 			return;
 		}
