@@ -5,6 +5,7 @@
 	name="Liferay-Source-Netbeans-Project"
 	xmlns:if="ant:if"
 	xmlns:ivy="antlib:org.apache.ivy.ant"
+	xmlns:unless="ant:unless"
 >
 
 	<import file="../common/shared-macrodefs.xml" />
