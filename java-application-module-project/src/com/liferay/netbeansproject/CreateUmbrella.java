@@ -31,9 +31,8 @@ import java.util.Properties;
  */
 public class CreateUmbrella {
 
-	public void createUmbrella(Path portalPath) throws Exception {
-		Properties buildProperties = PropertiesUtil.loadProperties(
-			Paths.get("build.properties"));
+	public void createUmbrella(Path portalPath, Properties buildProperties)
+		throws IOException {
 
 		Path portalNamePath = portalPath.getFileName();
 

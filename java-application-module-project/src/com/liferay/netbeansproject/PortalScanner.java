@@ -21,7 +21,6 @@ import com.liferay.netbeansproject.util.PropertiesUtil;
 
 import java.io.IOException;
 
-import java.nio.file.FileVisitOption;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -29,7 +28,6 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,16 +47,16 @@ public class PortalScanner {
 	}
 
 	public void scanPortal(Path portalPath) throws Exception {
-		Properties properties = PropertiesUtil.loadProperties(
+		Properties buildProperties = PropertiesUtil.loadProperties(
 			Paths.get("build.properties"));
 
 		Path portalNamePath = portalPath.getFileName();
 
 		Path projectPath = Paths.get(
-			properties.getProperty("project.dir"),
+			buildProperties.getProperty("project.dir"),
 			portalNamePath.toString());
 
-		final String ignoredDirs = properties.getProperty("ignored.dirs");
+		final String ignoredDirs = buildProperties.getProperty("ignored.dirs");
 
 		final Map<String, List<JarDependency>> jarDependenciesMap =
 			ProcessGradle.processGradle(
@@ -87,42 +85,32 @@ public class PortalScanner {
 						return FileVisitResult.CONTINUE;
 					}
 
-					try {
-						Module module = new Module(
-							path, jarDependenciesMap.get(fileName));
+					Module module = new Module(
+						path, jarDependenciesMap.get(fileName));
 
-						_linkModuletoMap(projectMap, module);
+					Path modulePath = module.getModulePath();
+
+					Path modulesGroupPath = modulePath.getParent();
+
+					Map<String, Module> modulesMap = projectMap.get(
+						modulesGroupPath);
+
+					if (modulesMap == null) {
+						modulesMap = new HashMap<>();
+
+						projectMap.put(modulesGroupPath, modulesMap);
 					}
-					catch (Exception e) {
-						throw new IOException(e);
-					}
+
+					modulesMap.put(module.getModuleName(), module);
 
 					return FileVisitResult.SKIP_SUBTREE;
 				}
 
 			});
 
-		CreateUmbrella c = new CreateUmbrella();
+		CreateUmbrella createUmbrella = new CreateUmbrella();
 
-		c.createUmbrella(portalPath);
-	}
-
-	private void _linkModuletoMap(
-		Map<Path, Map<String, Module>> projectMap, Module module) {
-
-		Path modulePath = module.getModulePath();
-
-		Path modulesGroupPath = modulePath.getParent();
-
-		Map<String, Module> modulesMap = projectMap.get(modulesGroupPath);
-
-		if (modulesMap == null) {
-			modulesMap = new HashMap<>();
-
-			projectMap.put(modulesGroupPath, modulesMap);
-		}
-
-		modulesMap.put(module.getModuleName(), module);
+		createUmbrella.createUmbrella(portalPath, buildProperties);
 	}
 
 }
