@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -35,7 +34,7 @@ public class PropertiesUtil {
 
 		Path extFilePath = filePath.resolveSibling(extFileName);
 
-		if(Files.exists(extFilePath)) {
+		if (Files.exists(extFilePath)) {
 			try (InputStream in = Files.newInputStream(extFilePath)) {
 				properties.load(in);
 			}
