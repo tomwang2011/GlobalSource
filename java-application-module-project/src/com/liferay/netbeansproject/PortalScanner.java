@@ -49,16 +49,16 @@ public class PortalScanner {
 	}
 
 	public void scanPortal(Path portalPath) throws Exception {
-		Properties buildProperties = PropertiesUtil.loadProperties(
+		Properties properties = PropertiesUtil.loadProperties(
 			Paths.get("build.properties"));
 
 		Path portalNamePath = portalPath.getFileName();
 
 		Path projectPath = Paths.get(
-			buildProperties.getProperty("project.dir"),
+			properties.getProperty("project.dir"),
 			portalNamePath.toString());
 
-		final String ignoredDirs = buildProperties.getProperty("ignored.dirs");
+		final String ignoredDirs = properties.getProperty("ignored.dirs");
 
 		final Map<String, List<JarDependency>> jarDependenciesMap =
 			ProcessGradle.processGradle(
@@ -67,7 +67,7 @@ public class PortalScanner {
 		final Map<Path, Map<String, Module>> projectMap = new HashMap<>();
 
 		Files.walkFileTree(
-			portalPath, EnumSet.allOf(FileVisitOption.class), Integer.MAX_VALUE,
+			portalPath,
 			new SimpleFileVisitor<Path>() {
 
 				@Override
