@@ -79,7 +79,7 @@ public class Module {
 			}
 		}
 
-		return new Module(
+		Module module = new Module(
 			projectPath, modulePath, _resolveSourcePath(modulePath),
 			_resolveResourcePath(modulePath, "main"),
 			_resolveTestPath(modulePath, true),
@@ -88,11 +88,15 @@ public class Module {
 			_resolveResourcePath(modulePath, "testIntegration"),
 			GradleUtil.getModuleDependencies(modulePath), jarDependencies,
 			checksum);
+
+		if (projectPath != null) {
+			module._save();
+		}
+
+		return module;
 	}
 
-	public static Module loadFromPropertiesFile(Path projectPath)
-		throws IOException {
-
+	public static Module load(Path projectPath) throws IOException {
 		Path moduleInfoPath = projectPath.resolve("ModuleInfo.properties");
 
 		if (Files.notExists(moduleInfoPath)) {
@@ -154,45 +158,6 @@ public class Module {
 
 	public Path getTestUnitResourcePath() {
 		return _testUnitResourcePath;
-	}
-
-	public void saveToPropertiesFile() throws IOException {
-		Properties properties = new Properties();
-
-		_putProperty(properties, "ModulePath", _modulePath);
-		_putProperty(properties, "SourcePath", _sourcePath);
-		_putProperty(properties, "SourceResourcePath", _sourceResourcePath);
-		_putProperty(properties, "TestUnitPath", _testUnitPath);
-		_putProperty(properties, "TestUnitResourcePath", _testUnitResourcePath);
-		_putProperty(properties, "TestIntegrationPath", _testIntegrationPath);
-		_putProperty(
-			properties, "TestIntegrationResourcePath",
-			_testIntegrationResourcePath);
-
-		Path gradleFilePath = _modulePath.resolve("build.gradle");
-
-		try {
-			if (Files.exists(gradleFilePath)) {
-				MessageDigest messageDigest = MessageDigest.getInstance("MD5");
-
-				byte[] hash = messageDigest.digest(
-					Files.readAllBytes(gradleFilePath));
-
-				properties.put("checksum", StringUtil.bytesToHexString(hash));
-			}
-		}
-		catch (NoSuchAlgorithmException nsae) {
-			throw new Error(nsae);
-		}
-
-		Files.createDirectories(_projectPath);
-
-		try (Writer writer = Files.newBufferedWriter(
-				_projectPath.resolve("ModuleInfo.properties"),
-				StandardCharsets.UTF_8)) {
-
-			properties.store(writer, null);
-		}
 	}
 
 	private static Path _getPath(Properties properties, String key) {
@@ -296,6 +261,45 @@ public class Module {
 		_moduleDependencies = moduleDependencies;
 		_jarDependencies = jarDependencies;
 		_checksum = checksum;
+	}
+
+	private void _save() throws IOException {
+		Properties properties = new Properties();
+
+		_putProperty(properties, "ModulePath", _modulePath);
+		_putProperty(properties, "SourcePath", _sourcePath);
+		_putProperty(properties, "SourceResourcePath", _sourceResourcePath);
+		_putProperty(properties, "TestUnitPath", _testUnitPath);
+		_putProperty(properties, "TestUnitResourcePath", _testUnitResourcePath);
+		_putProperty(properties, "TestIntegrationPath", _testIntegrationPath);
+		_putProperty(
+			properties, "TestIntegrationResourcePath",
+			_testIntegrationResourcePath);
+
+		Path gradleFilePath = _modulePath.resolve("build.gradle");
+
+		try {
+			if (Files.exists(gradleFilePath)) {
+				MessageDigest messageDigest = MessageDigest.getInstance("MD5");
+
+				byte[] hash = messageDigest.digest(
+					Files.readAllBytes(gradleFilePath));
+
+				properties.put("checksum", StringUtil.bytesToHexString(hash));
+			}
+		}
+		catch (NoSuchAlgorithmException nsae) {
+			throw new Error(nsae);
+		}
+
+		Files.createDirectories(_projectPath);
+
+		try (Writer writer = Files.newBufferedWriter(
+				_projectPath.resolve("ModuleInfo.properties"),
+				StandardCharsets.UTF_8)) {
+
+			properties.store(writer, null);
+		}
 	}
 
 	private final String _checksum;

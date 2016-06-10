@@ -113,13 +113,11 @@ public class AddModule {
 							projectRootPath.resolve(
 								Paths.get("modules", moduleName)));
 
-						Module module = Module.createModule(
+						Module.createModule(
 							projectRootPath.resolve(
 								Paths.get(
 									"modules", ModuleUtil.getModuleName(path))),
 							path, jarDependenciesMap.get(moduleName));
-
-						module.saveToPropertiesFile();
 
 						CreateModule.createModule(
 							projectRootPath, path, portalPath,
@@ -154,7 +152,7 @@ public class AddModule {
 		for (Path path :
 				Files.newDirectoryStream(projectRootPath.resolve("modules"))) {
 
-			Module module = Module.loadFromPropertiesFile(path);
+			Module module = Module.load(path);
 
 			if (module != null) {
 				map.put(module.getModuleName(), module);

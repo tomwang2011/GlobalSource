@@ -107,8 +107,6 @@ public class PortalScanner {
 
 					modulesMap.put(module.getModuleName(), module);
 
-					module.saveToPropertiesFile();
-
 					return FileVisitResult.SKIP_SUBTREE;
 				}
 
