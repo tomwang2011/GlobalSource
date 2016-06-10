@@ -38,8 +38,6 @@ public class ModuleUtil {
 
 		Properties properties = new Properties();
 
-		_putProperty(properties, "ModuleName", module.getModuleName());
-
 		Path modulePath = module.getModulePath();
 
 		_putProperty(properties, "ModulePath", modulePath);
