@@ -152,27 +152,11 @@ public class AddModule {
 		for (Path path :
 				Files.newDirectoryStream(projectRootPath.resolve("modules"))) {
 
-			Path moduleInfoPath = path.resolve("ModuleInfo.properties");
+			Module module = Module.loadFromPropertiesFile(path);
 
-			if (Files.notExists(moduleInfoPath)) {
-				continue;
+			if (module != null) {
+				map.put(module.getModuleName(), module);
 			}
-
-			Properties properties = PropertiesUtil.loadProperties(
-				moduleInfoPath);
-
-			Module module = Module.createModule(
-				Paths.get(properties.getProperty("ModulePath")),
-				Paths.get(properties.getProperty("SourcePath")),
-				Paths.get(properties.getProperty("SourceResourcePath")),
-				Paths.get(properties.getProperty("TestUnitPath")),
-				Paths.get(properties.getProperty("TestUnitResourcePath")),
-				Paths.get(properties.getProperty("TestIntegrationPath")),
-				Paths.get(
-					properties.getProperty("TestIntegrationResourcePath")),
-				properties.getProperty("checksum"));
-
-			map.put(module.getModuleName(), module);
 		}
 
 		return map;

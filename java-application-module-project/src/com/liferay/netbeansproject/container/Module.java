@@ -16,6 +16,7 @@ package com.liferay.netbeansproject.container;
 
 import com.liferay.netbeansproject.util.GradleUtil;
 import com.liferay.netbeansproject.util.ModuleUtil;
+import com.liferay.netbeansproject.util.PropertiesUtil;
 import com.liferay.netbeansproject.util.StringUtil;
 
 import java.io.IOException;
@@ -88,15 +89,26 @@ public class Module {
 			checksum);
 	}
 
-	public static Module createModule(
-		Path modulePath, Path sourcePath, Path sourceResourcePath,
-		Path testUnitPath, Path testUnitResourcePath, Path testIntegrationPath,
-		Path testIntegrationResourcePath, String checksum) {
+	public static Module loadFromPropertiesFile(Path projectPath)
+		throws IOException {
+
+		Path moduleInfoPath = projectPath.resolve("ModuleInfo.properties");
+
+		if (Files.notExists(moduleInfoPath)) {
+			return null;
+		}
+
+		Properties properties = PropertiesUtil.loadProperties(moduleInfoPath);
 
 		return new Module(
-			modulePath, sourcePath, sourceResourcePath, testUnitPath,
-			testUnitResourcePath, testIntegrationPath,
-			testIntegrationResourcePath, null, null, checksum);
+			Paths.get(properties.getProperty("ModulePath")),
+			_getPath(properties, "SourcePath"),
+			_getPath(properties, "SourceResourcePath"),
+			_getPath(properties, "TestUnitPath"),
+			_getPath(properties, "TestUnitResourcePath"),
+			_getPath(properties, "TestIntegrationPath"),
+			_getPath(properties, "TestIntegrationResourcePath"), null, null,
+			properties.getProperty("checksum"));
 	}
 
 	public String getChecksum() {
@@ -180,6 +192,16 @@ public class Module {
 
 			properties.store(writer, null);
 		}
+	}
+
+	private static Path _getPath(Properties properties, String key) {
+		String value = properties.getProperty(key);
+
+		if (value == null) {
+			return null;
+		}
+
+		return Paths.get(value);
 	}
 
 	private static void _putProperty(
