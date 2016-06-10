@@ -17,7 +17,6 @@ package com.liferay.netbeansproject;
 import com.liferay.netbeansproject.container.JarDependency;
 import com.liferay.netbeansproject.container.Module;
 import com.liferay.netbeansproject.util.ArgumentsUtil;
-import com.liferay.netbeansproject.util.ModuleUtil;
 import com.liferay.netbeansproject.util.PropertiesUtil;
 
 import java.io.IOException;
@@ -104,8 +103,7 @@ public class PortalScanner {
 
 					modulesMap.put(module.getModuleName(), module);
 
-					ModuleUtil.createModuleInfo(
-						module,
+					module.saveToPropertiesFile(
 						projectPath.resolve(
 							Paths.get("modules", module.getModuleName())));
 

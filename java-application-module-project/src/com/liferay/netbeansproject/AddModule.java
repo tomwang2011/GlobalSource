@@ -115,8 +115,7 @@ public class AddModule {
 						Module module = Module.createModule(
 							path, jarDependenciesMap.get(moduleName));
 
-						ModuleUtil.createModuleInfo(
-							module,
+						module.saveToPropertiesFile(
 							projectRootPath.resolve(
 								Paths.get("modules", module.getModuleName())));
 

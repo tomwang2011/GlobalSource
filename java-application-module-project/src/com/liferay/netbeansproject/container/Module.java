@@ -19,7 +19,9 @@ import com.liferay.netbeansproject.util.ModuleUtil;
 import com.liferay.netbeansproject.util.StringUtil;
 
 import java.io.IOException;
+import java.io.Writer;
 
+import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,6 +32,7 @@ import java.security.NoSuchAlgorithmException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 /**
  * @author Tom Wang
@@ -138,6 +141,53 @@ public class Module {
 
 	public Path getTestUnitResourcePath() {
 		return _testUnitResourcePath;
+	}
+
+	public void saveToPropertiesFile(Path projectPath) throws IOException {
+		Properties properties = new Properties();
+
+		_putProperty(properties, "ModulePath", _modulePath);
+		_putProperty(properties, "SourcePath", _sourcePath);
+		_putProperty(properties, "SourceResourcePath", _sourceResourcePath);
+		_putProperty(properties, "TestUnitPath", _testUnitPath);
+		_putProperty(properties, "TestUnitResourcePath", _testUnitResourcePath);
+		_putProperty(properties, "TestIntegrationPath", _testIntegrationPath);
+		_putProperty(
+			properties, "TestIntegrationResourcePath",
+			_testIntegrationResourcePath);
+
+		Path gradleFilePath = _modulePath.resolve("build.gradle");
+
+		try {
+			if (Files.exists(gradleFilePath)) {
+				MessageDigest messageDigest = MessageDigest.getInstance("MD5");
+
+				byte[] hash = messageDigest.digest(
+					Files.readAllBytes(gradleFilePath));
+
+				properties.put("checksum", StringUtil.bytesToHexString(hash));
+			}
+		}
+		catch (NoSuchAlgorithmException nsae) {
+			throw new Error(nsae);
+		}
+
+		Files.createDirectories(projectPath);
+
+		try (Writer writer = Files.newBufferedWriter(
+				projectPath.resolve("ModuleInfo.properties"),
+				StandardCharsets.UTF_8)) {
+
+			properties.store(writer, null);
+		}
+	}
+
+	private static void _putProperty(
+		Properties properties, String name, Object value) {
+
+		if (value != null) {
+			properties.put(name, String.valueOf(value));
+		}
 	}
 
 	private static Path _resolveResourcePath(Path modulePath, String type) {
