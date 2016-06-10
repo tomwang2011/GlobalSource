@@ -42,7 +42,7 @@ public class ModuleTest {
 
 		_createDirectories(srcPath, unitPath, integrationPath);
 
-		Module module = Module.createModule(_rootPath, null);
+		Module module = Module.createModule(null, _rootPath, null);
 
 		Assert.assertEquals(srcPath, module.getSourcePath());
 		Assert.assertEquals(unitPath, module.getTestUnitPath());
@@ -58,7 +58,7 @@ public class ModuleTest {
 
 		_createDirectories(srcPath, unitPath, integrationPath);
 
-		Module module = Module.createModule(_rootPath, null);
+		Module module = Module.createModule(null, _rootPath, null);
 
 		Assert.assertEquals(srcPath, module.getSourcePath());
 		Assert.assertEquals(unitPath, module.getTestUnitPath());
@@ -71,7 +71,7 @@ public class ModuleTest {
 
 		Files.createDirectories(unitTestPath);
 
-		Module module = Module.createModule(_rootPath, null);
+		Module module = Module.createModule(null, _rootPath, null);
 
 		Assert.assertNull(module.getSourcePath());
 		Assert.assertEquals(unitTestPath, module.getTestUnitPath());
@@ -84,7 +84,7 @@ public class ModuleTest {
 
 		Files.createDirectories(integrationTestPath);
 
-		Module module = Module.createModule(_rootPath, null);
+		Module module = Module.createModule(null, _rootPath, null);
 
 		Assert.assertNull(module.getSourcePath());
 		Assert.assertEquals(
@@ -99,7 +99,7 @@ public class ModuleTest {
 
 		_createDirectories(unitTestPath, integrationTestPath);
 
-		Module module = Module.createModule(_rootPath, null);
+		Module module = Module.createModule(null, _rootPath, null);
 
 		Assert.assertNull(module.getSourcePath());
 		Assert.assertEquals(unitTestPath, module.getTestUnitPath());
@@ -114,7 +114,7 @@ public class ModuleTest {
 
 		Files.createDirectories(srcPath);
 
-		Module module = Module.createModule(_rootPath, null);
+		Module module = Module.createModule(null, _rootPath, null);
 
 		Assert.assertEquals(srcPath, module.getSourcePath());
 	}
@@ -132,7 +132,7 @@ public class ModuleTest {
 			srcResourcesPath, testUnitResourcesPath,
 			testIntegrationResourcesPath);
 
-		Module module = Module.createModule(_rootPath, null);
+		Module module = Module.createModule(null, _rootPath, null);
 
 		Assert.assertEquals(
 			srcResourcesPath, module.getSourceResourcePath());

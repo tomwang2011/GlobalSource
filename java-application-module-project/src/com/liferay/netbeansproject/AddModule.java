@@ -88,15 +88,16 @@ public class AddModule {
 					String moduleName = ModuleUtil.getModuleName(path);
 
 					try {
+						Path moduleProjectPath = projectRootPath.resolve(
+							Paths.get("modules", moduleName));
+
 						if (currentProjectMap.containsKey(moduleName) &&
 							_isProjectUpToDate(
-								currentProjectMap.get(moduleName), path)) {
+								currentProjectMap.get(moduleName),
+								moduleProjectPath, path)) {
 
 							return FileVisitResult.SKIP_SUBTREE;
 						}
-
-						Path moduleProjectPath = projectRootPath.resolve(
-							Paths.get("modules", moduleName));
 
 						PathUtil.delete(moduleProjectPath);
 
@@ -113,11 +114,12 @@ public class AddModule {
 								Paths.get("modules", moduleName)));
 
 						Module module = Module.createModule(
+							projectRootPath.resolve(
+								Paths.get(
+									"modules", ModuleUtil.getModuleName(path))),
 							path, jarDependenciesMap.get(moduleName));
 
-						module.saveToPropertiesFile(
-							projectRootPath.resolve(
-								Paths.get("modules", module.getModuleName())));
+						module.saveToPropertiesFile();
 
 						CreateModule.createModule(
 							projectRootPath, path, portalPath,
@@ -162,10 +164,11 @@ public class AddModule {
 		return map;
 	}
 
-	private boolean _isProjectUpToDate(Module currentInfo, Path scannedPath)
+	private boolean _isProjectUpToDate(
+			Module currentModule, Path projectPath, Path scannedPath)
 		throws IOException {
 
-		Module module = Module.createModule(scannedPath, null);
+		Module module = Module.createModule(projectPath, scannedPath, null);
 
 		Path modulePath = _checkIfNullPath(module.getModulePath());
 		Path sourcePath = _checkIfNullPath(module.getSourcePath());
@@ -181,16 +184,17 @@ public class AddModule {
 
 		String checksum = module.getChecksum();
 
-		if (!modulePath.equals(currentInfo.getModulePath()) ||
-			!sourcePath.equals(currentInfo.getSourcePath()) ||
-			!sourceResourcePath.equals(currentInfo.getSourceResourcePath()) ||
-			!testUnitPath.equals(currentInfo.getTestUnitPath()) ||
+		if (!modulePath.equals(currentModule.getModulePath()) ||
+			!sourcePath.equals(currentModule.getSourcePath()) ||
+			!sourceResourcePath.equals(currentModule.getSourceResourcePath()) ||
+			!testUnitPath.equals(currentModule.getTestUnitPath()) ||
 			!testUnitResourcePath.equals(
-				currentInfo.getTestUnitResourcePath()) ||
-			!testIntegrationPath.equals(currentInfo.getTestIntegrationPath()) ||
+				currentModule.getTestUnitResourcePath()) ||
+			!testIntegrationPath.equals(
+				currentModule.getTestIntegrationPath()) ||
 			!testIntegrationResourcePath.equals(
-				currentInfo.getTestIntegrationResourcePath()) ||
-			!checksum.equals(currentInfo.getChecksum())) {
+				currentModule.getTestIntegrationResourcePath()) ||
+			!checksum.equals(currentModule.getChecksum())) {
 
 			return false;
 		}

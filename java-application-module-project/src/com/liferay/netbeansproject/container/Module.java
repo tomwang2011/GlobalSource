@@ -41,7 +41,8 @@ import java.util.Properties;
 public class Module {
 
 	public static Module createModule(
-			Path modulePath, List<JarDependency> jarDependencies)
+			Path projectPath, Path modulePath,
+			List<JarDependency> jarDependencies)
 		throws IOException {
 
 		if (jarDependencies == null) {
@@ -79,7 +80,7 @@ public class Module {
 		}
 
 		return new Module(
-			modulePath, _resolveSourcePath(modulePath),
+			projectPath, modulePath, _resolveSourcePath(modulePath),
 			_resolveResourcePath(modulePath, "main"),
 			_resolveTestPath(modulePath, true),
 			_resolveResourcePath(modulePath, "test"),
@@ -101,7 +102,7 @@ public class Module {
 		Properties properties = PropertiesUtil.loadProperties(moduleInfoPath);
 
 		return new Module(
-			Paths.get(properties.getProperty("ModulePath")),
+			projectPath, Paths.get(properties.getProperty("ModulePath")),
 			_getPath(properties, "SourcePath"),
 			_getPath(properties, "SourceResourcePath"),
 			_getPath(properties, "TestUnitPath"),
@@ -155,7 +156,7 @@ public class Module {
 		return _testUnitResourcePath;
 	}
 
-	public void saveToPropertiesFile(Path projectPath) throws IOException {
+	public void saveToPropertiesFile() throws IOException {
 		Properties properties = new Properties();
 
 		_putProperty(properties, "ModulePath", _modulePath);
@@ -184,10 +185,10 @@ public class Module {
 			throw new Error(nsae);
 		}
 
-		Files.createDirectories(projectPath);
+		Files.createDirectories(_projectPath);
 
 		try (Writer writer = Files.newBufferedWriter(
-				projectPath.resolve("ModuleInfo.properties"),
+				_projectPath.resolve("ModuleInfo.properties"),
 				StandardCharsets.UTF_8)) {
 
 			properties.store(writer, null);
@@ -278,12 +279,13 @@ public class Module {
 	}
 
 	private Module(
-		Path modulePath, Path sourcePath, Path sourceResourcePath,
-		Path testUnitPath, Path testUnitResourcePath, Path testIntegrationPath,
-		Path testIntegrationResourcePath,
+		Path projectPath, Path modulePath, Path sourcePath,
+		Path sourceResourcePath, Path testUnitPath, Path testUnitResourcePath,
+		Path testIntegrationPath, Path testIntegrationResourcePath,
 		List<ModuleDependency> moduleDependencies,
 		List<JarDependency> jarDependencies, String checksum) {
 
+		_projectPath = projectPath;
 		_modulePath = modulePath;
 		_sourcePath = sourcePath;
 		_sourceResourcePath = sourceResourcePath;
@@ -300,6 +302,7 @@ public class Module {
 	private final List<JarDependency> _jarDependencies;
 	private final List<ModuleDependency> _moduleDependencies;
 	private final Path _modulePath;
+	private final Path _projectPath;
 	private final Path _sourcePath;
 	private final Path _sourceResourcePath;
 	private final Path _testIntegrationPath;
