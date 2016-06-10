@@ -97,7 +97,7 @@ public class Module {
 	}
 
 	public static Module load(Path projectPath) throws IOException {
-		Path moduleInfoPath = projectPath.resolve("ModuleInfo.properties");
+		Path moduleInfoPath = projectPath.resolve("module-info.properties");
 
 		if (Files.notExists(moduleInfoPath)) {
 			return null;
@@ -106,13 +106,13 @@ public class Module {
 		Properties properties = PropertiesUtil.loadProperties(moduleInfoPath);
 
 		return new Module(
-			projectPath, Paths.get(properties.getProperty("ModulePath")),
-			_getPath(properties, "SourcePath"),
-			_getPath(properties, "SourceResourcePath"),
-			_getPath(properties, "TestUnitPath"),
-			_getPath(properties, "TestUnitResourcePath"),
-			_getPath(properties, "TestIntegrationPath"),
-			_getPath(properties, "TestIntegrationResourcePath"), null, null,
+			projectPath, Paths.get(properties.getProperty("module.path")),
+			_getPath(properties, "source.path"),
+			_getPath(properties, "source.resource.path"),
+			_getPath(properties, "test.unit.path"),
+			_getPath(properties, "test.unit.resource.path"),
+			_getPath(properties, "test.integration.path"),
+			_getPath(properties, "test.integration.resource.path"), null, null,
 			properties.getProperty("checksum"));
 	}
 
@@ -266,14 +266,14 @@ public class Module {
 	private void _save() throws IOException {
 		Properties properties = new Properties();
 
-		_putProperty(properties, "ModulePath", _modulePath);
-		_putProperty(properties, "SourcePath", _sourcePath);
-		_putProperty(properties, "SourceResourcePath", _sourceResourcePath);
-		_putProperty(properties, "TestUnitPath", _testUnitPath);
-		_putProperty(properties, "TestUnitResourcePath", _testUnitResourcePath);
-		_putProperty(properties, "TestIntegrationPath", _testIntegrationPath);
+		_putProperty(properties, "module.path", _modulePath);
+		_putProperty(properties, "source.path", _sourcePath);
+		_putProperty(properties, "source.resource.path", _sourceResourcePath);
+		_putProperty(properties, "test.unit.path", _testUnitPath);
+		_putProperty(properties, "test.unit.resource.path", _testUnitResourcePath);
+		_putProperty(properties, "test.integration.path", _testIntegrationPath);
 		_putProperty(
-			properties, "TestIntegrationResourcePath",
+			properties, "test.integration.resource.path",
 			_testIntegrationResourcePath);
 
 		Path gradleFilePath = _modulePath.resolve("build.gradle");
@@ -295,7 +295,7 @@ public class Module {
 		Files.createDirectories(_projectPath);
 
 		try (Writer writer = Files.newBufferedWriter(
-				_projectPath.resolve("ModuleInfo.properties"),
+				_projectPath.resolve("module-info.properties"),
 				StandardCharsets.UTF_8)) {
 
 			properties.store(writer, null);
