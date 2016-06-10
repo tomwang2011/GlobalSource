@@ -88,18 +88,17 @@ public class AddModule {
 					String moduleName = ModuleUtil.getModuleName(path);
 
 					try {
-						if (currentProjectMap.containsKey(moduleName)) {
-							if (_isProjectUpToDate(
-									currentProjectMap.get(moduleName), path)) {
+						if (currentProjectMap.containsKey(moduleName) &&
+							_isProjectUpToDate(
+								currentProjectMap.get(moduleName), path)) {
 
-								return FileVisitResult.SKIP_SUBTREE;
-							}
-
-							Path moduleProjectPath = projectRootPath.resolve(
-								Paths.get("modules", moduleName));
-
-							PathUtil.delete(moduleProjectPath);
+							return FileVisitResult.SKIP_SUBTREE;
 						}
+
+						Path moduleProjectPath = projectRootPath.resolve(
+							Paths.get("modules", moduleName));
+
+						PathUtil.delete(moduleProjectPath);
 
 						Map<String, List<JarDependency>> jarDependenciesMap =
 							new HashMap<>();
@@ -154,8 +153,14 @@ public class AddModule {
 		for (Path path :
 				Files.newDirectoryStream(projectRootPath.resolve("modules"))) {
 
+			Path moduleInfoPath = path.resolve("ModuleInfo.properties");
+
+			if (Files.notExists(moduleInfoPath)) {
+				continue;
+			}
+
 			Properties properties = PropertiesUtil.loadProperties(
-				path.resolve("ModuleInfo.properties"));
+				moduleInfoPath);
 
 			String moduleName = properties.getProperty("ModuleName");
 

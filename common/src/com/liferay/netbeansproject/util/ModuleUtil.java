@@ -16,70 +16,45 @@ package com.liferay.netbeansproject.util;
 
 import com.liferay.netbeansproject.container.Module;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.Writer;
 
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
+import java.util.Properties;
 
 /**
  * @author Tom Wang
  */
 public class ModuleUtil {
 
-	public static void appendPathToStringBuilder(Path path, StringBuilder sb) {
-		if (path == null) {
-			sb.append('\n');
-		}
-		else {
-			sb.append(path);
-			sb.append('\n');
-		}
-	}
-
 	public static void createModuleInfo(Module module, Path projectPath)
 		throws IOException {
 
-		StringBuilder sb = new StringBuilder();
+		Properties properties = new Properties();
 
-		sb.append("ModuleName=");
-		sb.append(module.getModuleName());
-		sb.append('\n');
-		sb.append("ModulePath=");
+		_putProperty(properties, "ModuleName", module.getModuleName());
 
 		Path modulePath = module.getModulePath();
 
-		sb.append(modulePath);
-		sb.append('\n');
-		sb.append("SourcePath=");
-
-		appendPathToStringBuilder(module.getSourcePath(), sb);
-
-		sb.append("SourceResourcePath=");
-
-		appendPathToStringBuilder(module.getSourceResourcePath(), sb);
-
-		sb.append("TestUnitPath=");
-
-		appendPathToStringBuilder(module.getTestUnitPath(), sb);
-
-		sb.append("TestUnitResourcePath=");
-
-		appendPathToStringBuilder(module.getTestUnitResourcePath(), sb);
-
-		sb.append("TestIntegrationPath=");
-
-		appendPathToStringBuilder(module.getTestIntegrationPath(), sb);
-
-		sb.append("TestIntegrationResourcePath=");
-
-		appendPathToStringBuilder(module.getTestIntegrationResourcePath(), sb);
-
-		sb.append("checksum=");
+		_putProperty(properties, "ModulePath", modulePath);
+		_putProperty(properties, "SourcePath", module.getSourcePath());
+		_putProperty(
+			properties, "SourceResourcePath", module.getSourceResourcePath());
+		_putProperty(properties, "TestUnitPath", module.getTestUnitPath());
+		_putProperty(
+			properties, "TestUnitResourcePath",
+			module.getTestUnitResourcePath());
+		_putProperty(
+			properties, "TestIntegrationPath", module.getTestIntegrationPath());
+		_putProperty(
+			properties, "TestIntegrationResourcePath",
+			module.getTestIntegrationResourcePath());
 
 		Path gradleFilePath = modulePath.resolve("build.gradle");
 
@@ -90,20 +65,20 @@ public class ModuleUtil {
 				byte[] hash = messageDigest.digest(
 					Files.readAllBytes(gradleFilePath));
 
-				sb.append(StringUtil.bytesToHexString(hash));
+				properties.put("checksum", StringUtil.bytesToHexString(hash));
 			}
 		}
-		catch (Exception e) {
-			throw new IOException(e);
+		catch (NoSuchAlgorithmException nsae) {
+			throw new Error(nsae);
 		}
 
 		Files.createDirectories(projectPath);
 
-		try (BufferedWriter bufferedWriter = Files.newBufferedWriter(
+		try (Writer writer = Files.newBufferedWriter(
 				projectPath.resolve("ModuleInfo.properties"),
-				Charset.defaultCharset(), StandardOpenOption.CREATE)) {
+				StandardCharsets.UTF_8)) {
 
-			bufferedWriter.append(sb);
+			properties.store(writer, null);
 		}
 	}
 
@@ -115,6 +90,14 @@ public class ModuleUtil {
 		}
 
 		return moduleName.toString();
+	}
+
+	private static void _putProperty(
+		Properties properties, String name, Object value) {
+
+		if (value != null) {
+			properties.put(name, String.valueOf(value));
+		}
 	}
 
 }
