@@ -15,6 +15,7 @@
 package com.liferay.netbeansproject.container;
 
 import com.liferay.netbeansproject.util.GradleUtil;
+import com.liferay.netbeansproject.util.HashUtil;
 import com.liferay.netbeansproject.util.ModuleUtil;
 import com.liferay.netbeansproject.util.PropertiesUtil;
 import com.liferay.netbeansproject.util.StringUtil;
@@ -33,6 +34,7 @@ import java.security.NoSuchAlgorithmException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Properties;
 
 /**
@@ -116,6 +118,36 @@ public class Module {
 			properties.getProperty("checksum"));
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+
+		if (!(obj instanceof Module)) {
+			return false;
+		}
+
+		Module module = (Module)obj;
+
+		if (Objects.equals(_modulePath, module._modulePath) &&
+			Objects.equals(_sourcePath, module._sourcePath)&&
+			Objects.equals(_sourceResourcePath, module._sourceResourcePath)&&
+			Objects.equals(_testUnitPath, module._testUnitPath)&&
+			Objects.equals(
+				_testUnitResourcePath, module._testUnitResourcePath)&&
+			Objects.equals(_testIntegrationPath, module._testIntegrationPath)&&
+			Objects.equals(
+				_testIntegrationResourcePath,
+				module._testIntegrationResourcePath)&&
+			Objects.equals(_checksum, module._checksum)) {
+
+			return true;
+		}
+
+		return false;
+	}
+
 	public String getChecksum() {
 		return _checksum;
 	}
@@ -158,6 +190,21 @@ public class Module {
 
 	public Path getTestUnitResourcePath() {
 		return _testUnitResourcePath;
+	}
+
+	@Override
+	public int hashCode() {
+		int hashCode = HashUtil.hash(0, _modulePath);
+
+		hashCode = HashUtil.hash(hashCode, _sourcePath);
+		hashCode = HashUtil.hash(hashCode, _sourceResourcePath);
+		hashCode = HashUtil.hash(hashCode, _testUnitPath);
+		hashCode = HashUtil.hash(hashCode, _testUnitResourcePath);
+		hashCode = HashUtil.hash(hashCode, _testIntegrationPath);
+		hashCode = HashUtil.hash(hashCode, _testIntegrationResourcePath);
+		hashCode = HashUtil.hash(hashCode, _checksum);
+
+		return hashCode;
 	}
 
 	private static Path _getPath(Properties properties, String key) {
@@ -270,7 +317,8 @@ public class Module {
 		_putProperty(properties, "source.path", _sourcePath);
 		_putProperty(properties, "source.resource.path", _sourceResourcePath);
 		_putProperty(properties, "test.unit.path", _testUnitPath);
-		_putProperty(properties, "test.unit.resource.path", _testUnitResourcePath);
+		_putProperty(
+			properties, "test.unit.resource.path", _testUnitResourcePath);
 		_putProperty(properties, "test.integration.path", _testIntegrationPath);
 		_putProperty(
 			properties, "test.integration.resource.path",

@@ -61,7 +61,7 @@ public class AddModule {
 		final Path projectRootPath = Paths.get(
 			properties.getProperty("project.dir"), portalName.toString());
 
-		final Map<String, Module> currentProjectMap = _getExistingProjects(
+		final Map<String, Module> existProjectMap = _getExistingProjects(
 			projectRootPath);
 
 		final String ignoredDirs = properties.getProperty("ignored.dirs");
@@ -91,10 +91,12 @@ public class AddModule {
 						Path moduleProjectPath = projectRootPath.resolve(
 							Paths.get("modules", moduleName));
 
-						if (currentProjectMap.containsKey(moduleName) &&
-							_isProjectUpToDate(
-								currentProjectMap.get(moduleName),
-								moduleProjectPath, path)) {
+						Module existModule = existProjectMap.get(moduleName);
+
+						if ((existModule != null) &&
+							existModule.equals(
+								Module.createModule(
+									moduleProjectPath, path, null))) {
 
 							return FileVisitResult.SKIP_SUBTREE;
 						}
@@ -121,7 +123,7 @@ public class AddModule {
 
 						CreateModule.createModule(
 							projectRootPath, path, portalPath,
-							new ArrayList<>(currentProjectMap.keySet()));
+							new ArrayList<>(existProjectMap.keySet()));
 					}
 					catch (IOException ioe) {
 						throw ioe;
@@ -134,14 +136,6 @@ public class AddModule {
 				}
 
 			});
-	}
-
-	private Path _checkIfNullPath(Path path) {
-		if (path == null) {
-			return Paths.get("");
-		}
-
-		return path;
 	}
 
 	private Map<String, Module> _getExistingProjects(Path projectRootPath)
@@ -160,44 +154,6 @@ public class AddModule {
 		}
 
 		return map;
-	}
-
-	private boolean _isProjectUpToDate(
-			Module currentModule, Path projectPath, Path scannedPath)
-		throws IOException {
-
-		Module module = Module.createModule(projectPath, scannedPath, null);
-
-		Path modulePath = _checkIfNullPath(module.getModulePath());
-		Path sourcePath = _checkIfNullPath(module.getSourcePath());
-		Path sourceResourcePath = _checkIfNullPath(
-			module.getSourceResourcePath());
-		Path testUnitPath = _checkIfNullPath(module.getTestUnitPath());
-		Path testUnitResourcePath = _checkIfNullPath(
-			module.getTestUnitResourcePath());
-		Path testIntegrationPath = _checkIfNullPath(
-			module.getTestIntegrationPath());
-		Path testIntegrationResourcePath = _checkIfNullPath(
-			module.getTestIntegrationResourcePath());
-
-		String checksum = module.getChecksum();
-
-		if (!modulePath.equals(currentModule.getModulePath()) ||
-			!sourcePath.equals(currentModule.getSourcePath()) ||
-			!sourceResourcePath.equals(currentModule.getSourceResourcePath()) ||
-			!testUnitPath.equals(currentModule.getTestUnitPath()) ||
-			!testUnitResourcePath.equals(
-				currentModule.getTestUnitResourcePath()) ||
-			!testIntegrationPath.equals(
-				currentModule.getTestIntegrationPath()) ||
-			!testIntegrationResourcePath.equals(
-				currentModule.getTestIntegrationResourcePath()) ||
-			!checksum.equals(currentModule.getChecksum())) {
-
-			return false;
-		}
-
-		return true;
 	}
 
 }
