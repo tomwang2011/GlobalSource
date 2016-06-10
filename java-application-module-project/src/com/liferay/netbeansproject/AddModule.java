@@ -162,15 +162,15 @@ public class AddModule {
 			map.put(
 				moduleName,
 				Module.createModule(
-					properties.getProperty("checksum"),
 					Paths.get(properties.getProperty("ModulePath")),
 					Paths.get(properties.getProperty("SourcePath")),
 					Paths.get(properties.getProperty("SourceResourcePath")),
+					Paths.get(properties.getProperty("TestUnitPath")),
+					Paths.get(properties.getProperty("TestUnitResourcePath")),
 					Paths.get(properties.getProperty("TestIntegrationPath")),
 					Paths.get(
 						properties.getProperty("TestIntegrationResourcePath")),
-					Paths.get(properties.getProperty("TestUnitPath")),
-					Paths.get(properties.getProperty("TestUnitResourcePath"))));
+					properties.getProperty("checksum")));
 		}
 
 		return map;

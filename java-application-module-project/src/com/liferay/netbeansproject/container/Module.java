@@ -75,26 +75,25 @@ public class Module {
 		}
 
 		return new Module(
-			checksum, jarDependencies,
-			GradleUtil.getModuleDependencies(modulePath), modulePath,
-			_resolveSourcePath(modulePath),
+			modulePath, _resolveSourcePath(modulePath),
 			_resolveResourcePath(modulePath, "main"),
+			_resolveTestPath(modulePath, true),
+			_resolveResourcePath(modulePath, "test"),
 			_resolveTestPath(modulePath, false),
 			_resolveResourcePath(modulePath, "testIntegration"),
-			_resolveTestPath(modulePath, true),
-			_resolveResourcePath(modulePath, "test"));
+			GradleUtil.getModuleDependencies(modulePath), jarDependencies,
+			checksum);
 	}
 
 	public static Module createModule(
-		String checksum, Path modulePath, Path sourcePath,
-		Path sourceResourcePath, Path testIntegrationPath,
-		Path testIntegrationResourcePath, Path testUnitPath,
-		Path testUnitResourcePath) {
+		Path modulePath, Path sourcePath, Path sourceResourcePath,
+		Path testUnitPath, Path testUnitResourcePath, Path testIntegrationPath,
+		Path testIntegrationResourcePath, String checksum) {
 
 		return new Module(
-			checksum, null, null, modulePath, sourcePath, sourceResourcePath,
-			testIntegrationPath, testIntegrationResourcePath, testUnitPath,
-			testUnitResourcePath);
+			modulePath, sourcePath, sourceResourcePath, testUnitPath,
+			testUnitResourcePath, testIntegrationPath,
+			testIntegrationResourcePath, null, null, checksum);
 	}
 
 	public String getChecksum() {
@@ -207,22 +206,22 @@ public class Module {
 	}
 
 	private Module(
-		String checksum, List<JarDependency> jarDependencies,
-		List<ModuleDependency> moduleDependencies, Path modulePath,
-		Path sourcePath, Path sourceResourcePath, Path testIntegrationPath,
-		Path testIntegrationResourcePath, Path testUnitPath,
-		Path testUnitResourcePath) {
+		Path modulePath, Path sourcePath, Path sourceResourcePath,
+		Path testUnitPath, Path testUnitResourcePath, Path testIntegrationPath,
+		Path testIntegrationResourcePath,
+		List<ModuleDependency> moduleDependencies,
+		List<JarDependency> jarDependencies, String checksum) {
 
-		_checksum = checksum;
-		_jarDependencies = jarDependencies;
-		_moduleDependencies = moduleDependencies;
 		_modulePath = modulePath;
 		_sourcePath = sourcePath;
 		_sourceResourcePath = sourceResourcePath;
-		_testIntegrationPath = testIntegrationPath;
-		_testIntegrationResourcePath = testIntegrationResourcePath;
 		_testUnitPath = testUnitPath;
 		_testUnitResourcePath = testUnitResourcePath;
+		_testIntegrationPath = testIntegrationPath;
+		_testIntegrationResourcePath = testIntegrationResourcePath;
+		_moduleDependencies = moduleDependencies;
+		_jarDependencies = jarDependencies;
+		_checksum = checksum;
 	}
 
 	private final String _checksum;
