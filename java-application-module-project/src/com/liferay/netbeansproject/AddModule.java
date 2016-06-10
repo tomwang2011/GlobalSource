@@ -113,7 +113,7 @@ public class AddModule {
 							projectRootPath.resolve(
 								Paths.get("modules", moduleName)));
 
-						Module module = new Module(
+						Module module = Module.createModule(
 							path, jarDependenciesMap.get(moduleName));
 
 						ModuleUtil.createModuleInfo(
@@ -161,7 +161,7 @@ public class AddModule {
 
 			map.put(
 				moduleName,
-				new Module(
+				Module.createModule(
 					properties.getProperty("checksum"),
 					Paths.get(properties.getProperty("ModulePath")),
 					Paths.get(properties.getProperty("SourcePath")),
@@ -179,7 +179,7 @@ public class AddModule {
 	private boolean _isProjectUpToDate(Module currentInfo, Path scannedPath)
 		throws IOException {
 
-		Module module = new Module(scannedPath, null);
+		Module module = Module.createModule(scannedPath, null);
 
 		Path modulePath = _checkIfNullPath(module.getModulePath());
 		Path sourcePath = _checkIfNullPath(module.getSourcePath());

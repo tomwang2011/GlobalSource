@@ -26,6 +26,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,10 +36,9 @@ import java.util.List;
  */
 public class Module {
 
-	public Module(Path modulePath, List<JarDependency> jarDependencies)
+	public static Module createModule(
+			Path modulePath, List<JarDependency> jarDependencies)
 		throws IOException {
-
-		_modulePath = modulePath;
 
 		if (jarDependencies == null) {
 			jarDependencies = new ArrayList<>();
@@ -56,56 +56,45 @@ public class Module {
 			}
 		}
 
-		_jarDependencies = jarDependencies;
-
-		_sourcePath = _resolveSourcePath(modulePath);
-		_sourceResourcePath = _resolveResourcePath(modulePath, "main");
-
-		_testUnitPath = _resolveTestPath(modulePath, true);
-		_testUnitResourcePath = _resolveResourcePath(modulePath, "test");
-
-		_testIntegrationPath = _resolveTestPath(modulePath, false);
-		_testIntegrationResourcePath = _resolveResourcePath(
-			modulePath, "testIntegration");
-
-		_moduleDependencies = GradleUtil.getModuleDependencies(modulePath);
+		String checksum = "";
 
 		Path gradleFilePath = modulePath.resolve("build.gradle");
 
-		try {
-			if (Files.exists(gradleFilePath)) {
+		if (Files.exists(gradleFilePath)) {
+			try {
 				MessageDigest messageDigest = MessageDigest.getInstance("MD5");
 
 				byte[] hash = messageDigest.digest(
 					Files.readAllBytes(gradleFilePath));
 
-				_checksum = StringUtil.bytesToHexString(hash);
+				checksum = StringUtil.bytesToHexString(hash);
 			}
-			else {
-				_checksum = "";
+			catch (NoSuchAlgorithmException nsae) {
+				throw new Error(nsae);
 			}
 		}
-		catch (Exception e) {
-			throw new IOException(e);
-		}
+
+		return new Module(
+			checksum, jarDependencies,
+			GradleUtil.getModuleDependencies(modulePath), modulePath,
+			_resolveSourcePath(modulePath),
+			_resolveResourcePath(modulePath, "main"),
+			_resolveTestPath(modulePath, false),
+			_resolveResourcePath(modulePath, "testIntegration"),
+			_resolveTestPath(modulePath, true),
+			_resolveResourcePath(modulePath, "test"));
 	}
 
-	public Module(
+	public static Module createModule(
 		String checksum, Path modulePath, Path sourcePath,
 		Path sourceResourcePath, Path testIntegrationPath,
 		Path testIntegrationResourcePath, Path testUnitPath,
 		Path testUnitResourcePath) {
 
-		_checksum = checksum;
-		_jarDependencies = null;
-		_moduleDependencies = null;
-		_modulePath = modulePath;
-		_sourcePath = sourcePath;
-		_sourceResourcePath = sourceResourcePath;
-		_testIntegrationPath = testIntegrationPath;
-		_testIntegrationResourcePath = testIntegrationResourcePath;
-		_testUnitPath = testUnitPath;
-		_testUnitResourcePath = testUnitResourcePath;
+		return new Module(
+			checksum, null, null, modulePath, sourcePath, sourceResourcePath,
+			testIntegrationPath, testIntegrationResourcePath, testUnitPath,
+			testUnitResourcePath);
 	}
 
 	public String getChecksum() {
@@ -215,6 +204,25 @@ public class Module {
 		}
 
 		return null;
+	}
+
+	private Module(
+		String checksum, List<JarDependency> jarDependencies,
+		List<ModuleDependency> moduleDependencies, Path modulePath,
+		Path sourcePath, Path sourceResourcePath, Path testIntegrationPath,
+		Path testIntegrationResourcePath, Path testUnitPath,
+		Path testUnitResourcePath) {
+
+		_checksum = checksum;
+		_jarDependencies = jarDependencies;
+		_moduleDependencies = moduleDependencies;
+		_modulePath = modulePath;
+		_sourcePath = sourcePath;
+		_sourceResourcePath = sourceResourcePath;
+		_testIntegrationPath = testIntegrationPath;
+		_testIntegrationResourcePath = testIntegrationResourcePath;
+		_testUnitPath = testUnitPath;
+		_testUnitResourcePath = testUnitResourcePath;
 	}
 
 	private final String _checksum;

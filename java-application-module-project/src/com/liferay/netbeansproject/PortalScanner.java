@@ -86,7 +86,7 @@ public class PortalScanner {
 						return FileVisitResult.CONTINUE;
 					}
 
-					Module module = new Module(
+					Module module = Module.createModule(
 						path, jarDependenciesMap.get(fileName));
 
 					Path modulePath = module.getModulePath();
