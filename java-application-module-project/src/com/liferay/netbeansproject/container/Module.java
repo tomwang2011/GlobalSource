@@ -63,7 +63,7 @@ public class Module {
 			}
 		}
 
-		String checksum = "";
+		String checksum = null;
 
 		Path gradleFilePath = modulePath.resolve("build.gradle");
 
@@ -131,15 +131,15 @@ public class Module {
 		Module module = (Module)obj;
 
 		if (Objects.equals(_modulePath, module._modulePath) &&
-			Objects.equals(_sourcePath, module._sourcePath)&&
-			Objects.equals(_sourceResourcePath, module._sourceResourcePath)&&
-			Objects.equals(_testUnitPath, module._testUnitPath)&&
+			Objects.equals(_sourcePath, module._sourcePath) &&
+			Objects.equals(_sourceResourcePath, module._sourceResourcePath) &&
+			Objects.equals(_testUnitPath, module._testUnitPath) &&
 			Objects.equals(
-				_testUnitResourcePath, module._testUnitResourcePath)&&
-			Objects.equals(_testIntegrationPath, module._testIntegrationPath)&&
+				_testUnitResourcePath, module._testUnitResourcePath) &&
+			Objects.equals(_testIntegrationPath, module._testIntegrationPath) &&
 			Objects.equals(
 				_testIntegrationResourcePath,
-				module._testIntegrationResourcePath)&&
+				module._testIntegrationResourcePath) &&
 			Objects.equals(_checksum, module._checksum)) {
 
 			return true;
