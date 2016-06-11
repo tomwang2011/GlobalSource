@@ -34,6 +34,19 @@ public class JarDependency {
 		return _test;
 	}
 
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+
+		sb.append("{jarPath=");
+		sb.append(_jarPath);
+		sb.append(", test=");
+		sb.append(_test);
+		sb.append("}");
+
+		return sb.toString();
+	}
+
 	private final Path _jarPath;
 	private final boolean _test;
 

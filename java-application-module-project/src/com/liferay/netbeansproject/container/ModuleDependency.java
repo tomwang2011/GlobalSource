@@ -32,6 +32,18 @@ public class ModuleDependency {
 		return _test;
 	}
 
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+
+		sb.append("{moduleLocation=");
+		sb.append(_moduleLocation);
+		sb.append(", test=");
+		sb.append(_test);
+
+		return sb.toString();
+	}
+
 	private final String _moduleLocation;
 	private final boolean _test;
 

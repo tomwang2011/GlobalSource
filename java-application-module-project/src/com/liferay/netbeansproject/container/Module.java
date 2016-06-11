@@ -207,6 +207,37 @@ public class Module {
 		return hashCode;
 	}
 
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+
+		sb.append("{projectPath=");
+		sb.append(_projectPath);
+		sb.append(", modulePath=");
+		sb.append(_modulePath);
+		sb.append(", sourcePath=");
+		sb.append(_sourcePath);
+		sb.append(", sourceResourcePath=");
+		sb.append(_sourceResourcePath);
+		sb.append(", testUnitPath=");
+		sb.append(_testUnitPath);
+		sb.append(", testUnitResourcePath=");
+		sb.append(_testUnitResourcePath);
+		sb.append(", testIntegrationPath=");
+		sb.append(_testIntegrationPath);
+		sb.append(", testIntegrationResourcePath=");
+		sb.append(_testIntegrationResourcePath);
+		sb.append(", moduleDependencies=");
+		sb.append(_moduleDependencies);
+		sb.append(", jarDependencies=");
+		sb.append(_jarDependencies);
+		sb.append(", checksum=");
+		sb.append(_checksum);
+		sb.append("}");
+
+		return sb.toString();
+	}
+
 	private static Path _getPath(Properties properties, String key) {
 		String value = properties.getProperty(key);
 
