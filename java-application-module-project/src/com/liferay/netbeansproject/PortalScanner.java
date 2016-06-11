@@ -22,6 +22,7 @@ import com.liferay.netbeansproject.util.PropertiesUtil;
 
 import java.io.IOException;
 
+import java.nio.file.FileVisitOption;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -29,6 +30,7 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,7 +68,7 @@ public class PortalScanner {
 		final Map<Path, Map<String, Module>> projectMap = new HashMap<>();
 
 		Files.walkFileTree(
-			portalPath,
+			portalPath, EnumSet.allOf(FileVisitOption.class), Integer.MAX_VALUE,
 			new SimpleFileVisitor<Path>() {
 
 				@Override
