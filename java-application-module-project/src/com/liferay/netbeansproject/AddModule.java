@@ -88,18 +88,17 @@ public class AddModule {
 					String moduleName = ModuleUtil.getModuleName(path);
 
 					try {
-						Path moduleProjectPath = projectRootPath.resolve(
-							Paths.get("modules", moduleName));
-
 						Module existModule = existProjectMap.get(moduleName);
 
 						if ((existModule != null) &&
 							existModule.equals(
-								Module.createModule(
-									moduleProjectPath, path, null))) {
+								Module.createModule(null, path, null))) {
 
 							return FileVisitResult.SKIP_SUBTREE;
 						}
+
+						Path moduleProjectPath = projectRootPath.resolve(
+							Paths.get("modules", moduleName));
 
 						PathUtil.delete(moduleProjectPath);
 
