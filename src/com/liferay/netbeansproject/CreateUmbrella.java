@@ -59,12 +59,8 @@ public class CreateUmbrella {
 
 		ZipUtil.unZip(projectPath);
 
-		Map<String, String> umbrellaSourceMap = PropertiesUtil.getProperties(
-			buildProperties, "umbrella.source.list");
-
 		_appendProjectProperties(
-			projectMap, umbrellaSourceMap, portalPath, projectPath,
-			buildProperties);
+			projectMap, portalPath, projectPath, buildProperties);
 
 		DocumentBuilderFactory documentBuilderFactory =
 			DocumentBuilderFactory.newInstance();
@@ -93,8 +89,7 @@ public class CreateUmbrella {
 	}
 
 	private static void _appendProjectProperties(
-			Map<Path, Map<String, Module>> projectMap,
-			Map<String, String> umbrellaSourceMap, Path portalPath,
+			Map<Path, Map<String, Module>> projectMap, Path portalPath,
 			Path projectPath, Properties buildProperties)
 		throws IOException {
 
@@ -103,6 +98,9 @@ public class CreateUmbrella {
 		sb.append("excludes=");
 		sb.append(buildProperties.getProperty("exclude.types"));
 		sb.append('\n');
+
+		Map<String, String> umbrellaSourceMap = PropertiesUtil.getProperties(
+			buildProperties, "umbrella.source.list");
 
 		for (Entry<String, String> source : umbrellaSourceMap.entrySet()) {
 			String key = source.getKey();
