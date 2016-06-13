@@ -16,18 +16,6 @@
 
 	<taskdef classpath="../common/lib/ant-contrib.jar" resource="net/sf/antcontrib/antlib.xml" />
 
-	<macrodef name="append-module">
-		<attribute name="src.dir" />
-		<attribute name="src.dir.name" />
-		<attribute name="project.dir" />
-
-		<sequential>
-			<concat destfile="@{project.dir}/nbproject/project.properties" append="true">project.@{src.dir.name}=@{project.dir}/modules/@{src.dir.name}
-reference.@{src.dir.name}.jar=$${project.@{src.dir.name}}/dist/@{src.dir.name}.jar
-</concat>
-		</sequential>
-	</macrodef>
-
 	<macrodef name="build-modules">
 		<attribute name="portal.dir" />
 		<attribute name="project.dir" />
@@ -38,12 +26,6 @@ reference.@{src.dir.name}.jar=$${project.@{src.dir.name}}/dist/@{src.dir.name}.j
 				project.dir="@{project.dir}"
 			>
 				<build.diff>
-					<append-module
-						src.dir="${src.dir}"
-						src.dir.name="${src.dir.name}"
-						project.dir="@{project.dir}"
-					/>
-
 					<unzip src="CleanProject.zip" dest="@{project.dir}/modules/${src.dir.name}/" />
 				</build.diff>
 			</common-build>

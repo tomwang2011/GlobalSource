@@ -123,7 +123,7 @@ public class PortalScanner {
 
 		CreateUmbrella createUmbrella = new CreateUmbrella();
 
-		createUmbrella.createUmbrella(portalPath, buildProperties);
+		createUmbrella.createUmbrella(projectMap, portalPath, buildProperties);
 	}
 
 	private void _generateModuleList(
