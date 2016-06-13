@@ -20,7 +20,6 @@ import com.liferay.netbeansproject.util.StringUtil;
 import com.liferay.netbeansproject.util.ZipUtil;
 
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.IOException;
 
 import java.nio.charset.Charset;
@@ -70,14 +69,48 @@ public class CreateUmbrella {
 			projectMap, umbrellaSourceMap, portalPath, projectPath,
 			buildProperties);
 
-		_createProject(projectPath, umbrellaSourceMap.keySet());
+		ProjectInfo projectInfo = new ProjectInfo(
+			buildProperties.getProperty("project.name"),
+			StringUtil.split(
+				new String(
+					Files.readAllBytes(projectPath.resolve("moduleList"))),
+				','),
+			umbrellaSourceMap.keySet());
+
+		_appendList(projectInfo, projectPath);
+
+		DocumentBuilderFactory documentBuilderFactory =
+			DocumentBuilderFactory.newInstance();
+
+		DocumentBuilder documentBuilder =
+			documentBuilderFactory.newDocumentBuilder();
+
+		_document = documentBuilder.newDocument();
+
+		_createProjectElement(projectInfo);
+
+		TransformerFactory transformerFactory =
+			TransformerFactory.newInstance();
+
+		Transformer transformer = transformerFactory.newTransformer();
+
+		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+		transformer.setOutputProperty(
+			"{http://xml.apache.org/xslt}indent-amount", "4");
+
+		Path projectXMLPath = projectPath.resolve("nbproject/project.xml");
+
+		transformer.transform(
+			new DOMSource(_document),
+			new StreamResult(projectXMLPath.toFile()));
 	}
 
-	private static void _appendList(ProjectInfo projectInfo, String projectDir)
+	private static void _appendList(ProjectInfo projectInfo, Path projectPath)
 		throws IOException {
 
 		try (BufferedWriter bufferedWriter = Files.newBufferedWriter(
-				Paths.get(projectDir, "nbproject", "project.properties"),
+				projectPath.resolve(
+					Paths.get("nbproject", "project.properties")),
 				Charset.defaultCharset(), StandardOpenOption.APPEND)) {
 
 			StringBuilder sb = new StringBuilder("javac.classpath=\\\n");
@@ -195,50 +228,6 @@ public class CreateUmbrella {
 		Element testRootsElement = _document.createElement("test-roots");
 
 		dataElement.appendChild(testRootsElement);
-	}
-
-	private static void _createProject(
-			Path projectPath, Set<String> umbrellaSources)
-		throws Exception {
-
-		Properties properties = PropertiesUtil.loadProperties(
-			Paths.get("build.properties"));
-
-		ProjectInfo projectInfo = new ProjectInfo(
-			properties.getProperty("project.name"),
-			StringUtil.split(
-				new String(
-					Files.readAllBytes(projectPath.resolve("moduleList"))),
-				','),
-			umbrellaSources);
-
-		String projectDir = projectPath.toString();
-
-		_appendList(projectInfo, projectDir);
-
-		DocumentBuilderFactory documentBuilderFactory =
-			DocumentBuilderFactory.newInstance();
-
-		DocumentBuilder documentBuilder =
-			documentBuilderFactory.newDocumentBuilder();
-
-		_document = documentBuilder.newDocument();
-
-		_createProjectElement(projectInfo);
-
-		TransformerFactory transformerFactory =
-			TransformerFactory.newInstance();
-
-		Transformer transformer = transformerFactory.newTransformer();
-
-		StreamResult streamResult = new StreamResult(
-			new File(projectDir, "nbproject/project.xml"));
-
-		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-		transformer.setOutputProperty(
-			"{http://xml.apache.org/xslt}indent-amount", "4");
-
-		transformer.transform(new DOMSource(_document), streamResult);
 	}
 
 	private static void _createProjectElement(ProjectInfo projectInfo) {
