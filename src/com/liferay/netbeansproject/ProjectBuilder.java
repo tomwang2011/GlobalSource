@@ -69,6 +69,9 @@ public class ProjectBuilder {
 
 		final Map<String, List<JarDependency>> jarDependenciesMap =
 			ProcessGradle.processGradle(
+				Boolean.valueOf(
+					buildProperties.getProperty(
+						"display.gradle.process.output")),
 				portalPath, projectPath, portalPath.resolve("modules"));
 
 		final Map<Path, Map<String, Module>> projectMap = new HashMap<>();
