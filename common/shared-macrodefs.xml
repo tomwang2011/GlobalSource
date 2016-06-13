@@ -25,9 +25,6 @@
 				portal.dir="@{portal.dir}"
 				project.dir="@{project.dir}"
 			>
-				<build.diff>
-					<unzip src="CleanProject.zip" dest="@{project.dir}/modules/${src.dir.name}/" />
-				</build.diff>
 			</common-build>
 
 			<for param="module">

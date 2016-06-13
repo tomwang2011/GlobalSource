@@ -18,6 +18,7 @@ import com.liferay.netbeansproject.ModuleBuildParser.ModuleInfo;
 import com.liferay.netbeansproject.util.ArgumentsUtil;
 import com.liferay.netbeansproject.util.PropertiesUtil;
 import com.liferay.netbeansproject.util.StringUtil;
+import com.liferay.netbeansproject.util.ZipUtil;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -68,6 +69,10 @@ public class CreateModule {
 					new String(
 						Files.readAllBytes(projectPath.resolve("moduleList"))),
 					',')));
+
+		Path moduleProjectPath = projectPath.resolve("modules");
+
+		ZipUtil.unZip(moduleProjectPath.resolve(modulePath.getFileName()));
 
 		Properties projectDependencyProperties = PropertiesUtil.loadProperties(
 			Paths.get("project-dependency.properties"));
