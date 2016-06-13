@@ -68,9 +68,9 @@ public class CreateUmbrella {
 		DocumentBuilder documentBuilder =
 			documentBuilderFactory.newDocumentBuilder();
 
-		_document = documentBuilder.newDocument();
+		Document document = documentBuilder.newDocument();
 
-		_createProjectElement(projectMap, buildProperties);
+		_createProjectElement(document, projectMap, buildProperties);
 
 		TransformerFactory transformerFactory =
 			TransformerFactory.newInstance();
@@ -84,8 +84,7 @@ public class CreateUmbrella {
 		Path projectXMLPath = projectPath.resolve("nbproject/project.xml");
 
 		transformer.transform(
-			new DOMSource(_document),
-			new StreamResult(projectXMLPath.toFile()));
+			new DOMSource(document), new StreamResult(projectXMLPath.toFile()));
 	}
 
 	private static void _appendProjectProperties(
@@ -158,37 +157,38 @@ public class CreateUmbrella {
 	}
 
 	private static void _createConfiguration(
-		Element projectElement, Map<Path, Map<String, Module>> projectMap,
-		Properties buildProperties) {
+		Document document, Element projectElement,
+		Map<Path, Map<String, Module>> projectMap, Properties buildProperties) {
 
-		Element configurationElement = _document.createElement("configuration");
+		Element configurationElement = document.createElement("configuration");
 
 		projectElement.appendChild(configurationElement);
 
-		_createData(configurationElement, buildProperties);
+		_createData(document, configurationElement, buildProperties);
 
-		_createReferences(configurationElement, projectMap);
+		_createReferences(document, configurationElement, projectMap);
 	}
 
 	private static void _createData(
-		Element configurationElement, Properties buildProperties) {
+		Document document, Element configurationElement,
+		Properties buildProperties) {
 
-		Element dataElement = _document.createElement("data");
+		Element dataElement = document.createElement("data");
 
 		dataElement.setAttribute(
 			"xmlns", "http://www.netbeans.org/ns/j2se-project/3");
 
 		configurationElement.appendChild(dataElement);
 
-		Element nameElement = _document.createElement("name");
+		Element nameElement = document.createElement("name");
 
 		nameElement.appendChild(
-			_document.createTextNode(
+			document.createTextNode(
 				buildProperties.getProperty("project.name")));
 
 		dataElement.appendChild(nameElement);
 
-		Element sourceRootsElement = _document.createElement("source-roots");
+		Element sourceRootsElement = document.createElement("source-roots");
 
 		dataElement.appendChild(sourceRootsElement);
 
@@ -196,84 +196,87 @@ public class CreateUmbrella {
 			buildProperties, "umbrella.source.list");
 
 		for (String module : umbrellaSourceMap.keySet()) {
-			_createRoots(sourceRootsElement, "src." + module + ".dir");
+			_createRoots(
+				document, sourceRootsElement, "src." + module + ".dir");
 		}
 
-		Element testRootsElement = _document.createElement("test-roots");
+		Element testRootsElement = document.createElement("test-roots");
 
 		dataElement.appendChild(testRootsElement);
 	}
 
 	private static void _createProjectElement(
-		Map<Path, Map<String, Module>> projectMap, Properties buildProperties) {
+		Document document, Map<Path, Map<String, Module>> projectMap,
+		Properties buildProperties) {
 
-		Element projectElement = _document.createElement("project");
+		Element projectElement = document.createElement("project");
 
 		projectElement.setAttribute(
 			"xmlns", "http://www.netbeans.org/ns/project/1");
 
-		_document.appendChild(projectElement);
+		document.appendChild(projectElement);
 
-		Element typeElement = _document.createElement("type");
+		Element typeElement = document.createElement("type");
 
 		typeElement.appendChild(
-			_document.createTextNode("org.netbeans.modules.java.j2seproject"));
+			document.createTextNode("org.netbeans.modules.java.j2seproject"));
 
 		projectElement.appendChild(typeElement);
 
-		_createConfiguration(projectElement, projectMap, buildProperties);
+		_createConfiguration(
+			document, projectElement, projectMap, buildProperties);
 	}
 
 	private static void _createReference(
-		Element referencesElement, String module) {
+		Document document, Element referencesElement, String module) {
 
-		Element referenceElement = _document.createElement("reference");
+		Element referenceElement = document.createElement("reference");
 
 		referencesElement.appendChild(referenceElement);
 
-		Element foreignProjectElement = _document.createElement(
+		Element foreignProjectElement = document.createElement(
 			"foreign-project");
 
-		foreignProjectElement.appendChild(_document.createTextNode(module));
+		foreignProjectElement.appendChild(document.createTextNode(module));
 
 		referenceElement.appendChild(foreignProjectElement);
 
-		Element artifactTypeElement = _document.createElement("artifact-type");
+		Element artifactTypeElement = document.createElement("artifact-type");
 
-		artifactTypeElement.appendChild(_document.createTextNode("jar"));
+		artifactTypeElement.appendChild(document.createTextNode("jar"));
 
 		referenceElement.appendChild(artifactTypeElement);
 
-		Element scriptElement = _document.createElement("script");
+		Element scriptElement = document.createElement("script");
 
-		scriptElement.appendChild(_document.createTextNode("build.xml"));
+		scriptElement.appendChild(document.createTextNode("build.xml"));
 
 		referenceElement.appendChild(scriptElement);
 
-		Element targetElement = _document.createElement("target");
+		Element targetElement = document.createElement("target");
 
-		targetElement.appendChild(_document.createTextNode("jar"));
+		targetElement.appendChild(document.createTextNode("jar"));
 
 		referenceElement.appendChild(targetElement);
 
-		Element cleanTargetElement = _document.createElement("clean-target");
+		Element cleanTargetElement = document.createElement("clean-target");
 
-		cleanTargetElement.appendChild(_document.createTextNode("clean"));
+		cleanTargetElement.appendChild(document.createTextNode("clean"));
 
 		referenceElement.appendChild(cleanTargetElement);
 
-		Element idElement = _document.createElement("id");
+		Element idElement = document.createElement("id");
 
-		idElement.appendChild(_document.createTextNode("jar"));
+		idElement.appendChild(document.createTextNode("jar"));
 
 		referenceElement.appendChild(idElement);
 	}
 
 	private static void _createReferences(
-		Element configurationElement,
+		Document document, Element configurationElement,
 		Map<Path, Map<String, Module>> projectMap) {
 
-		Element referencesElement = _document.createElement("references");
+		Element referencesElement = document.createElement("references");
 
 		referencesElement.setAttribute(
 			"xmlns", "http://www.netbeans.org/ns/ant-project-references/1");
@@ -282,21 +285,19 @@ public class CreateUmbrella {
 
 		for (Map<String, Module> map : projectMap.values()) {
 			for (String name : map.keySet()) {
-				_createReference(referencesElement, name);
+				_createReference(document, referencesElement, name);
 			}
 		}
 	}
 
 	private static void _createRoots(
-		Element sourceRootsElement, String module) {
+		Document document, Element sourceRootsElement, String module) {
 
-		Element rootElement = _document.createElement("root");
+		Element rootElement = document.createElement("root");
 
 		rootElement.setAttribute("id", module);
 
 		sourceRootsElement.appendChild(rootElement);
 	}
-
-	private static Document _document;
 
 }
