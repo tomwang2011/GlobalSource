@@ -16,7 +16,6 @@ package com.liferay.netbeansproject;
 
 import com.liferay.netbeansproject.container.Module;
 import com.liferay.netbeansproject.util.PropertiesUtil;
-import com.liferay.netbeansproject.util.StringUtil;
 import com.liferay.netbeansproject.util.ZipUtil;
 
 import java.io.BufferedWriter;
@@ -30,7 +29,6 @@ import java.nio.file.StandardOpenOption;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
-import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -68,14 +66,6 @@ public class CreateUmbrella {
 			projectMap, umbrellaSourceMap, portalPath, projectPath,
 			buildProperties);
 
-		ProjectInfo projectInfo = new ProjectInfo(
-			buildProperties.getProperty("project.name"),
-			StringUtil.split(
-				new String(
-					Files.readAllBytes(projectPath.resolve("moduleList"))),
-				','),
-			umbrellaSourceMap.keySet());
-
 		DocumentBuilderFactory documentBuilderFactory =
 			DocumentBuilderFactory.newInstance();
 
@@ -84,7 +74,7 @@ public class CreateUmbrella {
 
 		_document = documentBuilder.newDocument();
 
-		_createProjectElement(projectInfo);
+		_createProjectElement(projectMap, buildProperties);
 
 		TransformerFactory transformerFactory =
 			TransformerFactory.newInstance();
@@ -170,19 +160,20 @@ public class CreateUmbrella {
 	}
 
 	private static void _createConfiguration(
-		Element projectElement, ProjectInfo projectInfo) {
+		Element projectElement, Map<Path, Map<String, Module>> projectMap,
+		Properties buildProperties) {
 
 		Element configurationElement = _document.createElement("configuration");
 
 		projectElement.appendChild(configurationElement);
 
-		_createData(configurationElement, projectInfo);
+		_createData(configurationElement, buildProperties);
 
-		_createReferences(configurationElement, projectInfo);
+		_createReferences(configurationElement, projectMap);
 	}
 
 	private static void _createData(
-		Element configurationElement, ProjectInfo projectInfo) {
+		Element configurationElement, Properties buildProperties) {
 
 		Element dataElement = _document.createElement("data");
 
@@ -194,7 +185,8 @@ public class CreateUmbrella {
 		Element nameElement = _document.createElement("name");
 
 		nameElement.appendChild(
-			_document.createTextNode(projectInfo.getProjectName()));
+			_document.createTextNode(
+				buildProperties.getProperty("project.name")));
 
 		dataElement.appendChild(nameElement);
 
@@ -202,7 +194,10 @@ public class CreateUmbrella {
 
 		dataElement.appendChild(sourceRootsElement);
 
-		for (String module : projectInfo.getSources()) {
+		Map<String, String> umbrellaSourceMap = PropertiesUtil.getProperties(
+			buildProperties, "umbrella.source.list");
+
+		for (String module : umbrellaSourceMap.keySet()) {
 			_createRoots(sourceRootsElement, "src." + module + ".dir");
 		}
 
@@ -211,7 +206,9 @@ public class CreateUmbrella {
 		dataElement.appendChild(testRootsElement);
 	}
 
-	private static void _createProjectElement(ProjectInfo projectInfo) {
+	private static void _createProjectElement(
+		Map<Path, Map<String, Module>> projectMap, Properties buildProperties) {
+
 		Element projectElement = _document.createElement("project");
 
 		projectElement.setAttribute(
@@ -226,7 +223,7 @@ public class CreateUmbrella {
 
 		projectElement.appendChild(typeElement);
 
-		_createConfiguration(projectElement, projectInfo);
+		_createConfiguration(projectElement, projectMap, buildProperties);
 	}
 
 	private static void _createReference(
@@ -275,7 +272,8 @@ public class CreateUmbrella {
 	}
 
 	private static void _createReferences(
-		Element configurationElement, ProjectInfo projectInfo) {
+		Element configurationElement,
+		Map<Path, Map<String, Module>> projectMap) {
 
 		Element referencesElement = _document.createElement("references");
 
@@ -284,12 +282,10 @@ public class CreateUmbrella {
 
 		configurationElement.appendChild(referencesElement);
 
-		for (String module : projectInfo.getModules()) {
-			Path path = Paths.get(module);
-
-			Path moduleName = path.getFileName();
-
-			_createReference(referencesElement, moduleName.toString());
+		for (Map<String, Module> map : projectMap.values()) {
+			for (String name : map.keySet()) {
+				_createReference(referencesElement, name);
+			}
 		}
 	}
 
@@ -304,35 +300,5 @@ public class CreateUmbrella {
 	}
 
 	private static Document _document;
-
-	private static class ProjectInfo {
-
-		public String[] getModules() {
-			return _modules;
-		}
-
-		public String getProjectName() {
-			return _projectName;
-		}
-
-		public Set<String> getSources() {
-			return _sources;
-		}
-
-		private ProjectInfo(
-			String projectName, String[] modules, Set<String> sources) {
-
-			_projectName = projectName;
-
-			_modules = modules;
-
-			_sources = sources;
-		}
-
-		private final String[] _modules;
-		private final String _projectName;
-		private final Set<String> _sources;
-
-	}
 
 }
