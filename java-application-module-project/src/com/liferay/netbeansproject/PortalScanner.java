@@ -133,16 +133,12 @@ public class PortalScanner {
 		try (BufferedWriter bufferedWriter = Files.newBufferedWriter(
 				filePath, StandardCharsets.UTF_8, StandardOpenOption.CREATE)) {
 
-			StringBuilder sb = new StringBuilder();
-
 			for (Map<String, Module> map : moduleCollection) {
 				for (String name : map.keySet()) {
-					sb.append(name);
-					sb.append(',');
+					bufferedWriter.append(name);
+					bufferedWriter.append(',');
 				}
 			}
-
-			bufferedWriter.append(sb);
 		}
 	}
 
