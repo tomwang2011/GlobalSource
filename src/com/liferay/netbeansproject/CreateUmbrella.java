@@ -22,7 +22,6 @@ import com.liferay.netbeansproject.util.ZipUtil;
 import java.io.BufferedWriter;
 import java.io.IOException;
 
-import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -77,8 +76,6 @@ public class CreateUmbrella {
 				','),
 			umbrellaSourceMap.keySet());
 
-		_appendList(projectInfo, projectPath);
-
 		DocumentBuilderFactory documentBuilderFactory =
 			DocumentBuilderFactory.newInstance();
 
@@ -105,33 +102,6 @@ public class CreateUmbrella {
 			new StreamResult(projectXMLPath.toFile()));
 	}
 
-	private static void _appendList(ProjectInfo projectInfo, Path projectPath)
-		throws IOException {
-
-		try (BufferedWriter bufferedWriter = Files.newBufferedWriter(
-				projectPath.resolve(
-					Paths.get("nbproject", "project.properties")),
-				Charset.defaultCharset(), StandardOpenOption.APPEND)) {
-
-			StringBuilder sb = new StringBuilder("javac.classpath=\\\n");
-
-			for (String modulePath : projectInfo.getModules()) {
-				Path path = Paths.get(modulePath);
-
-				Path moduleName = path.getFileName();
-
-				sb.append("\t${reference.");
-				sb.append(moduleName);
-				sb.append(".jar}:\\\n");
-			}
-
-			sb.setLength(sb.length() - 3);
-
-			bufferedWriter.append(sb);
-			bufferedWriter.newLine();
-		}
-	}
-
 	private static void _appendProjectProperties(
 			Map<Path, Map<String, Module>> projectMap,
 			Map<String, String> umbrellaSourceMap, Path portalPath,
@@ -145,22 +115,24 @@ public class CreateUmbrella {
 		sb.append('\n');
 
 		for (Entry<String, String> source : umbrellaSourceMap.entrySet()) {
-			String s = source.getKey();
+			String key = source.getKey();
 
 			sb.append("file.reference.");
-			sb.append(s);
+			sb.append(key);
 			sb.append(".src=");
 			sb.append(portalPath.resolve(source.getValue()));
 			sb.append('\n');
 			sb.append("src.");
-			sb.append(s);
+			sb.append(key);
 			sb.append(".dir=${file.reference.");
-			sb.append(s);
+			sb.append(key);
 			sb.append(".src}");
 			sb.append('\n');
 		}
 
 		Path projectModulesPath = projectPath.resolve("modules");
+
+		StringBuilder javacSB = new StringBuilder("javac.classpath=\\\n");
 
 		for (Map<String, Module> map : projectMap.values()) {
 			for (String name : map.keySet()) {
@@ -176,6 +148,10 @@ public class CreateUmbrella {
 				sb.append("}/dist/");
 				sb.append(name);
 				sb.append(".jar\n");
+
+				javacSB.append("\t${reference.");
+				javacSB.append(name);
+				javacSB.append(".jar}:\\\n");
 			}
 		}
 
@@ -184,6 +160,11 @@ public class CreateUmbrella {
 				StandardOpenOption.APPEND)) {
 
 			bufferedWriter.append(sb);
+			bufferedWriter.newLine();
+
+			javacSB.setLength(javacSB.length() - 3);
+
+			bufferedWriter.append(javacSB);
 			bufferedWriter.newLine();
 		}
 	}
