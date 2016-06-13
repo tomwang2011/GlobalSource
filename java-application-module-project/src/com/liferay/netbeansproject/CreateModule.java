@@ -60,9 +60,14 @@ import org.w3c.dom.Element;
 public class CreateModule {
 
 	public static void createModule(
-			Path projectPath, Path modulePath, Path portalPath,
-			List<String> moduleList)
+			Path projectPath, Path modulePath, Path portalPath)
 		throws Exception {
+
+		List<String> moduleList = new ArrayList<>(Arrays.asList(
+				StringUtil.split(
+					new String(
+						Files.readAllBytes(projectPath.resolve("moduleList"))),
+					',')));
 
 		Properties projectDependencyProperties = PropertiesUtil.loadProperties(
 			Paths.get("project-dependency.properties"));
@@ -128,8 +133,7 @@ public class CreateModule {
 		createModule(
 			Paths.get(arguments.get("project.dir")),
 			Paths.get(arguments.get("src.dir")),
-			Paths.get(arguments.get("portal.dir")),
-			Arrays.asList(StringUtil.split(arguments.get("module.list"), ',')));
+			Paths.get(arguments.get("portal.dir")));
 	}
 
 	private static Set<Path> _addDependenciesToSet(String[] dependencies) {

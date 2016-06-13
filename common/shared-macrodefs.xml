@@ -10,29 +10,11 @@
 	<property file="build-ext.properties" />
 	<property file="build.properties" />
 
-	<property name="module.list" value="" />
 	<property name="test.list" value="" />
 
 	<property environment="env" />
 
 	<taskdef classpath="../common/lib/ant-contrib.jar" resource="net/sf/antcontrib/antlib.xml" />
-
-	<macrodef name="append-list">
-		<attribute name="list" />
-		<attribute name="src.dir.name" />
-
-		<sequential>
-			<if>
-				<equals arg1="${@{list}}" arg2="" />
-				<then>
-					<var name="@{list}" value="@{src.dir.name}" />
-				</then>
-				<else>
-					<var name="@{list}" value="${@{list}},@{src.dir.name}" />
-				</else>
-			</if>
-		</sequential>
-	</macrodef>
 
 	<macrodef name="append-module">
 		<attribute name="src.dir" />
@@ -43,10 +25,6 @@
 			<concat destfile="@{project.dir}/nbproject/project.properties" append="true">project.@{src.dir.name}=@{project.dir}/modules/@{src.dir.name}
 reference.@{src.dir.name}.jar=$${project.@{src.dir.name}}/dist/@{src.dir.name}.jar
 </concat>
-			<append-list
-				list="module.list"
-				src.dir.name="${src.dir}"
-			/>
 		</sequential>
 	</macrodef>
 
@@ -101,7 +79,6 @@ reference.@{src.dir.name}.jar=$${project.@{src.dir.name}}/dist/@{src.dir.name}.j
 							<java fork="${jvm.debug}" classname="com.liferay.netbeansproject.CreateModule" classpath="classes">
 								<jvmarg if:true="${jvm.debug}" line="${jpda.settings}" />
 								<arg value="src.dir=${src.dir}" />
-								<arg value="module.list=${module.list}" />
 								<arg value="portal.dir=@{portal.dir}" />
 								<arg value="project.dir=@{project.dir}" />
 							</java>
