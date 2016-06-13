@@ -21,7 +21,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 
-import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -95,7 +94,7 @@ public class CreateProject {
 
 		try (BufferedWriter bufferedWriter = Files.newBufferedWriter(
 				Paths.get(projectDir, "nbproject", "project.properties"),
-				Charset.defaultCharset(), StandardOpenOption.APPEND)) {
+				StandardOpenOption.APPEND)) {
 
 			StringBuilder sb = new StringBuilder("javac.classpath=\\\n");
 

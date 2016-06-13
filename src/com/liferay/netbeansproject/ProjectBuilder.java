@@ -24,7 +24,6 @@ import com.liferay.netbeansproject.util.PropertiesUtil;
 import java.io.BufferedWriter;
 import java.io.IOException;
 
-import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitOption;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -134,7 +133,7 @@ public class ProjectBuilder {
 		throws IOException {
 
 		try (BufferedWriter bufferedWriter = Files.newBufferedWriter(
-				filePath, StandardCharsets.UTF_8, StandardOpenOption.CREATE)) {
+				filePath, StandardOpenOption.CREATE)) {
 
 			for (Map<String, Module> map : moduleCollection) {
 				for (String name : map.keySet()) {

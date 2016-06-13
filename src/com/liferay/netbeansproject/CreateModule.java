@@ -24,7 +24,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 
-import java.nio.charset.Charset;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -191,8 +190,7 @@ public class CreateModule {
 			"project.properties");
 
 		try (BufferedWriter bufferedWriter = Files.newBufferedWriter(
-				projectPropertiesPath, Charset.defaultCharset(),
-				StandardOpenOption.APPEND)) {
+				projectPropertiesPath, StandardOpenOption.APPEND)) {
 
 			StringBuilder projectSB = new StringBuilder();
 
@@ -229,8 +227,7 @@ public class CreateModule {
 
 			if (!Files.exists(dependenciesPath)) {
 				Files.write(
-					dependenciesPath, Arrays.asList("compile:\ncompileTest:"),
-					Charset.defaultCharset());
+					dependenciesPath, Arrays.asList("compile:\ncompileTest:"));
 			}
 
 			Properties dependencyProperties = PropertiesUtil.loadProperties(
@@ -809,8 +806,7 @@ public class CreateModule {
 
 		content = StringUtil.replace(content, "%placeholder%", projectName);
 
-		Files.write(
-			buildXMLPath, Arrays.asList(content), Charset.defaultCharset());
+		Files.write(buildXMLPath, Arrays.asList(content));
 	}
 
 	private static Document _document;

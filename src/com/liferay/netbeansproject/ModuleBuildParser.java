@@ -18,7 +18,6 @@ import com.liferay.netbeansproject.util.StringUtil;
 
 import java.io.BufferedReader;
 
-import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -44,7 +43,7 @@ public class ModuleBuildParser {
 
 		try(
 			BufferedReader bufferedReader = Files.newBufferedReader(
-				gradleFilePath, Charset.defaultCharset())) {
+				gradleFilePath)) {
 
 			String line = null;
 

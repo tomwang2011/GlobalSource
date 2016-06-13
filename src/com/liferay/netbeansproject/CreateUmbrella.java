@@ -21,7 +21,6 @@ import com.liferay.netbeansproject.util.ZipUtil;
 import java.io.BufferedWriter;
 import java.io.IOException;
 
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -108,7 +107,7 @@ public class CreateUmbrella {
 
 		try (BufferedWriter bufferedWriter = Files.newBufferedWriter(
 				projectPath.resolve("nbproject/project.properties"),
-				StandardCharsets.UTF_8, StandardOpenOption.APPEND)) {
+				StandardOpenOption.APPEND)) {
 
 			bufferedWriter.append(sb);
 			bufferedWriter.newLine();

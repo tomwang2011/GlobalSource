@@ -23,7 +23,6 @@ import com.liferay.netbeansproject.util.StringUtil;
 import java.io.IOException;
 import java.io.Writer;
 
-import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -374,8 +373,7 @@ public class Module {
 		Files.createDirectories(_projectPath);
 
 		try (Writer writer = Files.newBufferedWriter(
-				_projectPath.resolve("module-info.properties"),
-				StandardCharsets.UTF_8)) {
+				_projectPath.resolve("module-info.properties"))) {
 
 			properties.store(writer, null);
 		}

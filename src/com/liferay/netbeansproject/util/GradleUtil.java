@@ -19,7 +19,6 @@ import com.liferay.netbeansproject.container.ModuleDependency;
 import java.io.BufferedReader;
 import java.io.IOException;
 
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -45,7 +44,7 @@ public class GradleUtil {
 
 		try(
 			BufferedReader bufferedReader = Files.newBufferedReader(
-				buildGradlePath, StandardCharsets.UTF_8)) {
+				buildGradlePath)) {
 
 			String line = null;
 
