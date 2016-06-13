@@ -36,7 +36,7 @@ import java.util.Properties;
  */
 public class CreateUmbrella {
 
-	public void createUmbrella(
+	public static void createUmbrella(
 			Map<Path, Map<String, Module>> projectMap, Path portalPath,
 			Properties buildProperties)
 		throws IOException {
@@ -53,7 +53,7 @@ public class CreateUmbrella {
 			projectMap, portalPath, projectPath, buildProperties);
 	}
 
-	private void _appendProjectProperties(
+	private static void _appendProjectProperties(
 			Map<Path, Map<String, Module>> projectMap, Path portalPath,
 			Path projectPath, Properties buildProperties)
 		throws IOException {

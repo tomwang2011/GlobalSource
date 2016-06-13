@@ -15,7 +15,7 @@
 package com.liferay.netbeansproject;
 
 import com.liferay.netbeansproject.ModuleBuildParser.ModuleInfo;
-import com.liferay.netbeansproject.util.ArgumentsUtil;
+import com.liferay.netbeansproject.container.Module;
 import com.liferay.netbeansproject.util.PropertiesUtil;
 import com.liferay.netbeansproject.util.StringUtil;
 import com.liferay.netbeansproject.util.ZipUtil;
@@ -132,13 +132,16 @@ public class CreateModule {
 		transformer.transform(new DOMSource(_document), streamResult);
 	}
 
-	public static void main(String[] args) throws Exception {
-		Map<String, String> arguments = ArgumentsUtil.parseArguments(args);
+	public static void createModules(
+		Map<Path, Map<String, Module>> projectMap, Path portalPath,
+		Path projectPath) throws Exception {
 
-		createModule(
-			Paths.get(arguments.get("project.dir")),
-			Paths.get(arguments.get("src.dir")),
-			Paths.get(arguments.get("portal.dir")));
+		for (Map<String, Module> map : projectMap.values()) {
+			for (Module module : map.values()) {
+				CreateModule.createModule(
+					projectPath, module.getModulePath(), portalPath);
+			}
+		}
 	}
 
 	private static Set<Path> _addDependenciesToSet(String[] dependencies) {

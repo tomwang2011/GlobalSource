@@ -121,9 +121,9 @@ public class PortalScanner {
 		_generateModuleList(
 			projectMap.values(), projectPath.resolve("moduleList"));
 
-		CreateUmbrella createUmbrella = new CreateUmbrella();
+		CreateModule.createModules(projectMap, portalPath, projectPath);
 
-		createUmbrella.createUmbrella(projectMap, portalPath, buildProperties);
+		CreateUmbrella.createUmbrella(projectMap, portalPath, buildProperties);
 	}
 
 	private void _generateModuleList(
