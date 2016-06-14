@@ -471,20 +471,6 @@ public class CreateModule {
 		}
 	}
 
-	private static void _createConfiguration(
-			Document document, Element projectElement, Module module,
-			Path portalPath)
-		throws IOException {
-
-		Element configurationElement = document.createElement("configuration");
-
-		projectElement.appendChild(configurationElement);
-
-		_createData(document, configurationElement, module, portalPath);
-
-		_createReferences(document, configurationElement, module);
-	}
-
 	private static void _createData(
 		Document document, Element configurationElement, Module module,
 		Path portalPath) {
@@ -581,7 +567,13 @@ public class CreateModule {
 		typeElement.appendChild(
 			document.createTextNode("org.netbeans.modules.java.j2seproject"));
 
-		_createConfiguration(document, projectElement, module, portalPath);
+		Element configurationElement = document.createElement("configuration");
+
+		projectElement.appendChild(configurationElement);
+
+		_createData(document, configurationElement, module, portalPath);
+
+		_createReferences(document, configurationElement, module);
 	}
 
 	private static void _createProjectXML(
