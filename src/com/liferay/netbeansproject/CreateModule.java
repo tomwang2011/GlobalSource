@@ -491,19 +491,19 @@ public class CreateModule {
 
 		Element dataElement = document.createElement("data");
 
+		configurationElement.appendChild(dataElement);
+
 		dataElement.setAttribute(
 			"xmlns", "http://www.netbeans.org/ns/j2se-project/3");
 
-		configurationElement.appendChild(dataElement);
-
 		Element nameElement = document.createElement("name");
+
+		dataElement.appendChild(nameElement);
 
 		Path moduleRelativePath = portalPath.relativize(module.getModulePath());
 
 		nameElement.appendChild(
 			document.createTextNode(moduleRelativePath.toString()));
-
-		dataElement.appendChild(nameElement);
 
 		Element sourceRootsElement = document.createElement("source-roots");
 
@@ -524,6 +524,8 @@ public class CreateModule {
 		}
 
 		Element testRootsElement = document.createElement("test-roots");
+
+		dataElement.appendChild(testRootsElement);
 
 		if (module.getTestUnitPath() != null) {
 			_createRoots(
@@ -559,8 +561,6 @@ public class CreateModule {
 			_createRoots(
 				document, sourceRootsElement, "portal-test", "src.test.dir");
 		}
-
-		dataElement.appendChild(testRootsElement);
 	}
 
 	private static void _createProjectElement(
@@ -569,17 +569,17 @@ public class CreateModule {
 
 		Element projectElement = document.createElement("project");
 
+		document.appendChild(projectElement);
+
 		projectElement.setAttribute(
 			"xmlns", "http://www.netbeans.org/ns/project/1");
 
-		document.appendChild(projectElement);
-
 		Element typeElement = document.createElement("type");
+
+		projectElement.appendChild(typeElement);
 
 		typeElement.appendChild(
 			document.createTextNode("org.netbeans.modules.java.j2seproject"));
-
-		projectElement.appendChild(typeElement);
 
 		_createConfiguration(document, projectElement, module, portalPath);
 	}
@@ -626,39 +626,39 @@ public class CreateModule {
 		Element foreignProjectElement = document.createElement(
 			"foreign-project");
 
-		foreignProjectElement.appendChild(document.createTextNode(module));
-
 		referenceElement.appendChild(foreignProjectElement);
+
+		foreignProjectElement.appendChild(document.createTextNode(module));
 
 		Element artifactTypeElement = document.createElement("artifact-type");
 
-		artifactTypeElement.appendChild(document.createTextNode("jar"));
-
 		referenceElement.appendChild(artifactTypeElement);
+
+		artifactTypeElement.appendChild(document.createTextNode("jar"));
 
 		Element scriptElement = document.createElement("script");
 
-		scriptElement.appendChild(document.createTextNode("build.xml"));
-
 		referenceElement.appendChild(scriptElement);
+
+		scriptElement.appendChild(document.createTextNode("build.xml"));
 
 		Element targetElement = document.createElement("target");
 
-		targetElement.appendChild(document.createTextNode("jar"));
-
 		referenceElement.appendChild(targetElement);
+
+		targetElement.appendChild(document.createTextNode("jar"));
 
 		Element cleanTargetElement = document.createElement("clean-target");
 
-		cleanTargetElement.appendChild(document.createTextNode("clean"));
-
 		referenceElement.appendChild(cleanTargetElement);
+
+		cleanTargetElement.appendChild(document.createTextNode("clean"));
 
 		Element idElement = document.createElement("id");
 
-		idElement.appendChild(document.createTextNode("jar"));
-
 		referenceElement.appendChild(idElement);
+
+		idElement.appendChild(document.createTextNode("jar"));
 	}
 
 	private static void _createReferences(
@@ -667,10 +667,10 @@ public class CreateModule {
 
 		Element referencesElement = document.createElement("references");
 
+		configurationElement.appendChild(referencesElement);
+
 		referencesElement.setAttribute(
 			"xmlns", "http://www.netbeans.org/ns/ant-project-references/1");
-
-		configurationElement.appendChild(referencesElement);
 
 		for (ModuleDependency moduleDependency :
 				module.getModuleDependencies()) {
@@ -696,11 +696,11 @@ public class CreateModule {
 
 		Element rootElement = document.createElement("root");
 
+		sourceRootsElement.appendChild(rootElement);
+
 		rootElement.setAttribute("id", rootId);
 
 		rootElement.setAttribute("name", label);
-
-		sourceRootsElement.appendChild(rootElement);
 	}
 
 	private static Set<Path> _getDependencySet(Path directory)
