@@ -472,38 +472,40 @@ public class CreateModule {
 	}
 
 	private static void _createConfiguration(
-			Element projectElement, Module module, Path portalPath)
+			Document document, Element projectElement, Module module,
+			Path portalPath)
 		throws IOException {
 
-		Element configurationElement = _document.createElement("configuration");
+		Element configurationElement = document.createElement("configuration");
 
 		projectElement.appendChild(configurationElement);
 
-		_createData(configurationElement, module, portalPath);
+		_createData(document, configurationElement, module, portalPath);
 
-		_createReferences(configurationElement, module);
+		_createReferences(document, configurationElement, module);
 	}
 
 	private static void _createData(
-		Element configurationElement, Module module, Path portalPath) {
+		Document document, Element configurationElement, Module module,
+		Path portalPath) {
 
-		Element dataElement = _document.createElement("data");
+		Element dataElement = document.createElement("data");
 
 		dataElement.setAttribute(
 			"xmlns", "http://www.netbeans.org/ns/j2se-project/3");
 
 		configurationElement.appendChild(dataElement);
 
-		Element nameElement = _document.createElement("name");
+		Element nameElement = document.createElement("name");
 
 		Path moduleRelativePath = portalPath.relativize(module.getModulePath());
 
 		nameElement.appendChild(
-			_document.createTextNode(moduleRelativePath.toString()));
+			document.createTextNode(moduleRelativePath.toString()));
 
 		dataElement.appendChild(nameElement);
 
-		Element sourceRootsElement = _document.createElement("source-roots");
+		Element sourceRootsElement = document.createElement("source-roots");
 
 		dataElement.appendChild(sourceRootsElement);
 
@@ -511,71 +513,75 @@ public class CreateModule {
 
 		if (module.getSourcePath() != null) {
 			_createRoots(
-				sourceRootsElement, "src", "src." + moduleName + ".src.dir");
+				document, sourceRootsElement, "src",
+				"src." + moduleName + ".src.dir");
 		}
 
 		if (module.getSourceResourcePath() != null) {
 			_createRoots(
-				sourceRootsElement, "resources",
+				document, sourceRootsElement, "resources",
 				"src." + moduleName + ".resources.dir");
 		}
 
-		Element testRootsElement = _document.createElement("test-roots");
+		Element testRootsElement = document.createElement("test-roots");
 
 		if (module.getTestUnitPath() != null) {
 			_createRoots(
-				testRootsElement, "test-unit",
+				document, testRootsElement, "test-unit",
 				"test." + moduleName + ".test-unit.dir");
 		}
 
 		if (module.getTestUnitResourcePath() != null) {
 			_createRoots(
-				testRootsElement, "test-unit-resources",
+				document, testRootsElement, "test-unit-resources",
 				"test." + moduleName + ".test-unit-resources.dir");
 		}
 
 		if (module.getTestIntegrationPath() != null) {
 			_createRoots(
-				testRootsElement, "test-integration",
+				document, testRootsElement, "test-integration",
 				"test." + moduleName + ".test-integration.dir");
 		}
 
 		if (module.getTestIntegrationResourcePath() != null) {
 			_createRoots(
-				testRootsElement, "test-integration-resources",
+				document, testRootsElement, "test-integration-resources",
 				"test." + moduleName + ".test-integration-resources.dir");
 		}
 
 		if (moduleName.equals("portal-impl")) {
 			_createRoots(
-				sourceRootsElement, "portal-test-integration", "src.test.dir");
+				document, sourceRootsElement, "portal-test-integration",
+				"src.test.dir");
 		}
 
 		if (moduleName.equals("portal-kernel")) {
-			_createRoots(sourceRootsElement, "portal-test", "src.test.dir");
+			_createRoots(
+				document, sourceRootsElement, "portal-test", "src.test.dir");
 		}
 
 		dataElement.appendChild(testRootsElement);
 	}
 
-	private static void _createProjectElement(Module module, Path portalPath)
+	private static void _createProjectElement(
+			Document document, Module module, Path portalPath)
 		throws IOException {
 
-		Element projectElement = _document.createElement("project");
+		Element projectElement = document.createElement("project");
 
 		projectElement.setAttribute(
 			"xmlns", "http://www.netbeans.org/ns/project/1");
 
-		_document.appendChild(projectElement);
+		document.appendChild(projectElement);
 
-		Element typeElement = _document.createElement("type");
+		Element typeElement = document.createElement("type");
 
 		typeElement.appendChild(
-			_document.createTextNode("org.netbeans.modules.java.j2seproject"));
+			document.createTextNode("org.netbeans.modules.java.j2seproject"));
 
 		projectElement.appendChild(typeElement);
 
-		_createConfiguration(projectElement, module, portalPath);
+		_createConfiguration(document, projectElement, module, portalPath);
 	}
 
 	private static void _createProjectXML(
@@ -588,9 +594,9 @@ public class CreateModule {
 		DocumentBuilder documentBuilder =
 			documentBuilderFactory.newDocumentBuilder();
 
-		_document = documentBuilder.newDocument();
+		Document document = documentBuilder.newDocument();
 
-		_createProjectElement(module, portalPath);
+		_createProjectElement(document, module, portalPath);
 
 		TransformerFactory transformerFactory =
 			TransformerFactory.newInstance();
@@ -605,61 +611,61 @@ public class CreateModule {
 				projectModulePath.resolve("nbproject/project.xml"))) {
 
 			transformer.transform(
-				new DOMSource(_document), new StreamResult(writer));
+				new DOMSource(document), new StreamResult(writer));
 		}
 	}
 
 	private static void _createReference(
-			Element referencesElement, String module)
+			Document document, Element referencesElement, String module)
 		throws IOException {
 
-		Element referenceElement = _document.createElement("reference");
+		Element referenceElement = document.createElement("reference");
 
 		referencesElement.appendChild(referenceElement);
 
-		Element foreignProjectElement = _document.createElement(
+		Element foreignProjectElement = document.createElement(
 			"foreign-project");
 
-		foreignProjectElement.appendChild(_document.createTextNode(module));
+		foreignProjectElement.appendChild(document.createTextNode(module));
 
 		referenceElement.appendChild(foreignProjectElement);
 
-		Element artifactTypeElement = _document.createElement("artifact-type");
+		Element artifactTypeElement = document.createElement("artifact-type");
 
-		artifactTypeElement.appendChild(_document.createTextNode("jar"));
+		artifactTypeElement.appendChild(document.createTextNode("jar"));
 
 		referenceElement.appendChild(artifactTypeElement);
 
-		Element scriptElement = _document.createElement("script");
+		Element scriptElement = document.createElement("script");
 
-		scriptElement.appendChild(_document.createTextNode("build.xml"));
+		scriptElement.appendChild(document.createTextNode("build.xml"));
 
 		referenceElement.appendChild(scriptElement);
 
-		Element targetElement = _document.createElement("target");
+		Element targetElement = document.createElement("target");
 
-		targetElement.appendChild(_document.createTextNode("jar"));
+		targetElement.appendChild(document.createTextNode("jar"));
 
 		referenceElement.appendChild(targetElement);
 
-		Element cleanTargetElement = _document.createElement("clean-target");
+		Element cleanTargetElement = document.createElement("clean-target");
 
-		cleanTargetElement.appendChild(_document.createTextNode("clean"));
+		cleanTargetElement.appendChild(document.createTextNode("clean"));
 
 		referenceElement.appendChild(cleanTargetElement);
 
-		Element idElement = _document.createElement("id");
+		Element idElement = document.createElement("id");
 
-		idElement.appendChild(_document.createTextNode("jar"));
+		idElement.appendChild(document.createTextNode("jar"));
 
 		referenceElement.appendChild(idElement);
 	}
 
 	private static void _createReferences(
-			Element configurationElement, Module module)
+			Document document, Element configurationElement, Module module)
 		throws IOException {
 
-		Element referencesElement = _document.createElement("references");
+		Element referencesElement = document.createElement("references");
 
 		referencesElement.setAttribute(
 			"xmlns", "http://www.netbeans.org/ns/ant-project-references/1");
@@ -675,19 +681,20 @@ public class CreateModule {
 				moduleLocation, ':');
 
 			_createReference(
-				referencesElement,
+				document, referencesElement,
 				moduleLocationSplit[moduleLocationSplit.length - 1]);
 		}
 
 		for (String dependency : module.getPortalLevelModuleDependencies()) {
-			_createReference(referencesElement, dependency);
+			_createReference(document, referencesElement, dependency);
 		}
 	}
 
 	private static void _createRoots(
-		Element sourceRootsElement, String label, String rootId) {
+		Document document, Element sourceRootsElement, String label,
+		String rootId) {
 
-		Element rootElement = _document.createElement("root");
+		Element rootElement = document.createElement("root");
 
 		rootElement.setAttribute("id", rootId);
 
@@ -758,8 +765,6 @@ public class CreateModule {
 
 		Files.write(buildXMLPath, Arrays.asList(content));
 	}
-
-	private static Document _document;
 
 	private static class ProjectInfo {
 
