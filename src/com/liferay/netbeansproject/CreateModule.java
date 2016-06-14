@@ -60,7 +60,8 @@ import org.w3c.dom.Element;
 public class CreateModule {
 
 	public static void createModule(
-			Path projectPath, Path modulePath, Path portalPath)
+			Path modulePath, Path portalPath, String excludedTypes,
+			Path projectPath)
 		throws Exception {
 
 		Path moduleProjectPath = projectPath.resolve("modules");
@@ -97,12 +98,7 @@ public class CreateModule {
 
 		_replaceProjectName(projectInfo, moduleDir);
 
-		Properties properties = PropertiesUtil.loadProperties(
-			Paths.get("build.properties"));
-
-		_appendProperties(
-			projectInfo, properties.getProperty("exclude.types"), moduleDir,
-			projectPath);
+		_appendProperties(projectInfo, excludedTypes, moduleDir, projectPath);
 
 		_createProjectXML(projectInfo, moduleDir);
 	}
