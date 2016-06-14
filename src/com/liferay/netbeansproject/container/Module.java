@@ -282,7 +282,8 @@ public class Module {
 
 		sourcePath = modulePath.resolve("src");
 
-		if (Files.exists(sourcePath.resolve("test")) ||
+		if (Files.exists(sourcePath.resolve("main")) ||
+			Files.exists(sourcePath.resolve("test")) ||
 			Files.exists(sourcePath.resolve("testIntegration"))) {
 
 			return null;
