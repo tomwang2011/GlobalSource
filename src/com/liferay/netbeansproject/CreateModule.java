@@ -22,6 +22,7 @@ import com.liferay.netbeansproject.util.ZipUtil;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
+import java.io.Writer;
 
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -102,32 +103,7 @@ public class CreateModule {
 			projectInfo, properties.getProperty("exclude.types"), moduleDir,
 			projectPath);
 
-		DocumentBuilderFactory documentBuilderFactory =
-			DocumentBuilderFactory.newInstance();
-
-		DocumentBuilder documentBuilder =
-			documentBuilderFactory.newDocumentBuilder();
-
-		_document = documentBuilder.newDocument();
-
-		_createProjectElement(projectInfo);
-
-		TransformerFactory transformerFactory =
-			TransformerFactory.newInstance();
-
-		Transformer transformer = transformerFactory.newTransformer();
-
-		Path fileNamePath = Paths.get(
-			moduleDir.toString(), projectInfo.getProjectName(), "nbproject",
-			"project.xml");
-
-		StreamResult streamResult = new StreamResult(fileNamePath.toFile());
-
-		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-		transformer.setOutputProperty(
-			"{http://xml.apache.org/xslt}indent-amount", "4");
-
-		transformer.transform(new DOMSource(_document), streamResult);
+		_createProjectXML(projectInfo, moduleDir);
 	}
 
 	private static Set<Path> _addDependenciesToSet(String[] dependencies) {
@@ -643,6 +619,39 @@ public class CreateModule {
 		projectElement.appendChild(typeElement);
 
 		_createConfiguration(projectElement, projectInfo);
+	}
+
+	private static void _createProjectXML(
+			ProjectInfo projectInfo, Path moduleDir)
+		throws Exception {
+
+		DocumentBuilderFactory documentBuilderFactory =
+			DocumentBuilderFactory.newInstance();
+
+		DocumentBuilder documentBuilder =
+			documentBuilderFactory.newDocumentBuilder();
+
+		_document = documentBuilder.newDocument();
+
+		_createProjectElement(projectInfo);
+
+		TransformerFactory transformerFactory =
+			TransformerFactory.newInstance();
+
+		Transformer transformer = transformerFactory.newTransformer();
+
+		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+		transformer.setOutputProperty(
+			"{http://xml.apache.org/xslt}indent-amount", "4");
+
+		Path fileNamePath = Paths.get(
+			moduleDir.toString(), projectInfo.getProjectName(), "nbproject",
+			"project.xml");
+
+		try (Writer writer = Files.newBufferedWriter(fileNamePath)) {
+			transformer.transform(
+				new DOMSource(_document), new StreamResult(writer));
+		}
 	}
 
 	private static void _createReference(
