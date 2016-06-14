@@ -16,6 +16,7 @@ package com.liferay.netbeansproject;
 
 import com.liferay.netbeansproject.ModuleBuildParser.ModuleInfo;
 import com.liferay.netbeansproject.container.Module;
+import com.liferay.netbeansproject.container.ModuleDependency;
 import com.liferay.netbeansproject.util.PropertiesUtil;
 import com.liferay.netbeansproject.util.StringUtil;
 import com.liferay.netbeansproject.util.ZipUtil;
@@ -480,7 +481,7 @@ public class CreateModule {
 
 		_createData(configurationElement, module, portalPath);
 
-		_createReferences(configurationElement, projectInfo);
+		_createReferences(configurationElement, module);
 	}
 
 	private static void _createData(
@@ -655,7 +656,7 @@ public class CreateModule {
 	}
 
 	private static void _createReferences(
-			Element configurationElement, ProjectInfo projectInfo)
+			Element configurationElement, Module module)
 		throws IOException {
 
 		Element referencesElement = _document.createElement("references");
@@ -665,17 +666,21 @@ public class CreateModule {
 
 		configurationElement.appendChild(referencesElement);
 
-		Map<String, ModuleInfo> dependenciesModuleMap =
-			projectInfo.getDependenciesModuleMap();
+		for (ModuleDependency moduleDependency :
+				module.getModuleDependencies()) {
 
-		for (String moduleName : dependenciesModuleMap.keySet()) {
-			_createReference(referencesElement, moduleName);
+			String moduleLocation = moduleDependency.getModuleLocation();
+
+			String[] moduleLocationSplit = StringUtil.split(
+				moduleLocation, ':');
+
+			_createReference(
+				referencesElement,
+				moduleLocationSplit[moduleLocationSplit.length - 1]);
 		}
 
-		for (String module : projectInfo.getProjectLibs()) {
-			if (!module.equals("")) {
-				_createReference(referencesElement, module);
-			}
+		for (String dependency : module.getPortalLevelModuleDependencies()) {
+			_createReference(referencesElement, dependency);
 		}
 	}
 
