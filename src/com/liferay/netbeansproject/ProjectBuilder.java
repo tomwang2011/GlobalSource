@@ -142,7 +142,7 @@ public class ProjectBuilder {
 
 		for (Module module : projectMap.values()) {
 			CreateModule.createModule(
-				module.getModulePath(), portalPath, excludedTypes, projectPath);
+				module, portalPath, excludedTypes, projectPath);
 		}
 	}
 

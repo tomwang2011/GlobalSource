@@ -120,14 +120,14 @@ public class IncrementBuilder {
 							projectRootPath.resolve(
 								Paths.get("modules", moduleName)));
 
-						Module.createModule(
+						Module module = Module.createModule(
 							projectRootPath.resolve(
 								Paths.get(
 									"modules", ModuleUtil.getModuleName(path))),
 							path, jarDependenciesMap.get(moduleName));
 
 						CreateModule.createModule(
-							path, portalPath, excludedTypes, projectRootPath);
+							module, portalPath, excludedTypes, projectRootPath);
 					}
 					catch (IOException ioe) {
 						throw ioe;

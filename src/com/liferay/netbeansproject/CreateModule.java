@@ -15,6 +15,7 @@
 package com.liferay.netbeansproject;
 
 import com.liferay.netbeansproject.ModuleBuildParser.ModuleInfo;
+import com.liferay.netbeansproject.container.Module;
 import com.liferay.netbeansproject.util.PropertiesUtil;
 import com.liferay.netbeansproject.util.StringUtil;
 import com.liferay.netbeansproject.util.ZipUtil;
@@ -60,11 +61,13 @@ import org.w3c.dom.Element;
 public class CreateModule {
 
 	public static void createModule(
-			Path modulePath, Path portalPath, String excludedTypes,
+			Module module, Path portalPath, String excludedTypes,
 			Path projectPath)
 		throws Exception {
 
 		Path moduleProjectPath = projectPath.resolve("modules");
+
+		Path modulePath = module.getModulePath();
 
 		ZipUtil.unZip(moduleProjectPath.resolve(modulePath.getFileName()));
 
