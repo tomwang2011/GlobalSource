@@ -15,6 +15,7 @@
 package com.liferay.netbeansproject;
 
 import com.liferay.netbeansproject.container.Module;
+import com.liferay.netbeansproject.util.ModuleUtil;
 import com.liferay.netbeansproject.util.PropertiesUtil;
 import com.liferay.netbeansproject.util.ZipUtil;
 
@@ -47,7 +48,7 @@ import org.w3c.dom.Element;
 public class CreateUmbrella {
 
 	public static void createUmbrella(
-			Map<Path, Map<String, Module>> projectMap, Path portalPath,
+			Map<Path, Module> projectMap, Path portalPath,
 			Properties buildProperties)
 		throws Exception {
 
@@ -95,9 +96,8 @@ public class CreateUmbrella {
 	}
 
 	private static void _appendProjectProperties(
-			Map<Path, Map<String, Module>> projectMap,
-			Map<String, String> umbrellaSourceMap, Path portalPath,
-			Path projectPath, String excludeTypes)
+			Map<Path, Module> projectMap, Map<String, String> umbrellaSourceMap,
+			Path portalPath, Path projectPath, String excludeTypes)
 		throws IOException {
 
 		StringBuilder sb = new StringBuilder();
@@ -126,25 +126,25 @@ public class CreateUmbrella {
 
 		StringBuilder javacSB = new StringBuilder("javac.classpath=\\\n");
 
-		for (Map<String, Module> map : projectMap.values()) {
-			for (String name : map.keySet()) {
-				sb.append("project.");
-				sb.append(name);
-				sb.append('=');
-				sb.append(projectModulesPath.resolve(name));
-				sb.append('\n');
-				sb.append("reference.");
-				sb.append(name);
-				sb.append(".jar=${project.");
-				sb.append(name);
-				sb.append("}/dist/");
-				sb.append(name);
-				sb.append(".jar\n");
+		for (Path modulePath : projectMap.keySet()) {
+			String name = ModuleUtil.getModuleName(modulePath);
 
-				javacSB.append("\t${reference.");
-				javacSB.append(name);
-				javacSB.append(".jar}:\\\n");
-			}
+			sb.append("project.");
+			sb.append(name);
+			sb.append('=');
+			sb.append(projectModulesPath.resolve(name));
+			sb.append('\n');
+			sb.append("reference.");
+			sb.append(name);
+			sb.append(".jar=${project.");
+			sb.append(name);
+			sb.append("}/dist/");
+			sb.append(name);
+			sb.append(".jar\n");
+
+			javacSB.append("\t${reference.");
+			javacSB.append(name);
+			javacSB.append(".jar}:\\\n");
 		}
 
 		try (BufferedWriter bufferedWriter = Files.newBufferedWriter(
@@ -162,8 +162,7 @@ public class CreateUmbrella {
 	}
 
 	private static void _createConfiguration(
-		Document document, Element projectElement,
-		Map<Path, Map<String, Module>> projectMap,
+		Document document, Element projectElement, Map<Path, Module> projectMap,
 		Map<String, String> umbrellaSourceMap, String projectName) {
 
 		Element configurationElement = document.createElement("configuration");
@@ -208,7 +207,7 @@ public class CreateUmbrella {
 	}
 
 	private static void _createProjectElement(
-		Document document, Map<Path, Map<String, Module>> projectMap,
+		Document document, Map<Path, Module> projectMap,
 		Map<String, String> umbrellaSourceMap, String projectName) {
 
 		Element projectElement = document.createElement("project");
@@ -277,7 +276,7 @@ public class CreateUmbrella {
 
 	private static void _createReferences(
 		Document document, Element configurationElement,
-		Map<Path, Map<String, Module>> projectMap) {
+		Map<Path, Module> projectMap) {
 
 		Element referencesElement = document.createElement("references");
 
@@ -286,10 +285,10 @@ public class CreateUmbrella {
 
 		configurationElement.appendChild(referencesElement);
 
-		for (Map<String, Module> map : projectMap.values()) {
-			for (String name : map.keySet()) {
-				_createReference(document, referencesElement, name);
-			}
+		for (Path modulePath : projectMap.keySet()) {
+			_createReference(
+				document, referencesElement,
+				ModuleUtil.getModuleName(modulePath));
 		}
 	}
 
