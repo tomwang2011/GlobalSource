@@ -94,13 +94,12 @@ public class CreateModule {
 			moduleName, portalPath, modulePath,
 			StringUtil.split(projectDependencies, ','), moduleList);
 
-		Path moduleDir = projectPath.resolve("modules");
+		_replaceProjectName(projectInfo, moduleProjectPath);
 
-		_replaceProjectName(projectInfo, moduleDir);
+		_appendProperties(
+			projectInfo, excludedTypes, moduleProjectPath, projectPath);
 
-		_appendProperties(projectInfo, excludedTypes, moduleDir, projectPath);
-
-		_createProjectXML(projectInfo, moduleDir);
+		_createProjectXML(projectInfo, moduleProjectPath);
 	}
 
 	private static Set<Path> _addDependenciesToSet(String[] dependencies) {
