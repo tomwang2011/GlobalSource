@@ -63,12 +63,6 @@ public class CreateModule {
 			Path projectPath, Path modulePath, Path portalPath)
 		throws Exception {
 
-		List<String> moduleList = new ArrayList<>(Arrays.asList(
-				StringUtil.split(
-					new String(
-						Files.readAllBytes(projectPath.resolve("moduleList"))),
-					',')));
-
 		Path moduleProjectPath = projectPath.resolve("modules");
 
 		ZipUtil.unZip(moduleProjectPath.resolve(modulePath.getFileName()));
@@ -87,6 +81,13 @@ public class CreateModule {
 			projectDependencies = projectDependencyProperties.getProperty(
 				"portal.module.dependencies");
 		}
+
+		List<String> moduleList = new ArrayList<>(
+			Arrays.asList(
+				StringUtil.split(
+					new String(
+						Files.readAllBytes(projectPath.resolve("moduleList"))),
+					',')));
 
 		ProjectInfo projectInfo = new ProjectInfo(
 			moduleName, portalPath, modulePath,
