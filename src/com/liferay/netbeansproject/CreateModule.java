@@ -15,7 +15,6 @@
 package com.liferay.netbeansproject;
 
 import com.liferay.netbeansproject.ModuleBuildParser.ModuleInfo;
-import com.liferay.netbeansproject.container.Module;
 import com.liferay.netbeansproject.util.PropertiesUtil;
 import com.liferay.netbeansproject.util.StringUtil;
 import com.liferay.netbeansproject.util.ZipUtil;
@@ -129,16 +128,6 @@ public class CreateModule {
 			"{http://xml.apache.org/xslt}indent-amount", "4");
 
 		transformer.transform(new DOMSource(_document), streamResult);
-	}
-
-	public static void createModules(
-			Map<Path, Module> projectMap, Path portalPath, Path projectPath)
-		throws Exception {
-
-		for (Module module : projectMap.values()) {
-			CreateModule.createModule(
-				projectPath, module.getModulePath(), portalPath);
-		}
 	}
 
 	private static Set<Path> _addDependenciesToSet(String[] dependencies) {

@@ -115,9 +115,7 @@ public class ProjectBuilder {
 								"modules", ModuleUtil.getModuleName(path))),
 						path, jarDependenciesMap.get(fileName));
 
-					Path modulePath = module.getModulePath();
-
-					projectMap.put(modulePath, module);
+					projectMap.put(module.getModulePath(), module);
 
 					return FileVisitResult.SKIP_SUBTREE;
 				}
@@ -126,7 +124,7 @@ public class ProjectBuilder {
 
 		_generateModuleList(projectMap, projectPath.resolve("moduleList"));
 
-		CreateModule.createModules(projectMap, portalPath, projectPath);
+		_createModules(projectMap, portalPath, projectPath);
 
 		CreateUmbrella.createUmbrella(
 			portalPath, projectName,
@@ -134,6 +132,16 @@ public class ProjectBuilder {
 				buildProperties, "umbrella.source.list"),
 			buildProperties.getProperty("exclude.types"), projectMap,
 			projectPath);
+	}
+
+	private static void _createModules(
+			Map<Path, Module> projectMap, Path portalPath, Path projectPath)
+		throws Exception {
+
+		for (Module module : projectMap.values()) {
+			CreateModule.createModule(
+				projectPath, module.getModulePath(), portalPath);
+		}
 	}
 
 	private void _generateModuleList(Map<Path, Module> moduleMap, Path filePath)
