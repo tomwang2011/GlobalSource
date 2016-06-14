@@ -65,6 +65,9 @@ public class IncrementBuilder {
 
 		final String ignoredDirs = buildProperties.getProperty("ignored.dirs");
 
+		final boolean displayGradleProcessOutput = Boolean.valueOf(
+			buildProperties.getProperty("display.gradle.process.output"));
+
 		Files.walkFileTree(
 			portalPath, EnumSet.allOf(FileVisitOption.class), Integer.MAX_VALUE,
 			new SimpleFileVisitor<Path>() {
@@ -106,10 +109,8 @@ public class IncrementBuilder {
 
 						if (Files.exists(path.resolve("build.gradle"))) {
 							jarDependenciesMap = ProcessGradle.processGradle(
-								Boolean.valueOf(
-									buildProperties.getProperty(
-										"display.gradle.process.output")),
-								portalPath, projectRootPath, path);
+								portalPath, projectRootPath, path,
+								displayGradleProcessOutput);
 						}
 
 						ZipUtil.unZip(
