@@ -65,26 +65,12 @@ public class CreateModule {
 			Path projectPath)
 		throws Exception {
 
-		Path moduleProjectPath = projectPath.resolve("modules");
+		String moduleName = module.getModuleName();
 
-		Path modulePath = module.getModulePath();
+		Path projectModulePath = projectPath.resolve(
+			Paths.get("modules", moduleName));
 
-		ZipUtil.unZip(moduleProjectPath.resolve(modulePath.getFileName()));
-
-		Properties projectDependencyProperties = PropertiesUtil.loadProperties(
-			Paths.get("project-dependency.properties"));
-
-		Path moduleNamePath = modulePath.getFileName();
-
-		String moduleName = moduleNamePath.toString();
-
-		String projectDependencies = projectDependencyProperties.getProperty(
-			moduleName);
-
-		if (projectDependencies == null) {
-			projectDependencies = projectDependencyProperties.getProperty(
-				"portal.module.dependencies");
-		}
+		ZipUtil.unZip(projectModulePath);
 
 		List<String> moduleList = new ArrayList<>(
 			Arrays.asList(
@@ -94,15 +80,15 @@ public class CreateModule {
 					',')));
 
 		ProjectInfo projectInfo = new ProjectInfo(
-			moduleName, portalPath, modulePath,
-			StringUtil.split(projectDependencies, ','), moduleList);
+			moduleName, portalPath, module.getModulePath(),
+			module.getPortalLevelModuleDependencies(), moduleList);
 
-		_replaceProjectName(projectInfo, moduleProjectPath);
+		_replaceProjectName(module, projectModulePath);
 
 		_appendProperties(
-			projectInfo, excludedTypes, moduleProjectPath, projectPath);
+			projectInfo, excludedTypes, projectModulePath, projectPath);
 
-		_createProjectXML(projectInfo, moduleProjectPath);
+		_createProjectXML(projectInfo, projectModulePath);
 	}
 
 	private static Set<Path> _addDependenciesToSet(String[] dependencies) {
@@ -146,9 +132,8 @@ public class CreateModule {
 
 		String projectName = projectInfo.getProjectName();
 
-		Path projectPropertiesPath = Paths.get(
-			modulePath.toString(), projectName, "nbproject",
-			"project.properties");
+		Path projectPropertiesPath = modulePath.resolve(
+			"nbproject/project.properties");
 
 		try (BufferedWriter bufferedWriter = Files.newBufferedWriter(
 				projectPropertiesPath, StandardOpenOption.APPEND)) {
@@ -621,7 +606,7 @@ public class CreateModule {
 	}
 
 	private static void _createProjectXML(
-			ProjectInfo projectInfo, Path moduleDir)
+			ProjectInfo projectInfo, Path projectModulePath)
 		throws Exception {
 
 		DocumentBuilderFactory documentBuilderFactory =
@@ -643,11 +628,9 @@ public class CreateModule {
 		transformer.setOutputProperty(
 			"{http://xml.apache.org/xslt}indent-amount", "4");
 
-		Path fileNamePath = Paths.get(
-			moduleDir.toString(), projectInfo.getProjectName(), "nbproject",
-			"project.xml");
+		try (Writer writer = Files.newBufferedWriter(
+				projectModulePath.resolve("nbproject/project.xml"))) {
 
-		try (Writer writer = Files.newBufferedWriter(fileNamePath)) {
 			transformer.transform(
 				new DOMSource(_document), new StreamResult(writer));
 		}
@@ -787,18 +770,14 @@ public class CreateModule {
 	}
 
 	private static void _replaceProjectName(
-			ProjectInfo projectInfo, Path moduleDir)
+			Module module, Path projectModulePath)
 		throws IOException {
 
-		String projectName = projectInfo.getProjectName();
+		Path buildXMLPath = projectModulePath.resolve("build.xml");
 
-		Path projectpath = moduleDir.resolve(projectName);
-
-		Path buildXMLPath = projectpath.resolve("build.xml");
-
-		String content = new String(Files.readAllBytes(buildXMLPath));
-
-		content = StringUtil.replace(content, "%placeholder%", projectName);
+		String content = StringUtil.replace(
+			new String(Files.readAllBytes(buildXMLPath)), "%placeholder%",
+			module.getModuleName());
 
 		Files.write(buildXMLPath, Arrays.asList(content));
 	}
@@ -823,7 +802,7 @@ public class CreateModule {
 			return _portalPath;
 		}
 
-		public String[] getProjectLibs() {
+		public List<String> getProjectLibs() {
 			return _projectLib;
 		}
 
@@ -839,7 +818,7 @@ public class CreateModule {
 
 		private ProjectInfo(
 			String projectName, Path portalPath, Path fullPath,
-			String[] projectLibs, List<String> moduleList) {
+			List<String> projectLibs, List<String> moduleList) {
 
 			_projectName = projectName;
 
@@ -864,7 +843,7 @@ public class CreateModule {
 		private final Path _fullPath;
 		private final Map<String, Path> _moduleMap;
 		private final Path _portalPath;
-		private final String[] _projectLib;
+		private final List<String> _projectLib;
 		private final String _projectName;
 
 	}
