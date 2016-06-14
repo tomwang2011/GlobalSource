@@ -50,6 +50,18 @@ public class PropertiesUtil {
 		return map;
 	}
 
+	public static String getRequiredProperty(
+		Properties properties, String key) {
+
+		String value = properties.getProperty(key);
+
+		if (value == null) {
+			throw new IllegalArgumentException("Missing \"" + key + "\"");
+		}
+
+		return value;
+	}
+
 	public static Properties loadProperties(Path filePath) throws IOException {
 		Properties properties = new Properties();
 

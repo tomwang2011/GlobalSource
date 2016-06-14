@@ -16,7 +16,6 @@ package com.liferay.netbeansproject;
 
 import com.liferay.netbeansproject.container.Module;
 import com.liferay.netbeansproject.util.ModuleUtil;
-import com.liferay.netbeansproject.util.PropertiesUtil;
 import com.liferay.netbeansproject.util.ZipUtil;
 
 import java.io.BufferedWriter;
@@ -24,12 +23,10 @@ import java.io.IOException;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Properties;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -48,24 +45,16 @@ import org.w3c.dom.Element;
 public class CreateUmbrella {
 
 	public static void createUmbrella(
-			Map<Path, Module> projectMap, Path portalPath,
-			Properties buildProperties)
+			Path portalPath, String projectName,
+			Map<String, String> umbrellaSourceMap, String excludeTypes,
+			Map<Path, Module> projectMap, Path projectPath)
 		throws Exception {
-
-		Path portalNamePath = portalPath.getFileName();
-
-		Path projectPath = Paths.get(
-			buildProperties.getProperty("project.dir"),
-			portalNamePath.toString());
 
 		ZipUtil.unZip(projectPath);
 
-		Map<String, String> umbrellaSourceMap = PropertiesUtil.getProperties(
-			buildProperties, "umbrella.source.list");
-
 		_appendProjectProperties(
 			projectMap, umbrellaSourceMap, portalPath, projectPath,
-			buildProperties.getProperty("exclude.types"));
+			excludeTypes);
 
 		DocumentBuilderFactory documentBuilderFactory =
 			DocumentBuilderFactory.newInstance();
@@ -74,8 +63,6 @@ public class CreateUmbrella {
 			documentBuilderFactory.newDocumentBuilder();
 
 		Document document = documentBuilder.newDocument();
-
-		String projectName = buildProperties.getProperty("project.name");
 
 		_createProjectElement(
 			document, projectMap, umbrellaSourceMap, projectName);
@@ -103,7 +90,11 @@ public class CreateUmbrella {
 		StringBuilder sb = new StringBuilder();
 
 		sb.append("excludes=");
-		sb.append(excludeTypes);
+
+		if (excludeTypes != null) {
+			sb.append(excludeTypes);
+		}
+
 		sb.append('\n');
 
 		for (Entry<String, String> source : umbrellaSourceMap.entrySet()) {

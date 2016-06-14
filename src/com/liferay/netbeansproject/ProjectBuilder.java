@@ -20,6 +20,7 @@ import com.liferay.netbeansproject.util.ArgumentsUtil;
 import com.liferay.netbeansproject.util.ModuleUtil;
 import com.liferay.netbeansproject.util.PathUtil;
 import com.liferay.netbeansproject.util.PropertiesUtil;
+import com.liferay.netbeansproject.util.StringUtil;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -33,11 +34,14 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.BasicFileAttributes;
 
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 /**
  * @author Tom Wang
@@ -56,15 +60,24 @@ public class ProjectBuilder {
 		Properties buildProperties = PropertiesUtil.loadProperties(
 			Paths.get("build.properties"));
 
+		String projectDir = PropertiesUtil.getRequiredProperty(
+			buildProperties, "project.dir");
+
+		String ignoredDirs = PropertiesUtil.getRequiredProperty(
+			buildProperties, "ignored.dirs");
+
+		String projectName = PropertiesUtil.getRequiredProperty(
+			buildProperties, "project.name");
+
 		Path portalNamePath = portalPath.getFileName();
 
 		final Path projectPath = Paths.get(
-			buildProperties.getProperty("project.dir"),
-			portalNamePath.toString());
+			projectDir, portalNamePath.toString());
 
 		PathUtil.delete(projectPath);
 
-		final String ignoredDirs = buildProperties.getProperty("ignored.dirs");
+		final Set<String> ignoredDirSet = new HashSet<>(
+			Arrays.asList(StringUtil.split(ignoredDirs, ',')));
 
 		final Map<String, List<JarDependency>> jarDependenciesMap =
 			ProcessGradle.processGradle(
@@ -88,7 +101,7 @@ public class ProjectBuilder {
 
 					String fileName = fileNamePath.toString();
 
-					if (ignoredDirs.contains(fileName)) {
+					if (ignoredDirSet.contains(fileName)) {
 						return FileVisitResult.SKIP_SUBTREE;
 					}
 
@@ -115,7 +128,12 @@ public class ProjectBuilder {
 
 		CreateModule.createModules(projectMap, portalPath, projectPath);
 
-		CreateUmbrella.createUmbrella(projectMap, portalPath, buildProperties);
+		CreateUmbrella.createUmbrella(
+			portalPath, projectName,
+			PropertiesUtil.getProperties(
+				buildProperties, "umbrella.source.list"),
+			buildProperties.getProperty("exclude.types"), projectMap,
+			projectPath);
 	}
 
 	private void _generateModuleList(Map<Path, Module> moduleMap, Path filePath)
