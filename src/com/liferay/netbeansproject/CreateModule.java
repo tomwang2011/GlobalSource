@@ -88,7 +88,7 @@ public class CreateModule {
 		_appendProperties(
 			projectInfo, excludedTypes, projectModulePath, projectPath);
 
-		_createProjectXML(projectInfo, projectModulePath);
+		_createProjectXML(module, portalPath.getParent(), projectModulePath);
 	}
 
 	private static Set<Path> _addDependenciesToSet(String[] dependencies) {
@@ -353,7 +353,7 @@ public class CreateModule {
 
 			projectSB.append("src.");
 			projectSB.append(moduleName);
-			projectSB.append(".dir=${file.reference.");
+			projectSB.append(".src.dir=${file.reference.");
 			projectSB.append(moduleName);
 			projectSB.append("-src}\n");
 		}
@@ -389,7 +389,7 @@ public class CreateModule {
 			projectSB.append('\n');
 			projectSB.append("test.");
 			projectSB.append(moduleName);
-			projectSB.append(".unit.dir=${file.reference.");
+			projectSB.append(".test-unit.dir=${file.reference.");
 			projectSB.append(moduleName);
 			projectSB.append("-test-unit}\n");
 		}
@@ -401,7 +401,7 @@ public class CreateModule {
 			projectSB.append('\n');
 			projectSB.append("test.");
 			projectSB.append(moduleName);
-			projectSB.append(".unit.dir=${file.reference.");
+			projectSB.append(".test-unit.dir=${file.reference.");
 			projectSB.append(moduleName);
 			projectSB.append("-test-unit}\n");
 		}
@@ -417,7 +417,7 @@ public class CreateModule {
 			projectSB.append('\n');
 			projectSB.append("test.");
 			projectSB.append(moduleName);
-			projectSB.append(".unit.resources.dir=${file.reference.");
+			projectSB.append(".test-unit-resources.dir=${file.reference.");
 			projectSB.append(moduleName);
 			projectSB.append("-test-unit-resources}\n");
 		}
@@ -435,7 +435,7 @@ public class CreateModule {
 			projectSB.append('\n');
 			projectSB.append("test.");
 			projectSB.append(moduleName);
-			projectSB.append(".integration.dir=${file.reference.");
+			projectSB.append(".test-integration.dir=${file.reference.");
 			projectSB.append(moduleName);
 			projectSB.append("-test-integration}\n");
 		}
@@ -447,7 +447,7 @@ public class CreateModule {
 			projectSB.append('\n');
 			projectSB.append("test.");
 			projectSB.append(moduleName);
-			projectSB.append(".integration.dir=${file.reference.");
+			projectSB.append(".test-integration.dir=${file.reference.");
 			projectSB.append(moduleName);
 			projectSB.append("-test-integration}\n");
 		}
@@ -463,27 +463,28 @@ public class CreateModule {
 			projectSB.append('\n');
 			projectSB.append("test.");
 			projectSB.append(moduleName);
-			projectSB.append(".integration.resources.dir=${file.reference.");
+			projectSB.append(
+				".test-integration-resources.dir=${file.reference.");
 			projectSB.append(moduleName);
 			projectSB.append("-test-integration-resources}\n");
 		}
 	}
 
 	private static void _createConfiguration(
-			Element projectElement, ProjectInfo projectInfo)
+			Element projectElement, Module module, Path portalPath)
 		throws IOException {
 
 		Element configurationElement = _document.createElement("configuration");
 
 		projectElement.appendChild(configurationElement);
 
-		_createData(configurationElement, projectInfo);
+		_createData(configurationElement, module, portalPath);
 
 		_createReferences(configurationElement, projectInfo);
 	}
 
 	private static void _createData(
-		Element configurationElement, ProjectInfo projectInfo) {
+		Element configurationElement, Module module, Path portalPath) {
 
 		Element dataElement = _document.createElement("data");
 
@@ -494,16 +495,10 @@ public class CreateModule {
 
 		Element nameElement = _document.createElement("name");
 
-		Path projectPath = projectInfo.getFullPath();
-
-		Path portalPath = projectInfo.getPortalPath();
-
-		Path portalParentPath = portalPath.getParent();
-
-		Path projectNamePath = portalParentPath.relativize(projectPath);
+		Path moduleRelativePath = portalPath.relativize(module.getModulePath());
 
 		nameElement.appendChild(
-			_document.createTextNode(projectNamePath.toString()));
+			_document.createTextNode(moduleRelativePath.toString()));
 
 		dataElement.appendChild(nameElement);
 
@@ -511,81 +506,58 @@ public class CreateModule {
 
 		dataElement.appendChild(sourceRootsElement);
 
-		String projectName = projectInfo.getProjectName();
+		String moduleName = module.getModuleName();
 
-		Path srcPath = projectPath.resolve("src");
-
-		Path mainPath = srcPath.resolve("main");
-
-		Path mainJavaPath = mainPath.resolve("java");
-
-		if (!Files.exists(mainPath) || Files.exists(mainJavaPath)) {
+		if (module.getSourcePath() != null) {
 			_createRoots(
-				sourceRootsElement, "src", "src." + projectName + ".dir");
+				sourceRootsElement, "src", "src." + moduleName + ".src.dir");
 		}
 
-		Path mainResourcesPath = mainPath.resolve("resources");
-
-		if (Files.exists(mainResourcesPath)) {
+		if (module.getSourceResourcePath() != null) {
 			_createRoots(
 				sourceRootsElement, "resources",
-				"src." + projectName + ".resources.dir");
-		}
-
-		if (projectName.equals("portal-impl")) {
-			_createRoots(
-				sourceRootsElement, "portal-test-integration", "src.test.dir");
-		}
-		else if (projectName.equals("portal-kernel")) {
-			_createRoots(sourceRootsElement, "portal-test", "src.test.dir");
+				"src." + moduleName + ".resources.dir");
 		}
 
 		Element testRootsElement = _document.createElement("test-roots");
 
-		Path testPath = projectPath.resolve("test");
-
-		Path testUnitPath = testPath.resolve("unit");
-		Path srcTestPath = srcPath.resolve("test");
-
-		if (Files.exists(testUnitPath) || Files.exists(srcTestPath)) {
+		if (module.getTestUnitPath() != null) {
 			_createRoots(
-				testRootsElement, "unit" + File.separator + "test",
-				"test." + projectName + ".unit.dir");
+				testRootsElement, "test-unit",
+				"test." + moduleName + ".test-unit.dir");
 		}
 
-		Path testResourcesPath = testPath.resolve("resources");
-
-		if (Files.exists(testResourcesPath)) {
+		if (module.getTestUnitResourcePath() != null) {
 			_createRoots(
-				sourceRootsElement, "unit" + File.separator + "resources",
-				"test." + projectName + ".unit.resources.dir");
+				testRootsElement, "test-unit-resources",
+				"test." + moduleName + ".test-unit-resources.dir");
 		}
 
-		Path testIntegrationPath = testPath.resolve("integration");
-		Path srcTestIntegrationPath = srcPath.resolve("testIntegration");
-
-		if (Files.exists(testIntegrationPath) ||
-			Files.exists(srcTestIntegrationPath)) {
-
+		if (module.getTestIntegrationPath() != null) {
 			_createRoots(
-				testRootsElement, "integration" + File.separator + "test",
-				"test." + projectName + ".integration.dir");
+				testRootsElement, "test-integration",
+				"test." + moduleName + ".test-integration.dir");
 		}
 
-		Path testIntegrationResources = srcTestIntegrationPath.resolve(
-			"resources");
-
-		if (Files.exists(testIntegrationResources)) {
+		if (module.getTestIntegrationResourcePath() != null) {
 			_createRoots(
-				sourceRootsElement,
-				"integration" + File.separator + "resources",
-				"test." + projectName + ".integration.resources.dir");
+				testRootsElement, "test-integration-resources",
+				"test." + moduleName + ".test-integration-resources.dir");
+		}
+
+		if (moduleName.equals("portal-impl")) {
+			_createRoots(
+				sourceRootsElement, "portal-test-integration", "src.test.dir");
+		}
+
+		if (moduleName.equals("portal-kernel")) {
+			_createRoots(sourceRootsElement, "portal-test", "src.test.dir");
 		}
 
 		dataElement.appendChild(testRootsElement);
 	}
 
-	private static void _createProjectElement(ProjectInfo projectInfo)
+	private static void _createProjectElement(Module module, Path portalPath)
 		throws IOException {
 
 		Element projectElement = _document.createElement("project");
@@ -602,11 +574,11 @@ public class CreateModule {
 
 		projectElement.appendChild(typeElement);
 
-		_createConfiguration(projectElement, projectInfo);
+		_createConfiguration(projectElement, module, portalPath);
 	}
 
 	private static void _createProjectXML(
-			ProjectInfo projectInfo, Path projectModulePath)
+			Module module, Path portalPath, Path projectModulePath)
 		throws Exception {
 
 		DocumentBuilderFactory documentBuilderFactory =
@@ -617,7 +589,7 @@ public class CreateModule {
 
 		_document = documentBuilder.newDocument();
 
-		_createProjectElement(projectInfo);
+		_createProjectElement(module, portalPath);
 
 		TransformerFactory transformerFactory =
 			TransformerFactory.newInstance();
