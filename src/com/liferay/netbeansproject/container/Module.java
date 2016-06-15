@@ -33,11 +33,9 @@ import java.security.NoSuchAlgorithmException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
-import java.util.Queue;
 
 /**
  * @author Tom Wang
@@ -278,31 +276,7 @@ public class Module {
 				properties, "portal.module.dependencies");
 		}
 
-		Queue<String> dependencyQueue = new LinkedList<>();
-
-		dependencyQueue.addAll(
-			Arrays.asList(StringUtil.split(dependencies, ',')));
-
-		String dependency = null;
-
-		List<String> portalLevelDependencies = new ArrayList<>();
-
-		while ((dependency = dependencyQueue.poll()) != null) {
-			if (dependency.startsWith("${")) {
-				dependencyQueue.addAll(
-					Arrays.asList(
-						StringUtil.split(
-							properties.getProperty(
-								dependency.substring(
-									2, dependency.length() - 1)),
-							',')));
-			}
-			else {
-				portalLevelDependencies.add(dependency);
-			}
-		}
-
-		return portalLevelDependencies;
+		return Arrays.asList(StringUtil.split(dependencies, ','));
 	}
 
 	private static Path _resolveResourcePath(Path modulePath, String type) {
