@@ -22,12 +22,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import java.nio.file.FileVisitResult;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -101,44 +99,36 @@ public class ProcessGradle {
 		final Map<String, List<JarDependency>> dependenciesMap =
 			new HashMap<>();
 
-		Files.walkFileTree(
-			dependenciesDirPath,
-			new SimpleFileVisitor<Path>() {
+		try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(
+				dependenciesDirPath)) {
 
-				@Override
-				public FileVisitResult visitFile(
-						Path path, BasicFileAttributes basicFileAttributes)
-					throws IOException {
+			for (Path dependencyPath : directoryStream) {
+				List<JarDependency> jarDependencies = new ArrayList<>();
 
-					List<JarDependency> jarDependencies = new ArrayList<>();
+				Properties dependencies = PropertiesUtil.loadProperties(
+					dependencyPath);
 
-					Properties dependencies = PropertiesUtil.loadProperties(
-						path);
+				for (String jar :
+						StringUtil.split(
+							dependencies.getProperty("compile"), ':')) {
 
-					for (String jar :
-							StringUtil.split(
-								dependencies.getProperty("compile"), ':')) {
-
-						jarDependencies.add(
-							new JarDependency(Paths.get(jar), false));
-					}
-
-					for (String jar :
-							StringUtil.split(
-								dependencies.getProperty("compileTest"), ':')) {
-
-						jarDependencies.add(
-							new JarDependency(Paths.get(jar), true));
-					}
-
-					Path moduleName = path.getFileName();
-
-					dependenciesMap.put(moduleName.toString(), jarDependencies);
-
-					return FileVisitResult.CONTINUE;
+					jarDependencies.add(
+						new JarDependency(Paths.get(jar), false));
 				}
 
-			});
+				for (String jar :
+						StringUtil.split(
+							dependencies.getProperty("compileTest"), ':')) {
+
+					jarDependencies.add(
+						new JarDependency(Paths.get(jar), true));
+				}
+
+				Path moduleName = dependencyPath.getFileName();
+
+				dependenciesMap.put(moduleName.toString(), jarDependencies);
+			}
+		}
 
 		return dependenciesMap;
 	}
