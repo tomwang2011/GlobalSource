@@ -14,7 +14,6 @@
 
 package com.liferay.netbeansproject;
 
-import com.liferay.netbeansproject.container.Module;
 import com.liferay.netbeansproject.util.ModuleUtil;
 import com.liferay.netbeansproject.util.ZipUtil;
 
@@ -28,6 +27,7 @@ import java.nio.file.StandardOpenOption;
 
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -48,22 +48,22 @@ public class CreateUmbrella {
 	public static void createUmbrella(
 			Path portalPath, String projectName,
 			Map<String, String> umbrellaSourceMap, String excludeTypes,
-			Map<Path, Module> projectMap, Path projectPath)
+			Set<Path> modulePaths, Path projectPath)
 		throws Exception {
 
 		ZipUtil.unZip(projectPath);
 
 		_appendProjectProperties(
-			portalPath, excludeTypes, umbrellaSourceMap, projectMap,
+			portalPath, excludeTypes, umbrellaSourceMap, modulePaths,
 			projectPath);
 
 		_createProjectXML(
-			projectName, umbrellaSourceMap, projectMap, projectPath);
+			projectName, umbrellaSourceMap, modulePaths, projectPath);
 	}
 
 	private static void _appendProjectProperties(
 			Path portalPath, String excludeTypes,
-			Map<String, String> umbrellaSourceMap, Map<Path, Module> projectMap,
+			Map<String, String> umbrellaSourceMap, Set<Path> modulePaths,
 			Path projectPath)
 		throws IOException {
 
@@ -97,7 +97,7 @@ public class CreateUmbrella {
 
 		StringBuilder javacSB = new StringBuilder("javac.classpath=\\\n");
 
-		for (Path modulePath : projectMap.keySet()) {
+		for (Path modulePath : modulePaths) {
 			String name = ModuleUtil.getModuleName(modulePath);
 
 			sb.append("project.");
@@ -125,7 +125,7 @@ public class CreateUmbrella {
 			bufferedWriter.append(sb);
 			bufferedWriter.newLine();
 
-			if (!projectMap.isEmpty()) {
+			if (!modulePaths.isEmpty()) {
 				javacSB.setLength(javacSB.length() - 3);
 			}
 
@@ -164,7 +164,7 @@ public class CreateUmbrella {
 
 	private static void _createProjectElement(
 		Document document, String projectName,
-		Map<String, String> umbrellaSourceMap, Map<Path, Module> projectMap) {
+		Map<String, String> umbrellaSourceMap, Set<Path> modulePaths) {
 
 		Element projectElement = document.createElement("project");
 
@@ -187,12 +187,12 @@ public class CreateUmbrella {
 		_createData(
 			document, configurationElement, umbrellaSourceMap, projectName);
 
-		_createReferences(document, configurationElement, projectMap);
+		_createReferences(document, configurationElement, modulePaths);
 	}
 
 	private static void _createProjectXML(
 			String projectName, Map<String, String> umbrellaSourceMap,
-			Map<Path, Module> projectMap, Path projectPath)
+			Set<Path> modulePaths, Path projectPath)
 		throws Exception {
 
 		DocumentBuilderFactory documentBuilderFactory =
@@ -204,7 +204,7 @@ public class CreateUmbrella {
 		Document document = documentBuilder.newDocument();
 
 		_createProjectElement(
-			document, projectName, umbrellaSourceMap, projectMap);
+			document, projectName, umbrellaSourceMap, modulePaths);
 
 		TransformerFactory transformerFactory =
 			TransformerFactory.newInstance();
@@ -270,7 +270,7 @@ public class CreateUmbrella {
 
 	private static void _createReferences(
 		Document document, Element configurationElement,
-		Map<Path, Module> projectMap) {
+		Set<Path> modulePaths) {
 
 		Element referencesElement = document.createElement("references");
 
@@ -279,7 +279,7 @@ public class CreateUmbrella {
 
 		configurationElement.appendChild(referencesElement);
 
-		for (Path modulePath : projectMap.keySet()) {
+		for (Path modulePath : modulePaths) {
 			_createReference(
 				document, referencesElement,
 				ModuleUtil.getModuleName(modulePath));

@@ -89,7 +89,7 @@ public class ProjectBuilder {
 			PropertiesUtil.loadProperties(
 				Paths.get("project-dependency.properties"));
 
-		final Map<Path, Module> projectMap = new HashMap<>();
+		final Map<Path, Module> moduleMap = new HashMap<>();
 
 		Files.walkFileTree(
 			portalPath, EnumSet.allOf(FileVisitOption.class), Integer.MAX_VALUE,
@@ -119,7 +119,7 @@ public class ProjectBuilder {
 						path, jarDependenciesMap.get(fileName),
 						projectDependencyProperties);
 
-					projectMap.put(module.getModulePath(), module);
+					moduleMap.put(module.getModulePath(), module);
 
 					return FileVisitResult.SKIP_SUBTREE;
 				}
@@ -129,9 +129,9 @@ public class ProjectBuilder {
 		String excludedTypes = buildProperties.getProperty("exclude.types");
 
 		ProjectDependencyResolver projectDependencyResolver =
-			new ProjectDependencyResolver(projectMap, portalPath);
+			new ProjectDependencyResolver(moduleMap, portalPath);
 
-		for (Module module : projectMap.values()) {
+		for (Module module : moduleMap.values()) {
 			CreateModule.createModule(
 				module, portalPath, excludedTypes, projectDependencyResolver,
 				projectPath);
@@ -141,7 +141,7 @@ public class ProjectBuilder {
 			portalPath, projectName,
 			PropertiesUtil.getProperties(
 				buildProperties, "umbrella.source.list"),
-			excludedTypes, projectMap, projectPath);
+			excludedTypes, moduleMap.keySet(), projectPath);
 	}
 
 }
