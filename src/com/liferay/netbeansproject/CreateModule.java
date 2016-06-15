@@ -63,22 +63,16 @@ public class CreateModule {
 			Path projectPath)
 		throws Exception {
 
-		String moduleName = module.getModuleName();
-
 		Path projectModulePath = projectPath.resolve(
-			Paths.get("modules", moduleName));
+			Paths.get("modules", module.getModuleName()));
 
 		ZipUtil.unZip(projectModulePath);
-
-		ProjectInfo projectInfo = new ProjectInfo(
-			moduleName, portalPath, module.getModulePath(),
-			module.getPortalLevelModuleDependencies());
 
 		_replaceProjectName(module, projectModulePath);
 
 		_appendProperties(
-			module, projectInfo, excludedTypes, projectModulePath,
-			projectDependencyResolver, projectPath);
+			module, excludedTypes, projectModulePath, projectDependencyResolver,
+			portalPath, projectPath);
 
 		_createProjectXML(module, portalPath.getParent(), projectModulePath);
 	}
@@ -118,13 +112,12 @@ public class CreateModule {
 	}
 
 	private static void _appendProperties(
-			Module module, ProjectInfo projectInfo, String excludeTypes,
-			Path modulePath,
+			Module module, String excludeTypes, Path modulePath,
 			ProjectDependencyResolver projectDependencyResolver,
-			Path projectPath)
+			Path portalPath, Path projectPath)
 		throws Exception {
 
-		String projectName = projectInfo.getProjectName();
+		String projectName = module.getModuleName();
 
 		Path projectPropertiesPath = modulePath.resolve(
 			"nbproject/project.properties");
@@ -139,19 +132,20 @@ public class CreateModule {
 			projectSB.append('\n');
 
 			projectSB.append("application.title=");
-			projectSB.append(projectInfo.getFullPath());
+			projectSB.append(module.getModulePath());
 			projectSB.append('\n');
 
 			projectSB.append("dist.jar=${dist.dir}/");
 			projectSB.append(projectName);
 			projectSB.append(".jar\n");
 
-			_appendSourcePath(
-				projectName, projectInfo.getFullPath(), projectSB);
+			_appendSourcePath(projectName, module.getModulePath(), projectSB);
 
 			StringBuilder javacSB = new StringBuilder("javac.classpath=\\\n");
 
-			for (String projectLibs : projectInfo.getProjectLibs()) {
+			for (String projectLibs :
+					module.getPortalLevelModuleDependencies()) {
+
 				if (!projectLibs.isEmpty()) {
 					_appendReferenceProperties(
 						bufferedWriter, projectLibs, javacSB);
@@ -204,9 +198,8 @@ public class CreateModule {
 					StringUtil.split(
 						compileTestDependencies, File.pathSeparatorChar)));
 
-			for (
-				ModuleDependency moduleDependency :
-				module.getModuleDependencies()) {
+			for (ModuleDependency moduleDependency :
+					module.getModuleDependencies()) {
 
 				Module dependencyModule = projectDependencyResolver.resolve(
 					moduleDependency.getModuleLocation());
@@ -222,8 +215,6 @@ public class CreateModule {
 						javacSB);
 				}
 			}
-
-			Path portalPath = projectInfo.getPortalPath();
 
 			_appendLibJars(portalPath, compileSet, javacSB, projectSB);
 			_appendLibJars(portalPath, compileTestSet, testSB, projectSB);
@@ -249,7 +240,7 @@ public class CreateModule {
 			if (projectName.equals("portal-impl")) {
 				projectSB.append(
 					"\nfile.reference.portal-test-integration-src=");
-				projectSB.append(projectInfo.getPortalPath());
+				projectSB.append(portalPath);
 				projectSB.append("/portal-test-integration/src\n");
 				projectSB.append("src.test.dir=");
 				projectSB.append(
@@ -258,7 +249,7 @@ public class CreateModule {
 
 			if (projectName.equals("portal-kernel")) {
 				projectSB.append("\nfile.reference.portal-test-src=");
-				projectSB.append(projectInfo.getPortalPath());
+				projectSB.append(portalPath);
 				projectSB.append("/portal-test/src\n");
 				projectSB.append(
 					"src.test.dir=${file.reference.portal-test-src}");
@@ -719,44 +710,6 @@ public class CreateModule {
 			module.getModuleName());
 
 		Files.write(buildXMLPath, Arrays.asList(content));
-	}
-
-	private static class ProjectInfo {
-
-		public Path getFullPath() {
-			return _fullPath;
-		}
-
-		public Path getPortalPath() {
-			return _portalPath;
-		}
-
-		public List<String> getProjectLibs() {
-			return _projectLib;
-		}
-
-		public String getProjectName() {
-			return _projectName;
-		}
-
-		private ProjectInfo(
-			String projectName, Path portalPath, Path fullPath,
-			List<String> projectLibs) {
-
-			_projectName = projectName;
-
-			_portalPath = portalPath;
-
-			_fullPath = fullPath;
-
-			_projectLib = projectLibs;
-		}
-
-		private final Path _fullPath;
-		private final Path _portalPath;
-		private final List<String> _projectLib;
-		private final String _projectName;
-
 	}
 
 }
