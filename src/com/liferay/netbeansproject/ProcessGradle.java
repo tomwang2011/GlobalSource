@@ -64,14 +64,7 @@ public class ProcessGradle {
 
 		Map<String, String> env = processBuilder.environment();
 
-		String javaVersion = System.getProperty("java.version");
-
-		if (javaVersion.startsWith("1.7.")) {
-			env.put("GRADLE_OPTS", "-Xmx2g -XX:MaxPermSize=256m");
-		}
-		else {
-			env.put("GRADLE_OPTS", "-Xmx2g");
-		}
+		env.put("GRADLE_OPTS", "-Xmx2g");
 
 		Process process = processBuilder.start();
 
