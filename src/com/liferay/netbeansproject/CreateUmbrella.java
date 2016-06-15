@@ -14,8 +14,8 @@
 
 package com.liferay.netbeansproject;
 
+import com.liferay.netbeansproject.util.FileUtil;
 import com.liferay.netbeansproject.util.ModuleUtil;
-import com.liferay.netbeansproject.util.ZipUtil;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -51,7 +51,7 @@ public class CreateUmbrella {
 			Set<Path> modulePaths, Path projectPath)
 		throws Exception {
 
-		ZipUtil.unZip(projectPath);
+		FileUtil.unZip(projectPath);
 
 		_appendProjectProperties(
 			portalPath, excludeTypes, umbrellaSourceMap, modulePaths,

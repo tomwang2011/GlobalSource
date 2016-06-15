@@ -18,8 +18,8 @@ import com.liferay.netbeansproject.container.JarDependency;
 import com.liferay.netbeansproject.container.Module;
 import com.liferay.netbeansproject.resolvers.ProjectDependencyResolver;
 import com.liferay.netbeansproject.util.ArgumentsUtil;
+import com.liferay.netbeansproject.util.FileUtil;
 import com.liferay.netbeansproject.util.ModuleUtil;
-import com.liferay.netbeansproject.util.PathUtil;
 import com.liferay.netbeansproject.util.PropertiesUtil;
 import com.liferay.netbeansproject.util.StringUtil;
 
@@ -73,7 +73,7 @@ public class ProjectBuilder {
 		final Path projectPath = Paths.get(
 			projectDir, portalNamePath.toString());
 
-		PathUtil.delete(projectPath);
+		FileUtil.delete(projectPath);
 
 		final Set<String> ignoredDirSet = new HashSet<>(
 			Arrays.asList(StringUtil.split(ignoredDirs, ',')));

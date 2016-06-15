@@ -18,10 +18,9 @@ import com.liferay.netbeansproject.container.JarDependency;
 import com.liferay.netbeansproject.container.Module;
 import com.liferay.netbeansproject.resolvers.ProjectDependencyResolver;
 import com.liferay.netbeansproject.util.ArgumentsUtil;
+import com.liferay.netbeansproject.util.FileUtil;
 import com.liferay.netbeansproject.util.ModuleUtil;
-import com.liferay.netbeansproject.util.PathUtil;
 import com.liferay.netbeansproject.util.PropertiesUtil;
-import com.liferay.netbeansproject.util.ZipUtil;
 
 import java.io.IOException;
 
@@ -115,7 +114,7 @@ public class IncrementBuilder {
 						Path moduleProjectPath = projectRootPath.resolve(
 							Paths.get("modules", moduleName));
 
-						PathUtil.delete(moduleProjectPath);
+						FileUtil.delete(moduleProjectPath);
 
 						Map<String, List<JarDependency>> jarDependenciesMap =
 							new HashMap<>();
@@ -126,7 +125,7 @@ public class IncrementBuilder {
 								displayGradleProcessOutput);
 						}
 
-						ZipUtil.unZip(
+						FileUtil.unZip(
 							projectRootPath.resolve(
 								Paths.get("modules", moduleName)));
 

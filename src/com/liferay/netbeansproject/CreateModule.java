@@ -17,9 +17,9 @@ package com.liferay.netbeansproject;
 import com.liferay.netbeansproject.container.Module;
 import com.liferay.netbeansproject.container.ModuleDependency;
 import com.liferay.netbeansproject.resolvers.ProjectDependencyResolver;
+import com.liferay.netbeansproject.util.FileUtil;
 import com.liferay.netbeansproject.util.PropertiesUtil;
 import com.liferay.netbeansproject.util.StringUtil;
-import com.liferay.netbeansproject.util.ZipUtil;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -66,7 +66,7 @@ public class CreateModule {
 		Path projectModulePath = projectPath.resolve(
 			Paths.get("modules", module.getModuleName()));
 
-		ZipUtil.unZip(projectModulePath);
+		FileUtil.unZip(projectModulePath);
 
 		_replaceProjectName(module, projectModulePath);
 

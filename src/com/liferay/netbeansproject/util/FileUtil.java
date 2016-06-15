@@ -29,7 +29,39 @@ import java.nio.file.attribute.BasicFileAttributes;
 /**
  * @author Tom Wang
  */
-public class ZipUtil {
+public class FileUtil {
+
+	public static void delete(Path projectDirPath) throws IOException {
+		if (!Files.exists(projectDirPath)) {
+			return;
+		}
+
+		Files.walkFileTree(
+			projectDirPath,
+			new SimpleFileVisitor<Path>() {
+
+				@Override
+				public FileVisitResult postVisitDirectory(
+						Path path, IOException ioe)
+					throws IOException {
+
+					Files.delete(path);
+
+					return FileVisitResult.CONTINUE;
+				}
+
+				@Override
+				public FileVisitResult visitFile(
+						Path path, BasicFileAttributes basicFileAttributes)
+					throws IOException {
+
+					Files.delete(path);
+
+					return FileVisitResult.CONTINUE;
+				}
+
+			});
+	}
 
 	public static void unZip(final Path destinationPath) throws IOException {
 		Files.createDirectories(destinationPath);

@@ -14,7 +14,7 @@
 
 package com.liferay.netbeansproject.container;
 
-import com.liferay.netbeansproject.util.PathUtil;
+import com.liferay.netbeansproject.util.FileUtil;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,7 +30,7 @@ public class ModuleTest {
 
 	@After
 	public void cleanup() throws IOException {
-		PathUtil.delete(_rootPath);
+		FileUtil.delete(_rootPath);
 	}
 
 	@Test
