@@ -126,24 +126,16 @@ public class ProjectBuilder {
 
 		String excludedTypes = buildProperties.getProperty("exclude.types");
 
-		_createModules(projectMap, portalPath, projectPath, excludedTypes);
+		for (Module module : projectMap.values()) {
+			CreateModule.createModule(
+				module, portalPath, excludedTypes, projectPath);
+		}
 
 		CreateUmbrella.createUmbrella(
 			portalPath, projectName,
 			PropertiesUtil.getProperties(
 				buildProperties, "umbrella.source.list"),
 			excludedTypes, projectMap, projectPath);
-	}
-
-	private static void _createModules(
-			Map<Path, Module> projectMap, Path portalPath, Path projectPath,
-			String excludedTypes)
-		throws Exception {
-
-		for (Module module : projectMap.values()) {
-			CreateModule.createModule(
-				module, portalPath, excludedTypes, projectPath);
-		}
 	}
 
 	private void _generateModuleList(Map<Path, Module> moduleMap, Path filePath)
