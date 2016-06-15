@@ -148,11 +148,11 @@ public class ProcessGradle {
 
 		Path relativeWorkPath = modulesPath.relativize(workDirPath);
 
-		if (relativeWorkPath.getNameCount() == 0) {
+		String relativeWorkPathString = relativeWorkPath.toString();
+
+		if (relativeWorkPathString.isEmpty()) {
 			return "printDependencies";
 		}
-
-		String relativeWorkPathString = relativeWorkPath.toString();
 
 		relativeWorkPathString = relativeWorkPathString.replace('/', ':');
 
