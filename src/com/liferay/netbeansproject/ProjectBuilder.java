@@ -23,7 +23,6 @@ import com.liferay.netbeansproject.util.PathUtil;
 import com.liferay.netbeansproject.util.PropertiesUtil;
 import com.liferay.netbeansproject.util.StringUtil;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
 
 import java.nio.file.FileVisitOption;
@@ -32,7 +31,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
-import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.BasicFileAttributes;
 
 import java.util.Arrays;
@@ -128,8 +126,6 @@ public class ProjectBuilder {
 
 			});
 
-		_generateModuleList(projectMap, projectPath.resolve("moduleList"));
-
 		String excludedTypes = buildProperties.getProperty("exclude.types");
 
 		ProjectDependencyResolver projectDependencyResolver =
@@ -146,19 +142,6 @@ public class ProjectBuilder {
 			PropertiesUtil.getProperties(
 				buildProperties, "umbrella.source.list"),
 			excludedTypes, projectMap, projectPath);
-	}
-
-	private void _generateModuleList(Map<Path, Module> moduleMap, Path filePath)
-		throws IOException {
-
-		try (BufferedWriter bufferedWriter = Files.newBufferedWriter(
-				filePath, StandardOpenOption.CREATE)) {
-
-			for (Path path : moduleMap.keySet()) {
-				bufferedWriter.append(ModuleUtil.getModuleName(path));
-				bufferedWriter.append(',');
-			}
-		}
 	}
 
 }
