@@ -176,6 +176,10 @@ public class CreateModule {
 		Path path, String prefix, String name, String subfix,
 		StringBuilder sb) {
 
+		if (path == null) {
+			return;
+		}
+
 		sb.append("file.reference.");
 		sb.append(name);
 		sb.append('-');
