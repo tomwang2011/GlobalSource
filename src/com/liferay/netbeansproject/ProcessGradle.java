@@ -45,36 +45,20 @@ public class ProcessGradle {
 			boolean displayGradleProcessOutput)
 		throws Exception {
 
-		Path gradlewPath = portalDirPath.resolve("gradlew");
-
-		List<String> gradleTask = new ArrayList<>();
-
-		gradleTask.add(gradlewPath.toString());
-		gradleTask.add("--parallel");
-		gradleTask.add("--init-script=dependency.gradle");
-		gradleTask.add("-p");
-
-		Path modulesPath = portalDirPath.resolve("modules");
-
-		gradleTask.add(modulesPath.toString());
-
-		Path relativeWorkPath = modulesPath.relativize(workDirPath);
-
-		String relativeWorkString = relativeWorkPath.toString();
-
-		if (!relativeWorkString.isEmpty()) {
-			relativeWorkString = relativeWorkString.replace('/', ':');
-
-			relativeWorkString += ":";
-		}
-
-		gradleTask.add(relativeWorkString + "printDependencies");
-
 		Path dependenciesDirPath = projectDirPath.resolve("dependencies");
 
 		Files.createDirectories(dependenciesDirPath);
 
-		gradleTask.add("-PdependencyDirectory=" + dependenciesDirPath);
+		List<String> gradleTask = new ArrayList<>();
+
+		gradleTask.add(String.valueOf(portalDirPath.resolve("gradlew")));
+		gradleTask.add("--parallel");
+		gradleTask.add("--init-script=dependency.gradle");
+		gradleTask.add("-p");
+		gradleTask.add(String.valueOf(portalDirPath.resolve("modules")));
+		gradleTask.add(_getTaskName(portalDirPath, workDirPath));
+		gradleTask.add(
+			"-PdependencyDirectory=".concat(dependenciesDirPath.toString()));
 
 		ProcessBuilder processBuilder = new ProcessBuilder(gradleTask);
 
@@ -165,6 +149,22 @@ public class ProcessGradle {
 			});
 
 		return dependenciesMap;
+	}
+
+	private static String _getTaskName(Path portalDirPath, Path workDirPath) {
+		Path modulesPath = portalDirPath.resolve("modules");
+
+		Path relativeWorkPath = modulesPath.relativize(workDirPath);
+
+		if (relativeWorkPath.getNameCount() == 0) {
+			return "printDependencies";
+		}
+
+		String relativeWorkPathString = relativeWorkPath.toString();
+
+		relativeWorkPathString = relativeWorkPathString.replace('/', ':');
+
+		return relativeWorkPathString.concat(":").concat("printDependencies");
 	}
 
 }
