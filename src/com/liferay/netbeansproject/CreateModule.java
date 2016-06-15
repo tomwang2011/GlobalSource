@@ -227,8 +227,6 @@ public class CreateModule {
 				}
 			}
 
-			projectInfo.setDependenciesModuleMap(dependenciesModuleMap);
-
 			Path portalPath = projectInfo.getPortalPath();
 
 			_appendLibJars(portalPath, compileSet, javacSB, projectSB);
@@ -760,10 +758,6 @@ public class CreateModule {
 
 	private static class ProjectInfo {
 
-		public Map<String, ModuleInfo> getDependenciesModuleMap() {
-			return _dependenciesModuleMap;
-		}
-
 		public Path getFullPath() {
 			return _fullPath;
 		}
@@ -782,12 +776,6 @@ public class CreateModule {
 
 		public String getProjectName() {
 			return _projectName;
-		}
-
-		public void setDependenciesModuleMap(
-			Map<String, ModuleInfo> dependenciesModuleMap) {
-
-			_dependenciesModuleMap = dependenciesModuleMap;
 		}
 
 		private ProjectInfo(
@@ -813,7 +801,6 @@ public class CreateModule {
 			}
 		}
 
-		private Map<String, ModuleInfo> _dependenciesModuleMap;
 		private final Path _fullPath;
 		private final Map<String, Path> _moduleMap;
 		private final Path _portalPath;
