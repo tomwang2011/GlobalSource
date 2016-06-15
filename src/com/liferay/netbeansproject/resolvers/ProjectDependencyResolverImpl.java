@@ -18,6 +18,7 @@ import com.liferay.netbeansproject.container.Module;
 import com.liferay.netbeansproject.util.StringUtil;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import java.util.Map;
 
@@ -37,17 +38,9 @@ public class ProjectDependencyResolverImpl
 
 	@Override
 	public Module resolve(String moduleLocation) {
-		String[] modulePathSplit = StringUtil.split(moduleLocation, ':');
-
-		int splitLength = modulePathSplit.length - 1;
-
-		Path moduleGroupPath = _portalDir.resolve("modules");
-
-		for (int i = 0; i <= splitLength; i++) {
-			moduleGroupPath = moduleGroupPath.resolve(modulePathSplit[i]);
-		}
-
-		return _projectMap.get(moduleGroupPath);
+		return _projectMap.get(
+			_portalDir.resolve(
+				Paths.get("modules", StringUtil.split(moduleLocation, ':'))));
 	}
 
 	private static Path _portalDir;
