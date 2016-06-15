@@ -17,7 +17,6 @@ package com.liferay.netbeansproject;
 import com.liferay.netbeansproject.container.JarDependency;
 import com.liferay.netbeansproject.container.Module;
 import com.liferay.netbeansproject.resolvers.ProjectDependencyResolver;
-import com.liferay.netbeansproject.resolvers.ProjectDependencyResolverImpl;
 import com.liferay.netbeansproject.util.ArgumentsUtil;
 import com.liferay.netbeansproject.util.ModuleUtil;
 import com.liferay.netbeansproject.util.PathUtil;
@@ -134,7 +133,7 @@ public class ProjectBuilder {
 		String excludedTypes = buildProperties.getProperty("exclude.types");
 
 		ProjectDependencyResolver projectDependencyResolver =
-			new ProjectDependencyResolverImpl(projectMap, portalPath);
+			new ProjectDependencyResolver(projectMap, portalPath);
 
 		for (Module module : projectMap.values()) {
 			CreateModule.createModule(
