@@ -89,14 +89,13 @@ public class ProcessGradle {
 				}
 			}
 		}
-		else {
-			int exitCode = process.waitFor();
 
-			if (exitCode != 0) {
-				throw new IOException(
-					"Process " + processBuilder.command() + " failed with " +
-						exitCode);
-			}
+		int exitCode = process.waitFor();
+
+		if (exitCode != 0) {
+			throw new IOException(
+				"Process " + processBuilder.command() + " failed with " +
+					exitCode);
 		}
 
 		final Map<String, List<JarDependency>> dependenciesMap =
