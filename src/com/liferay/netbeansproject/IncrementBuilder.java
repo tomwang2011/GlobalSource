@@ -16,6 +16,8 @@ package com.liferay.netbeansproject;
 
 import com.liferay.netbeansproject.container.JarDependency;
 import com.liferay.netbeansproject.container.Module;
+import com.liferay.netbeansproject.resolvers.ProjectDependencyResolver;
+import com.liferay.netbeansproject.resolvers.ProjectDependencyResolverImpl;
 import com.liferay.netbeansproject.util.ArgumentsUtil;
 import com.liferay.netbeansproject.util.ModuleUtil;
 import com.liferay.netbeansproject.util.PathUtil;
@@ -67,6 +69,9 @@ public class IncrementBuilder {
 
 		final boolean displayGradleProcessOutput = Boolean.valueOf(
 			buildProperties.getProperty("display.gradle.process.output"));
+
+		final ProjectDependencyResolver projectDependencyResolver =
+			new ProjectDependencyResolverImpl(existProjectMap, portalPath);
 
 		final Properties projectDependencyProperties =
 			PropertiesUtil.loadProperties(
@@ -134,7 +139,8 @@ public class IncrementBuilder {
 							projectDependencyProperties);
 
 						CreateModule.createModule(
-							module, portalPath, excludedTypes, projectRootPath);
+							module, portalPath, excludedTypes,
+							projectDependencyResolver, projectRootPath);
 					}
 					catch (IOException ioe) {
 						throw ioe;
