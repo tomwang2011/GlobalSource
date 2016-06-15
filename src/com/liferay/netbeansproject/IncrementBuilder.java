@@ -45,11 +45,11 @@ import java.util.Properties;
 public class IncrementBuilder {
 
 	public static void main(String[] args) throws IOException {
-		IncrementBuilder addModule = new IncrementBuilder();
-
 		Map<String, String> arguments = ArgumentsUtil.parseArguments(args);
 
-		addModule.addModule(Paths.get(arguments.get("portal.dir")));
+		IncrementBuilder incrementBuilder = new IncrementBuilder();
+
+		incrementBuilder.addModule(Paths.get(arguments.get("portal.dir")));
 	}
 
 	public void addModule(final Path portalPath) throws IOException {
