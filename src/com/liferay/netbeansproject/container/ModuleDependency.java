@@ -14,18 +14,20 @@
 
 package com.liferay.netbeansproject.container;
 
+import java.nio.file.Path;
+
 /**
  * @author Tom Wang
  */
 public class ModuleDependency {
 
-	public ModuleDependency(String moduleLocation, boolean test) {
-		_moduleLocation = moduleLocation;
+	public ModuleDependency(Path moduleRelativePath, boolean test) {
+		_moduleRelativePath = moduleRelativePath;
 		_test = test;
 	}
 
-	public String getModuleLocation() {
-		return _moduleLocation;
+	public Path getModuleRelativePath() {
+		return _moduleRelativePath;
 	}
 
 	public boolean isTest() {
@@ -36,15 +38,15 @@ public class ModuleDependency {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 
-		sb.append("{moduleLocation=");
-		sb.append(_moduleLocation);
+		sb.append("{moduleRelativePath=");
+		sb.append(_moduleRelativePath);
 		sb.append(", test=");
 		sb.append(_test);
 
 		return sb.toString();
 	}
 
-	private final String _moduleLocation;
+	private final Path _moduleRelativePath;
 	private final boolean _test;
 
 }

@@ -202,7 +202,7 @@ public class CreateModule {
 					module.getModuleDependencies()) {
 
 				Module dependencyModule = projectDependencyResolver.resolve(
-					moduleDependency.getModuleLocation());
+					moduleDependency.getModuleRelativePath());
 
 				if (moduleDependency.isTest()) {
 					_appendReferenceProperties(
@@ -652,14 +652,11 @@ public class CreateModule {
 		for (ModuleDependency moduleDependency :
 				module.getModuleDependencies()) {
 
-			String moduleLocation = moduleDependency.getModuleLocation();
-
-			String[] moduleLocationSplit = StringUtil.split(
-				moduleLocation, ':');
+			Path moduleRelativePath = moduleDependency.getModuleRelativePath();
 
 			_createReference(
 				document, referencesElement,
-				moduleLocationSplit[moduleLocationSplit.length - 1]);
+				String.valueOf(moduleRelativePath.getFileName()));
 		}
 
 		for (String dependency : module.getPortalLevelModuleDependencies()) {

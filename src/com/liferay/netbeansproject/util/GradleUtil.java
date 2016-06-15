@@ -20,6 +20,7 @@ import java.io.IOException;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -62,9 +63,11 @@ public class GradleUtil {
 					"Broken syntax in " + buildGradlePath);
 			}
 
+			String moduleLocation = line.substring(index1 + 1, index2);
+
 			moduleDependencies.add(
 				new ModuleDependency(
-					line.substring(index1 + 1, index2),
+					Paths.get("modules", StringUtil.split(moduleLocation, ':')),
 					line.startsWith("test")));
 		}
 
