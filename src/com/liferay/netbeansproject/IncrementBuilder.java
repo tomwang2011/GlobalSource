@@ -34,9 +34,11 @@ import java.nio.file.attribute.BasicFileAttributes;
 
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 /**
  * @author Tom Wang
@@ -78,7 +80,7 @@ public class IncrementBuilder {
 	public void addModule(
 			final Path projectRootPath, final Path portalPath,
 			Properties buildProperties)
-		throws IOException {
+		throws Exception {
 
 		final Map<Path, Module> existProjectMap = _getExistingProjects(
 			projectRootPath);
@@ -96,6 +98,8 @@ public class IncrementBuilder {
 			"exclude.types");
 
 		final String portalLibJars = ModuleUtil.getPortalLibJars(portalPath);
+
+		final Set<Path> changedModules = new HashSet<>();
 
 		Files.walkFileTree(
 			portalPath, EnumSet.allOf(FileVisitOption.class), Integer.MAX_VALUE,
@@ -128,47 +132,46 @@ public class IncrementBuilder {
 							return FileVisitResult.SKIP_SUBTREE;
 						}
 
-						String moduleName = ModuleUtil.getModuleName(path);
-
-						Path moduleProjectPath = projectRootPath.resolve(
-							Paths.get("modules", moduleName));
-
-						FileUtil.delete(moduleProjectPath);
-
-						Map<String, List<JarDependency>> jarDependenciesMap =
-							new HashMap<>();
-
-						if (Files.exists(path.resolve("build.gradle"))) {
-							jarDependenciesMap = GradleUtil.getJarDependencies(
-								portalPath, path, displayGradleProcessOutput);
-						}
-
-						FileUtil.unZip(
-							projectRootPath.resolve(
-								Paths.get("modules", moduleName)));
-
-						Module module = Module.createModule(
-							projectRootPath.resolve(
-								Paths.get(
-									"modules", ModuleUtil.getModuleName(path))),
-							path, jarDependenciesMap.get(moduleName),
-							projectDependencyProperties);
-
-						CreateModule.createModule(
-							module, projectRootPath, excludedTypes,
-							portalLibJars, portalPath);
+						changedModules.add(path);
 					}
 					catch (IOException ioe) {
 						throw ioe;
-					}
-					catch (Exception e) {
-						throw new IOException(e);
 					}
 
 					return FileVisitResult.SKIP_SUBTREE;
 				}
 
 			});
+
+		for (Path path : changedModules) {
+			String moduleName = ModuleUtil.getModuleName(path);
+
+			Path moduleProjectPath = projectRootPath.resolve(
+				Paths.get("modules", moduleName));
+
+			FileUtil.delete(moduleProjectPath);
+
+			Map<String, List<JarDependency>> jarDependenciesMap =
+				new HashMap<>();
+
+			if (Files.exists(path.resolve("build.gradle"))) {
+				jarDependenciesMap = GradleUtil.getJarDependencies(
+					portalPath, path, displayGradleProcessOutput);
+			}
+
+			FileUtil.unZip(
+				projectRootPath.resolve(Paths.get("modules", moduleName)));
+
+			Module module = Module.createModule(
+				projectRootPath.resolve(
+					Paths.get("modules", ModuleUtil.getModuleName(path))),
+				path, jarDependenciesMap.get(moduleName),
+				projectDependencyProperties);
+
+			CreateModule.createModule(
+				module, projectRootPath, excludedTypes, portalLibJars,
+				portalPath);
+		}
 	}
 
 	private Map<Path, Module> _getExistingProjects(Path projectRootPath)
