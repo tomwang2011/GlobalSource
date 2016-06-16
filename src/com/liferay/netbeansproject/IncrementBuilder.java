@@ -123,8 +123,7 @@ public class IncrementBuilder {
 
 						if (Files.exists(path.resolve("build.gradle"))) {
 							jarDependenciesMap = ProcessGradle.processGradle(
-								portalPath, projectRootPath, path,
-								displayGradleProcessOutput);
+								portalPath, path, displayGradleProcessOutput);
 						}
 
 						FileUtil.unZip(

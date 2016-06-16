@@ -40,11 +40,11 @@ import java.util.Properties;
 public class ProcessGradle {
 
 	public static Map<String, List<JarDependency>> processGradle(
-			Path portalDirPath, Path projectDirPath, Path workDirPath,
+			Path portalDirPath, Path workDirPath,
 			boolean displayGradleProcessOutput)
 		throws Exception {
 
-		Path dependenciesDirPath = projectDirPath.resolve("dependencies");
+		Path dependenciesDirPath = Files.createTempDirectory(null);
 
 		FileUtil.delete(dependenciesDirPath);
 

@@ -80,7 +80,7 @@ public class ProjectBuilder {
 
 		final Map<String, List<JarDependency>> jarDependenciesMap =
 			ProcessGradle.processGradle(
-				portalPath, projectPath, portalPath.resolve("modules"),
+				portalPath, portalPath.resolve("modules"),
 				Boolean.valueOf(
 					buildProperties.getProperty(
 						"display.gradle.process.output")));
