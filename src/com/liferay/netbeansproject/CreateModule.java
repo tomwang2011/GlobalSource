@@ -69,12 +69,6 @@ public class CreateModule {
 		_createProjectXML(module, portalPath.getParent(), projectModulePath);
 	}
 
-	private static void _appendDependencyJar(Path jarPath, StringBuilder sb) {
-		sb.append('\t');
-		sb.append(jarPath);
-		sb.append(":\\\n");
-	}
-
 	private static void _appendProjectDependencies(
 		String moduleName, StringBuilder projectSB, StringBuilder javacSB) {
 
@@ -458,17 +452,23 @@ public class CreateModule {
 	}
 
 	private static void _resolveDependencyJarSet(
-		Module module, StringBuilder projectSB, StringBuilder testSB) {
+		Module module, StringBuilder javacSB, StringBuilder testSB) {
+
+		StringBuilder sb = null;
 
 		for (JarDependency jarDependency : module.getJarDependencies()) {
 			Path jarPath = jarDependency.getJarPath();
 
 			if (jarDependency.isTest()) {
-				_appendDependencyJar(jarPath, testSB);
+				sb = testSB;
 			}
 			else {
-				_appendDependencyJar(jarPath, projectSB);
+				sb = javacSB;
 			}
+
+			sb.append('\t');
+			sb.append(jarPath);
+			sb.append(":\\\n");
 		}
 	}
 
