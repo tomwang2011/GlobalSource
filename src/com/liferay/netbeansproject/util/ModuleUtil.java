@@ -50,14 +50,14 @@ public class ModuleUtil {
 
 				@Override
 				public FileVisitResult visitFile(
-						Path dir, BasicFileAttributes attrs)
+						Path filePath, BasicFileAttributes attrs)
 					throws IOException {
 
-					String fileName = dir.toString();
+					String filePathString = filePath.toString();
 
-					if (fileName.endsWith(".jar")) {
+					if (filePathString.endsWith(".jar")) {
 						sb.append('\t');
-						sb.append(dir);
+						sb.append(filePathString);
 						sb.append(":\\\n");
 					}
 
