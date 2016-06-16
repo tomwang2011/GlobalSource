@@ -19,6 +19,7 @@ import com.liferay.netbeansproject.container.Module;
 import com.liferay.netbeansproject.resolvers.ProjectDependencyResolver;
 import com.liferay.netbeansproject.util.ArgumentsUtil;
 import com.liferay.netbeansproject.util.FileUtil;
+import com.liferay.netbeansproject.util.GradleUtil;
 import com.liferay.netbeansproject.util.ModuleUtil;
 import com.liferay.netbeansproject.util.PropertiesUtil;
 import com.liferay.netbeansproject.util.StringUtil;
@@ -79,7 +80,7 @@ public class ProjectBuilder {
 			Arrays.asList(StringUtil.split(ignoredDirs, ',')));
 
 		final Map<String, List<JarDependency>> jarDependenciesMap =
-			ProcessGradle.getJarDependencies(
+			GradleUtil.getJarDependencies(
 				portalPath, portalPath.resolve("modules"),
 				Boolean.valueOf(
 					buildProperties.getProperty(

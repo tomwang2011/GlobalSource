@@ -19,6 +19,7 @@ import com.liferay.netbeansproject.container.Module;
 import com.liferay.netbeansproject.resolvers.ProjectDependencyResolver;
 import com.liferay.netbeansproject.util.ArgumentsUtil;
 import com.liferay.netbeansproject.util.FileUtil;
+import com.liferay.netbeansproject.util.GradleUtil;
 import com.liferay.netbeansproject.util.ModuleUtil;
 import com.liferay.netbeansproject.util.PropertiesUtil;
 
@@ -122,10 +123,8 @@ public class IncrementBuilder {
 							new HashMap<>();
 
 						if (Files.exists(path.resolve("build.gradle"))) {
-							jarDependenciesMap =
-								ProcessGradle.getJarDependencies(
-									portalPath, path,
-									displayGradleProcessOutput);
+							jarDependenciesMap = GradleUtil.getJarDependencies(
+								portalPath, path, displayGradleProcessOutput);
 						}
 
 						FileUtil.unZip(

@@ -14,22 +14,128 @@
 
 package com.liferay.netbeansproject.util;
 
+import com.liferay.netbeansproject.container.JarDependency;
 import com.liferay.netbeansproject.container.ModuleDependency;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * @author Tom Wang
  */
 public class GradleUtil {
+
+	public static Map<String, List<JarDependency>> getJarDependencies(
+			Path portalDirPath, Path workDirPath,
+			boolean displayGradleProcessOutput)
+		throws Exception {
+
+		Path dependenciesDirPath = Files.createTempDirectory(null);
+
+		FileUtil.delete(dependenciesDirPath);
+
+		Files.createDirectories(dependenciesDirPath);
+
+		List<String> gradleTask = new ArrayList<>();
+
+		gradleTask.add(String.valueOf(portalDirPath.resolve("gradlew")));
+		gradleTask.add("--parallel");
+		gradleTask.add("--init-script=dependency.gradle");
+		gradleTask.add("-p");
+		gradleTask.add(String.valueOf(portalDirPath.resolve("modules")));
+		gradleTask.add(_getTaskName(portalDirPath, workDirPath));
+		gradleTask.add(
+			"-PdependencyDirectory=".concat(dependenciesDirPath.toString()));
+
+		ProcessBuilder processBuilder = new ProcessBuilder(gradleTask);
+
+		Map<String, String> env = processBuilder.environment();
+
+		env.put("GRADLE_OPTS", "-Xmx2g");
+
+		Process process = processBuilder.start();
+
+		if (displayGradleProcessOutput) {
+			String line = null;
+
+			try(
+				BufferedReader br = new BufferedReader(
+					new InputStreamReader(process.getInputStream()))) {
+
+				while ((line = br.readLine()) != null) {
+					System.out.println(line);
+				}
+			}
+
+			try(
+				BufferedReader br = new BufferedReader(
+					new InputStreamReader(process.getErrorStream()))) {
+
+				while ((line = br.readLine()) != null) {
+					System.out.println(line);
+				}
+			}
+		}
+
+		int exitCode = process.waitFor();
+
+		if (exitCode != 0) {
+			throw new IOException(
+				"Process " + processBuilder.command() + " failed with " +
+					exitCode);
+		}
+
+		final Map<String, List<JarDependency>> dependenciesMap =
+			new HashMap<>();
+
+		try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(
+				dependenciesDirPath)) {
+
+			for (Path dependencyPath : directoryStream) {
+				List<JarDependency> jarDependencies = new ArrayList<>();
+
+				Properties dependencies = PropertiesUtil.loadProperties(
+					dependencyPath);
+
+				for (String jar :
+						StringUtil.split(
+							dependencies.getProperty("compile"), ':')) {
+
+					jarDependencies.add(
+						new JarDependency(Paths.get(jar), false));
+				}
+
+				for (String jar :
+						StringUtil.split(
+							dependencies.getProperty("compileTest"), ':')) {
+
+					jarDependencies.add(
+						new JarDependency(Paths.get(jar), true));
+				}
+
+				Path moduleName = dependencyPath.getFileName();
+
+				dependenciesMap.put(moduleName.toString(), jarDependencies);
+			}
+		}
+
+		FileUtil.delete(dependenciesDirPath);
+
+		return dependenciesMap;
+	}
 
 	public static List<ModuleDependency> getModuleDependencies(Path modulePath)
 		throws IOException {
@@ -72,6 +178,22 @@ public class GradleUtil {
 		}
 
 		return moduleDependencies;
+	}
+
+	private static String _getTaskName(Path portalDirPath, Path workDirPath) {
+		Path modulesPath = portalDirPath.resolve("modules");
+
+		Path relativeWorkPath = modulesPath.relativize(workDirPath);
+
+		String relativeWorkPathString = relativeWorkPath.toString();
+
+		if (relativeWorkPathString.isEmpty()) {
+			return "printDependencies";
+		}
+
+		relativeWorkPathString = relativeWorkPathString.replace('/', ':');
+
+		return relativeWorkPathString.concat(":").concat("printDependencies");
 	}
 
 }
