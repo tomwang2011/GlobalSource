@@ -74,21 +74,16 @@ public class CreateModule {
 
 		projectSB.append("project.");
 		projectSB.append(moduleName);
-		projectSB.append('=');
-
-		Path path = Paths.get("..", moduleName);
-
-		projectSB.append(path);
+		projectSB.append("=../");
+		projectSB.append(moduleName);
 		projectSB.append('\n');
 		projectSB.append("reference.");
 		projectSB.append(moduleName);
 		projectSB.append(".jar=${project.");
 		projectSB.append(moduleName);
-
-		path = Paths.get("}", "dist", moduleName + ".jar");
-
-		projectSB.append(path);
-		projectSB.append('\n');
+		projectSB.append("}/dist/");
+		projectSB.append(moduleName);
+		projectSB.append(".jar\n");
 
 		javacSB.append("\t${reference.");
 		javacSB.append(moduleName);
