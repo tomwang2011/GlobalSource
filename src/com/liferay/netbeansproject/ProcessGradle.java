@@ -39,7 +39,7 @@ import java.util.Properties;
  */
 public class ProcessGradle {
 
-	public static Map<String, List<JarDependency>> processGradle(
+	public static Map<String, List<JarDependency>> getJarDependencies(
 			Path portalDirPath, Path workDirPath,
 			boolean displayGradleProcessOutput)
 		throws Exception {

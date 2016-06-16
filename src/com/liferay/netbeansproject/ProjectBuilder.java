@@ -79,7 +79,7 @@ public class ProjectBuilder {
 			Arrays.asList(StringUtil.split(ignoredDirs, ',')));
 
 		final Map<String, List<JarDependency>> jarDependenciesMap =
-			ProcessGradle.processGradle(
+			ProcessGradle.getJarDependencies(
 				portalPath, portalPath.resolve("modules"),
 				Boolean.valueOf(
 					buildProperties.getProperty(
