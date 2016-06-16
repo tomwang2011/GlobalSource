@@ -15,6 +15,7 @@
 package com.liferay.netbeansproject;
 
 import com.liferay.netbeansproject.container.JarDependency;
+import com.liferay.netbeansproject.util.FileUtil;
 import com.liferay.netbeansproject.util.PropertiesUtil;
 import com.liferay.netbeansproject.util.StringUtil;
 
@@ -44,6 +45,8 @@ public class ProcessGradle {
 		throws Exception {
 
 		Path dependenciesDirPath = projectDirPath.resolve("dependencies");
+
+		FileUtil.delete(dependenciesDirPath);
 
 		Files.createDirectories(dependenciesDirPath);
 
@@ -129,6 +132,8 @@ public class ProcessGradle {
 				dependenciesMap.put(moduleName.toString(), jarDependencies);
 			}
 		}
+
+		FileUtil.delete(dependenciesDirPath);
 
 		return dependenciesMap;
 	}

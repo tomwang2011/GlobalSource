@@ -74,8 +74,6 @@
 				<jvmarg if:true="${jvm.debug}" line="${jpda.settings}" />
 				<arg value="portal.dir=@{portal.dir}" />
 			</java>
-
-			<delete dir="@{project.dir}/dependencies" />
 		</sequential>
 	</macrodef>
 
@@ -131,8 +129,6 @@
 							<jvmarg if:true="${jvm.debug}" line="${jpda.settings}" />
 							<arg value="portal.dir=@{portal.dir}" />
 						</java>
-
-						<delete dir="${project.dir}/${portal.name}/dependencies" />
 					</then>
 					<else>
 						<build-modules
