@@ -16,7 +16,6 @@ package com.liferay.netbeansproject;
 
 import com.liferay.netbeansproject.container.JarDependency;
 import com.liferay.netbeansproject.container.Module;
-import com.liferay.netbeansproject.resolvers.ProjectDependencyResolver;
 import com.liferay.netbeansproject.util.FileUtil;
 import com.liferay.netbeansproject.util.GradleUtil;
 import com.liferay.netbeansproject.util.ModuleUtil;
@@ -136,15 +135,11 @@ public class ProjectBuilder {
 
 		String excludedTypes = buildProperties.getProperty("exclude.types");
 
-		ProjectDependencyResolver projectDependencyResolver =
-			new ProjectDependencyResolver(moduleMap, portalPath);
-
 		String portalLibJars = ModuleUtil.getPortalLibJars(portalPath);
 
 		for (Module module : moduleMap.values()) {
 			CreateModule.createModule(
-				module, projectPath, excludedTypes, projectDependencyResolver,
-				portalLibJars, portalPath);
+				module, projectPath, excludedTypes, portalLibJars, portalPath);
 		}
 
 		CreateUmbrella.createUmbrella(
