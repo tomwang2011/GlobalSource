@@ -68,32 +68,35 @@ public class ProjectBuilder {
 			projectBuilder.scanPortal(
 				Boolean.valueOf(arguments.get("rebuild")),
 				projectDirPath.resolve(portalDirPath.getFileName()),
-				portalDirPath, buildProperties);
+				portalDirPath,
+				Boolean.valueOf(
+					buildProperties.getProperty(
+						"display.gradle.process.output")),
+				PropertiesUtil.getRequiredProperty(
+					buildProperties, "ignored.dirs"),
+				PropertiesUtil.getRequiredProperty(
+					buildProperties, "project.name"),
+				buildProperties.getProperty("exclude.types"),
+				PropertiesUtil.getProperties(
+					buildProperties, "umbrella.source.list"));
 		}
 	}
 
 	public void scanPortal(
 			boolean rebuild, final Path projectPath, Path portalPath,
-			Properties buildProperties)
+			final boolean displayGradleProcessOutput, String ignoredDirs,
+			String projectName, String excludedTypes,
+			Map<String, String> umbrellaSourceList)
 		throws Exception {
 
 		final Map<Path, Module> existingProjectMap = _getExistingProjects(
 			rebuild, projectPath.resolve("modules"));
-
-		final boolean displayGradleProcessOutput = Boolean.valueOf(
-			buildProperties.getProperty("display.gradle.process.output"));
 
 		if (existingProjectMap.isEmpty()) {
 			rebuild = true;
 
 			FileUtil.delete(projectPath);
 		}
-
-		String ignoredDirs = PropertiesUtil.getRequiredProperty(
-			buildProperties, "ignored.dirs");
-
-		String projectName = PropertiesUtil.getRequiredProperty(
-			buildProperties, "project.name");
 
 		final Set<String> ignoredDirSet = new HashSet<>(
 			Arrays.asList(StringUtil.split(ignoredDirs, ',')));
@@ -145,8 +148,6 @@ public class ProjectBuilder {
 
 		Map<Path, Module> moduleMap = new HashMap<>();
 
-		String excludedTypes = buildProperties.getProperty("exclude.types");
-
 		String portalLibJars = ModuleUtil.getPortalLibJars(portalPath);
 
 		Map<String, List<JarDependency>> jarDependenciesMap = new HashMap<>();
@@ -157,10 +158,7 @@ public class ProjectBuilder {
 				displayGradleProcessOutput);
 
 			CreateUmbrella.createUmbrella(
-				portalPath, projectName,
-				PropertiesUtil.getProperties(
-					buildProperties, "umbrella.source.list"),
-				excludedTypes,
+				portalPath, projectName, umbrellaSourceList, excludedTypes,
 				changedModules, projectPath);
 		}
 
@@ -193,7 +191,6 @@ public class ProjectBuilder {
 			CreateModule.createModule(
 				module, projectPath, excludedTypes, portalLibJars, portalPath);
 		}
-
 	}
 
 	private Map<Path, Module> _getExistingProjects(
