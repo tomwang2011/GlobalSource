@@ -96,12 +96,13 @@ public class ProjectBuilder {
 			Map<String, String> umbrellaSourceList)
 		throws Exception {
 
-		final Map<Path, Module> oldModules = new HashMap<>();
+		final Map<Path, Module> oldModulePaths = new HashMap<>();
 
 		if (!rebuild) {
-			_loadExistingProjects(projectPath.resolve("modules"), oldModules);
+			_loadExistingProjects(
+				projectPath.resolve("modules"), oldModulePaths);
 
-			if (oldModules.isEmpty()) {
+			if (oldModulePaths.isEmpty()) {
 				rebuild = true;
 			}
 		}
@@ -115,7 +116,7 @@ public class ProjectBuilder {
 
 		final Set<Path> modulePaths = new HashSet<>();
 
-		final Set<Path> newModules = new HashSet<>();
+		final Set<Path> newModulePaths = new HashSet<>();
 
 		Files.walkFileTree(
 			portalPath, EnumSet.allOf(FileVisitOption.class), Integer.MAX_VALUE,
@@ -138,7 +139,7 @@ public class ProjectBuilder {
 
 					modulePaths.add(path);
 
-					Module module = oldModules.remove(path);
+					Module module = oldModulePaths.remove(path);
 
 					if ((module == null) ||
 						!module.equals(
@@ -146,7 +147,7 @@ public class ProjectBuilder {
 								null, path, null,
 								projectDependencyProperties))) {
 
-						newModules.add(path);
+						newModulePaths.add(path);
 					}
 
 					return FileVisitResult.SKIP_SUBTREE;
@@ -158,11 +159,11 @@ public class ProjectBuilder {
 
 		Map<String, List<JarDependency>> jarDependenciesMap = new HashMap<>();
 
-		for (Path modulePath : oldModules.keySet()) {
+		for (Path oldModulePath : oldModulePaths.keySet()) {
 			FileUtil.delete(
 				projectPath.resolve(
 					Paths.get(
-						"modules", ModuleUtil.getModuleName(modulePath))));
+						"modules", ModuleUtil.getModuleName(oldModulePath))));
 		}
 
 		if (rebuild) {
@@ -173,16 +174,18 @@ public class ProjectBuilder {
 				displayGradleProcessOutput);
 		}
 		else {
-			for (Path newModule : newModules) {
+			for (Path newModulePath : newModulePaths) {
 				FileUtil.delete(
 					projectPath.resolve(
 						Paths.get(
-							"modules", ModuleUtil.getModuleName(newModule))));
+							"modules",
+							ModuleUtil.getModuleName(newModulePath))));
 
-				if (Files.exists(newModule.resolve("build.gradle"))) {
+				if (Files.exists(newModulePath.resolve("build.gradle"))) {
 					jarDependenciesMap.putAll(
 						GradleUtil.getJarDependencies(
-							portalPath, newModule, displayGradleProcessOutput));
+							portalPath, newModulePath,
+							displayGradleProcessOutput));
 				}
 			}
 		}
