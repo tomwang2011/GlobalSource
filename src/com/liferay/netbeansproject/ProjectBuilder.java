@@ -136,7 +136,7 @@ public class ProjectBuilder {
 						return FileVisitResult.CONTINUE;
 					}
 
-					Module module = modules.get(path);
+					Module module = modules.remove(path);
 
 					if ((module == null) ||
 						!module.equals(
@@ -155,6 +155,13 @@ public class ProjectBuilder {
 		String portalLibJars = ModuleUtil.getPortalLibJars(portalPath);
 
 		Map<String, List<JarDependency>> jarDependenciesMap = new HashMap<>();
+
+		for (Path modulePath : modules.keySet()) {
+			String moduleName = ModuleUtil.getModuleName(modulePath);
+
+			FileUtil.delete(
+				projectPath.resolve(Paths.get("modules", moduleName)));
+		}
 
 		if (rebuild) {
 			FileUtil.delete(projectPath);
