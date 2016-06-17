@@ -47,30 +47,30 @@ public class IncrementBuilder {
 		Properties buildProperties = PropertiesUtil.loadProperties(
 			Paths.get("build.properties"));
 
-		Path projectPath = Paths.get(
+		Path projectDirPath = Paths.get(
 			PropertiesUtil.getRequiredProperty(buildProperties, "project.dir"));
 
-		for (String portal : StringUtil.split(
+		IncrementBuilder incrementBuilder = new IncrementBuilder();
+
+		ProjectBuilder projectBuilder = new ProjectBuilder();
+
+		for (String portalDir : StringUtil.split(
 				PropertiesUtil.getRequiredProperty(
 					buildProperties, "portal.dirs"),
 				',')) {
 
-			Path portalPath = Paths.get(portal);
+			Path portalDirPath = Paths.get(portalDir);
 
-			Path portalProjectPath = projectPath.resolve(
-				portalPath.getFileName());
+			Path portalProjectPath = projectDirPath.resolve(
+				portalDirPath.getFileName());
 
 			if (Files.exists(portalProjectPath)) {
-				IncrementBuilder incrementBuilder = new IncrementBuilder();
-
 				incrementBuilder.addModule(
-					portalProjectPath, portalPath, buildProperties);
+					portalProjectPath, portalDirPath, buildProperties);
 			}
 			else {
-				ProjectBuilder projectBuilder = new ProjectBuilder();
-
 				projectBuilder.scanPortal(
-					portalProjectPath, portalPath, buildProperties);
+					portalProjectPath, portalDirPath, buildProperties);
 			}
 		}
 	}

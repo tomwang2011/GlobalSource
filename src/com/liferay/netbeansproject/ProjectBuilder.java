@@ -50,23 +50,21 @@ public class ProjectBuilder {
 		Properties buildProperties = PropertiesUtil.loadProperties(
 			Paths.get("build.properties"));
 
-		Path projectPath = Paths.get(
+		Path projectDirPath = Paths.get(
 			PropertiesUtil.getRequiredProperty(buildProperties, "project.dir"));
 
-		for (String portal : StringUtil.split(
+		ProjectBuilder projectBuilder = new ProjectBuilder();
+
+		for (String portalDir : StringUtil.split(
 				PropertiesUtil.getRequiredProperty(
 					buildProperties, "portal.dirs"),
 				',')) {
 
-			Path portalPath = Paths.get(portal);
-
-			Path portalProjectPath = projectPath.resolve(
-				portalPath.getFileName());
-
-			ProjectBuilder projectBuilder = new ProjectBuilder();
+			Path portalDirPath = Paths.get(portalDir);
 
 			projectBuilder.scanPortal(
-				portalProjectPath, portalPath, buildProperties);
+				projectDirPath.resolve(portalDirPath.getFileName()),
+				portalDirPath, buildProperties);
 		}
 	}
 
