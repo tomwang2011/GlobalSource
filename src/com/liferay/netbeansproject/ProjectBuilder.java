@@ -50,35 +50,42 @@ public class ProjectBuilder {
 	public static void main(String[] args) throws Exception {
 		Map<String, String> arguments = ArgumentsUtil.parseArguments(args);
 
+		boolean rebuild = Boolean.valueOf(arguments.get("rebuild"));
+
 		Properties buildProperties = PropertiesUtil.loadProperties(
 			Paths.get("build.properties"));
+
+		String[] portalDirs = StringUtil.split(
+			PropertiesUtil.getRequiredProperty(buildProperties, "portal.dirs"),
+			',');
 
 		Path projectDirPath = Paths.get(
 			PropertiesUtil.getRequiredProperty(buildProperties, "project.dir"));
 
+		boolean displayGradleProcessOutput = Boolean.valueOf(
+			buildProperties.getProperty("display.gradle.process.output"));
+
+		String ignoredDirs = PropertiesUtil.getRequiredProperty(
+			buildProperties, "ignored.dirs");
+
+		String projectName = PropertiesUtil.getRequiredProperty(
+			buildProperties, "project.name");
+
+		String excludeTypes = buildProperties.getProperty("exclude.types");
+
+		Map<String, String> umbrellaSourceListMap =
+			PropertiesUtil.getProperties(
+				buildProperties, "umbrella.source.list");
+
 		ProjectBuilder projectBuilder = new ProjectBuilder();
 
-		for (String portalDir : StringUtil.split(
-				PropertiesUtil.getRequiredProperty(
-					buildProperties, "portal.dirs"),
-				',')) {
-
+		for (String portalDir : portalDirs) {
 			Path portalDirPath = Paths.get(portalDir);
 
 			projectBuilder.scanPortal(
-				Boolean.valueOf(arguments.get("rebuild")),
-				projectDirPath.resolve(portalDirPath.getFileName()),
-				portalDirPath,
-				Boolean.valueOf(
-					buildProperties.getProperty(
-						"display.gradle.process.output")),
-				PropertiesUtil.getRequiredProperty(
-					buildProperties, "ignored.dirs"),
-				PropertiesUtil.getRequiredProperty(
-					buildProperties, "project.name"),
-				buildProperties.getProperty("exclude.types"),
-				PropertiesUtil.getProperties(
-					buildProperties, "umbrella.source.list"));
+				rebuild, projectDirPath.resolve(portalDirPath.getFileName()),
+				portalDirPath, displayGradleProcessOutput, ignoredDirs,
+				projectName, excludeTypes, umbrellaSourceListMap);
 		}
 	}
 
@@ -89,13 +96,14 @@ public class ProjectBuilder {
 			Map<String, String> umbrellaSourceList)
 		throws Exception {
 
-		final Map<Path, Module> existingProjectMap = _getExistingProjects(
-			rebuild, projectPath.resolve("modules"));
+		final Map<Path, Module> modules = new HashMap<>();
 
-		if (existingProjectMap.isEmpty()) {
-			rebuild = true;
+		if (!rebuild) {
+			_loadExistingProjects(projectPath.resolve("modules"), modules);
 
-			FileUtil.delete(projectPath);
+			if (modules.isEmpty()) {
+				rebuild = true;
+			}
 		}
 
 		final Set<String> ignoredDirSet = new HashSet<>(
@@ -105,7 +113,7 @@ public class ProjectBuilder {
 			PropertiesUtil.loadProperties(
 				Paths.get("project-dependency.properties"));
 
-		final Set<Path> changedModules = new HashSet<>();
+		final Set<Path> modulePaths = new HashSet<>();
 
 		Files.walkFileTree(
 			portalPath, EnumSet.allOf(FileVisitOption.class), Integer.MAX_VALUE,
@@ -128,92 +136,82 @@ public class ProjectBuilder {
 						return FileVisitResult.CONTINUE;
 					}
 
-					Module existModule = existingProjectMap.get(path);
+					Module module = modules.get(path);
 
-					if ((existModule != null) &&
-						existModule.equals(
+					if ((module == null) ||
+						!module.equals(
 							Module.createModule(
 								null, path, null,
 								projectDependencyProperties))) {
 
-						return FileVisitResult.SKIP_SUBTREE;
+						modulePaths.add(path);
 					}
-
-					changedModules.add(path);
 
 					return FileVisitResult.SKIP_SUBTREE;
 				}
 
 			});
 
-		Map<Path, Module> moduleMap = new HashMap<>();
-
 		String portalLibJars = ModuleUtil.getPortalLibJars(portalPath);
 
 		Map<String, List<JarDependency>> jarDependenciesMap = new HashMap<>();
 
 		if (rebuild) {
+			FileUtil.delete(projectPath);
+
 			jarDependenciesMap = GradleUtil.getJarDependencies(
 				portalPath, portalPath.resolve("modules"),
 				displayGradleProcessOutput);
 
 			CreateUmbrella.createUmbrella(
 				portalPath, projectName, umbrellaSourceList, excludedTypes,
-				changedModules, projectPath);
+				modulePaths, projectPath);
 		}
-
-		for (Path path : changedModules) {
-			if (!rebuild) {
-				String moduleName = ModuleUtil.getModuleName(path);
+		else {
+			for (Path modulePath : modulePaths) {
+				String moduleName = ModuleUtil.getModuleName(modulePath);
 
 				Path moduleProjectPath = projectPath.resolve(
 					Paths.get("modules", moduleName));
 
 				FileUtil.delete(moduleProjectPath);
 
-				jarDependenciesMap = new HashMap<>();
-
-				if (Files.exists(path.resolve("build.gradle"))) {
-					jarDependenciesMap = GradleUtil.getJarDependencies(
-						portalPath, path, displayGradleProcessOutput);
+				if (Files.exists(modulePath.resolve("build.gradle"))) {
+					jarDependenciesMap.putAll(
+						GradleUtil.getJarDependencies(
+							portalPath, modulePath,
+							displayGradleProcessOutput));
 				}
 			}
+		}
 
+		for (Path modulePath : modulePaths) {
 			Module module = Module.createModule(
 				projectPath.resolve(
-					Paths.get("modules", ModuleUtil.getModuleName(path))),
-				path,
-				jarDependenciesMap.get(String.valueOf(path.getFileName())),
+					Paths.get("modules", ModuleUtil.getModuleName(modulePath))),
+				modulePath,
+				jarDependenciesMap.get(
+					String.valueOf(modulePath.getFileName())),
 				projectDependencyProperties);
-
-			moduleMap.put(module.getModulePath(), module);
 
 			CreateModule.createModule(
 				module, projectPath, excludedTypes, portalLibJars, portalPath);
 		}
 	}
 
-	private Map<Path, Module> _getExistingProjects(
-			boolean rebuild, Path projectModulesPath)
+	private void _loadExistingProjects(
+			Path projectModulesPath, Map<Path, Module> modules)
 		throws IOException {
-
-		Map<Path, Module> map = new HashMap<>();
-
-		if (rebuild) {
-			return map;
-		}
 
 		if (Files.exists(projectModulesPath)) {
 			for (Path path : Files.newDirectoryStream(projectModulesPath)) {
 				Module module = Module.load(path);
 
 				if (module != null) {
-					map.put(module.getModulePath(), module);
+					modules.put(module.getModulePath(), module);
 				}
 			}
 		}
-
-		return map;
 	}
 
 }
