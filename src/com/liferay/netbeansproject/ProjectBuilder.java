@@ -126,11 +126,9 @@ public class ProjectBuilder {
 						Path path, BasicFileAttributes basicFileAttributes)
 					throws IOException {
 
-					Path fileNamePath = path.getFileName();
+					if (ignoredDirSet.contains(
+							String.valueOf(path.getFileName()))) {
 
-					String fileName = fileNamePath.toString();
-
-					if (ignoredDirSet.contains(fileName)) {
 						return FileVisitResult.SKIP_SUBTREE;
 					}
 
@@ -160,11 +158,11 @@ public class ProjectBuilder {
 
 		Map<String, List<JarDependency>> jarDependenciesMap = new HashMap<>();
 
-		for (Path oldModulePath : oldModules.keySet()) {
-			String moduleName = ModuleUtil.getModuleName(oldModulePath);
-
+		for (Path modulePath : oldModules.keySet()) {
 			FileUtil.delete(
-				projectPath.resolve(Paths.get("modules", moduleName)));
+				projectPath.resolve(
+					Paths.get(
+						"modules", ModuleUtil.getModuleName(modulePath))));
 		}
 
 		if (rebuild) {
@@ -175,19 +173,16 @@ public class ProjectBuilder {
 				displayGradleProcessOutput);
 		}
 		else {
-			for (Path newModulePath : newModules) {
-				String moduleName = ModuleUtil.getModuleName(newModulePath);
+			for (Path newModule : newModules) {
+				FileUtil.delete(
+					projectPath.resolve(
+						Paths.get(
+							"modules", ModuleUtil.getModuleName(newModule))));
 
-				Path moduleProjectPath = projectPath.resolve(
-					Paths.get("modules", moduleName));
-
-				FileUtil.delete(moduleProjectPath);
-
-				if (Files.exists(newModulePath.resolve("build.gradle"))) {
+				if (Files.exists(newModule.resolve("build.gradle"))) {
 					jarDependenciesMap.putAll(
 						GradleUtil.getJarDependencies(
-							portalPath, newModulePath,
-							displayGradleProcessOutput));
+							portalPath, newModule, displayGradleProcessOutput));
 				}
 			}
 		}
