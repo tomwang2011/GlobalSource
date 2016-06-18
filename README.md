@@ -1,13 +1,11 @@
 # Liferay-Source-Netbeans-Project-Builder
 
-Please use Java-application-modules-project
+Create a build-ext.properties file and fill in the following settings: 
 
-1. Create a build-ext.properties file and fill in the following settings: 
+1. Set portal.dirs to your local liferay codebase. It can be a comma separated list.
 
-2. Set the portal.dir to your local liferay-portal
+2. Set the project.dir to your desired location for generated project files
 
-3. Set the project.dir to your desired location for generated project files
+3. Set jdk8.home to your jdk8 home. In case your default jdk is jdk8 already, it is optional.
 
-4. run Ant build
-
-5. Load the generated parent project or individual modules with Netbeans
+Run ant build for a clean rebuild, run ant add (or just ant, add is the default target) for an increment build.
