@@ -205,7 +205,7 @@ public class ProjectBuilder {
 
 		CreateUmbrella.createUmbrella(
 			portalPath, projectName, umbrellaSourceList, excludedTypes,
-			modulePaths, projectPath);
+			modulePaths, projectPath.resolve("umbrella"));
 	}
 
 	private void _loadExistingProjects(
