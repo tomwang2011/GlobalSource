@@ -137,6 +137,11 @@ public class ProjectBuilder {
 						return FileVisitResult.CONTINUE;
 					}
 
+					if (path.endsWith("WEB-INF")) {
+						path = path.getParent();
+						path = path.getParent();
+					}
+
 					modulePaths.add(path);
 
 					Module module = oldModulePaths.remove(path);

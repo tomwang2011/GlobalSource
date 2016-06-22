@@ -82,6 +82,12 @@ public class Module {
 			}
 		}
 
+		Path moduleName = modulePath.getFileName();
+
+		if (projectPath != null) {
+			projectPath = projectPath.resolve(moduleName);
+		}
+
 		Module module = new Module(
 			projectPath, modulePath, _resolveSourcePath(modulePath),
 			_resolveResourcePath(modulePath, "main"),
