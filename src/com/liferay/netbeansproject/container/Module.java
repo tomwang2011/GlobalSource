@@ -135,6 +135,25 @@ public class Module {
 			}
 		}
 
+		String moduleDependenciesString = properties.getProperty(
+			"module.dependencies");
+
+		List<ModuleDependency> moduleDependencies = new ArrayList<>();
+
+		if (moduleDependenciesString != null) {
+			for (String moduleDependencyString :
+					StringUtil.split(moduleDependenciesString, ';')) {
+
+				String[] moduleDependencySplit = StringUtil.split(
+					moduleDependencyString, ',');
+
+				moduleDependencies.add(
+					new ModuleDependency(
+						Paths.get(moduleDependencySplit[0]),
+						Boolean.valueOf(moduleDependencySplit[1])));
+			}
+		}
+
 		return new Module(
 			projectPath, Paths.get(properties.getProperty("module.path")),
 			_getPath(properties, "source.path"),
@@ -142,8 +161,9 @@ public class Module {
 			_getPath(properties, "test.unit.path"),
 			_getPath(properties, "test.unit.resource.path"),
 			_getPath(properties, "test.integration.path"),
-			_getPath(properties, "test.integration.resource.path"), null,
-			jarDependencies, null, properties.getProperty("checksum"));
+			_getPath(properties, "test.integration.resource.path"),
+			moduleDependencies, jarDependencies, null,
+			properties.getProperty("checksum"));
 	}
 
 	@Override
@@ -435,6 +455,22 @@ public class Module {
 			jarDependencySB.setLength(jarDependencySB.length() - 1);
 
 			_putProperty(properties, "jar.dependencies", jarDependencySB);
+		}
+
+		if (_moduleDependencies.size() > 0) {
+			StringBuilder moduleDependencySB = new StringBuilder();
+
+			for (ModuleDependency moduleDependency : _moduleDependencies) {
+				moduleDependencySB.append(
+					moduleDependency.getModuleRelativePath());
+				moduleDependencySB.append(',');
+				moduleDependencySB.append(moduleDependency.isTest());
+				moduleDependencySB.append(';');
+			}
+
+			moduleDependencySB.setLength(moduleDependencySB.length() - 1);
+
+			_putProperty(properties, "module.dependencies", moduleDependencySB);
 		}
 
 		Files.createDirectories(_projectPath);
