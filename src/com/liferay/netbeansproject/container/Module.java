@@ -162,7 +162,10 @@ public class Module {
 			_getPath(properties, "test.unit.resource.path"),
 			_getPath(properties, "test.integration.path"),
 			_getPath(properties, "test.integration.resource.path"),
-			moduleDependencies, jarDependencies, null,
+			moduleDependencies, jarDependencies,
+			Arrays.asList(
+				StringUtil.split(
+					properties.getProperty("portal.dependencies"), ',')),
 			properties.getProperty("checksum"));
 	}
 
@@ -472,6 +475,10 @@ public class Module {
 
 			_putProperty(properties, "module.dependencies", moduleDependencySB);
 		}
+
+		_putProperty(
+			properties, "portal.dependencies",
+			StringUtil.merge(_portalLevelModuleDependencies, ','));
 
 		Files.createDirectories(_projectPath);
 
