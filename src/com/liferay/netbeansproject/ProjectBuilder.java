@@ -114,7 +114,7 @@ public class ProjectBuilder {
 			PropertiesUtil.loadProperties(
 				Paths.get("project-dependency.properties"));
 
-		final Set<Path> modulePaths = new HashSet<>();
+		final Set<String> moduleNames = new HashSet<>();
 
 		final Set<Path> newModulePaths = new HashSet<>();
 
@@ -142,7 +142,7 @@ public class ProjectBuilder {
 						path = path.getParent();
 					}
 
-					modulePaths.add(path);
+					moduleNames.add(String.valueOf(path.getFileName()));
 
 					Module module = oldModulePaths.remove(path);
 
@@ -211,7 +211,7 @@ public class ProjectBuilder {
 
 		CreateUmbrella.createUmbrella(
 			portalPath, projectName, umbrellaSourceList, excludedTypes,
-			modulePaths, projectPath.resolve("umbrella"));
+			moduleNames, projectPath.resolve("umbrella"));
 	}
 
 	private void _loadExistingProjects(

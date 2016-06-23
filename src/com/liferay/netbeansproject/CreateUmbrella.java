@@ -47,7 +47,7 @@ public class CreateUmbrella {
 	public static void createUmbrella(
 			Path portalPath, String projectName,
 			Map<String, String> umbrellaSourceMap, String excludeTypes,
-			Set<Path> modulePaths, Path projectPath)
+			Set<String> moduleNames, Path projectPath)
 		throws Exception {
 
 		FileUtil.delete(projectPath);
@@ -55,16 +55,16 @@ public class CreateUmbrella {
 		FileUtil.unZip(projectPath);
 
 		_appendProjectProperties(
-			portalPath, excludeTypes, umbrellaSourceMap, modulePaths,
+			portalPath, excludeTypes, umbrellaSourceMap, moduleNames,
 			projectPath);
 
 		_createProjectXML(
-			projectName, umbrellaSourceMap, modulePaths, projectPath);
+			projectName, umbrellaSourceMap, moduleNames, projectPath);
 	}
 
 	private static void _appendProjectProperties(
 			Path portalPath, String excludeTypes,
-			Map<String, String> umbrellaSourceMap, Set<Path> modulePaths,
+			Map<String, String> umbrellaSourceMap, Set<String> moduleNames,
 			Path projectPath)
 		throws IOException {
 
@@ -100,26 +100,22 @@ public class CreateUmbrella {
 
 		StringBuilder javacSB = new StringBuilder("javac.classpath=\\\n");
 
-		for (Path modulePath : modulePaths) {
-			Path modulePathName = modulePath.getFileName();
-
-			String name = modulePathName.toString();
-
+		for (String moduleName : moduleNames) {
 			sb.append("project.");
-			sb.append(name);
+			sb.append(moduleName);
 			sb.append('=');
-			sb.append(projectModulesPath.resolve(name));
+			sb.append(projectModulesPath.resolve(moduleName));
 			sb.append('\n');
 			sb.append("reference.");
-			sb.append(name);
+			sb.append(moduleName);
 			sb.append(".jar=${project.");
-			sb.append(name);
+			sb.append(moduleName);
 			sb.append("}/dist/");
-			sb.append(name);
+			sb.append(moduleName);
 			sb.append(".jar\n");
 
 			javacSB.append("\t${reference.");
-			javacSB.append(name);
+			javacSB.append(moduleName);
 			javacSB.append(".jar}:\\\n");
 		}
 
@@ -130,7 +126,7 @@ public class CreateUmbrella {
 			bufferedWriter.append(sb);
 			bufferedWriter.newLine();
 
-			if (!modulePaths.isEmpty()) {
+			if (!moduleNames.isEmpty()) {
 				javacSB.setLength(javacSB.length() - 3);
 			}
 
@@ -169,7 +165,7 @@ public class CreateUmbrella {
 
 	private static void _createProjectElement(
 		Document document, String projectName,
-		Map<String, String> umbrellaSourceMap, Set<Path> modulePaths) {
+		Map<String, String> umbrellaSourceMap, Set<String> moduleNames) {
 
 		Element projectElement = document.createElement("project");
 
@@ -192,12 +188,12 @@ public class CreateUmbrella {
 		_createData(
 			document, configurationElement, umbrellaSourceMap, projectName);
 
-		_createReferences(document, configurationElement, modulePaths);
+		_createReferences(document, configurationElement, moduleNames);
 	}
 
 	private static void _createProjectXML(
 			String projectName, Map<String, String> umbrellaSourceMap,
-			Set<Path> modulePaths, Path projectPath)
+			Set<String> moduleNames, Path projectPath)
 		throws Exception {
 
 		DocumentBuilderFactory documentBuilderFactory =
@@ -209,7 +205,7 @@ public class CreateUmbrella {
 		Document document = documentBuilder.newDocument();
 
 		_createProjectElement(
-			document, projectName, umbrellaSourceMap, modulePaths);
+			document, projectName, umbrellaSourceMap, moduleNames);
 
 		TransformerFactory transformerFactory =
 			TransformerFactory.newInstance();
@@ -275,7 +271,7 @@ public class CreateUmbrella {
 
 	private static void _createReferences(
 		Document document, Element configurationElement,
-		Set<Path> modulePaths) {
+		Set<String> moduleNames) {
 
 		Element referencesElement = document.createElement("references");
 
@@ -284,11 +280,8 @@ public class CreateUmbrella {
 
 		configurationElement.appendChild(referencesElement);
 
-		for (Path modulePath : modulePaths) {
-			Path modulePathName = modulePath.getFileName();
-
-			_createReference(
-				document, referencesElement, modulePathName.toString());
+		for (String moduleName : moduleNames) {
+			_createReference(document, referencesElement, moduleName);
 		}
 	}
 
