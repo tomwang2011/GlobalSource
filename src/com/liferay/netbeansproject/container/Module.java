@@ -16,7 +16,6 @@ package com.liferay.netbeansproject.container;
 
 import com.liferay.netbeansproject.util.GradleUtil;
 import com.liferay.netbeansproject.util.HashUtil;
-import com.liferay.netbeansproject.util.ModuleUtil;
 import com.liferay.netbeansproject.util.PropertiesUtil;
 import com.liferay.netbeansproject.util.StringUtil;
 
@@ -98,7 +97,7 @@ public class Module {
 			GradleUtil.getModuleDependencies(modulePath), jarDependencies,
 			_resolvePortalLevelDependencies(
 				projectDependencyProperties,
-				ModuleUtil.getModuleName(modulePath)),
+				moduleName.toString()),
 			checksum);
 
 		if (projectPath != null) {
@@ -171,7 +170,9 @@ public class Module {
 	}
 
 	public String getModuleName() {
-		return ModuleUtil.getModuleName(_modulePath);
+		Path fileName = _modulePath.getFileName();
+
+		return fileName.toString();
 	}
 
 	public Path getModulePath() {
