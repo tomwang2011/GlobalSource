@@ -434,7 +434,7 @@ public class Module {
 			throw new Error(nsae);
 		}
 
-		if (_jarDependencies.size() > 0) {
+		if (!_jarDependencies.isEmpty()) {
 			StringBuilder jarDependencySB = new StringBuilder();
 
 			for (JarDependency jarDependency : _jarDependencies) {
@@ -449,7 +449,7 @@ public class Module {
 			_putProperty(properties, "jar.dependencies", jarDependencySB);
 		}
 
-		if (_moduleDependencies.size() > 0) {
+		if (!_moduleDependencies.isEmpty()) {
 			StringBuilder moduleDependencySB = new StringBuilder();
 
 			for (ModuleDependency moduleDependency : _moduleDependencies) {
