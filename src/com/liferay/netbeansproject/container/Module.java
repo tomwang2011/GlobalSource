@@ -116,16 +116,6 @@ public class Module {
 
 		Properties properties = PropertiesUtil.loadProperties(moduleInfoPath);
 
-		String portalDependenciesString = properties.getProperty(
-			"portal.dependencies");
-
-		List<String> portalDependencies = new ArrayList<>(
-			Arrays.asList(
-				StringUtil.split(
-					portalDependenciesString.substring(
-						1, portalDependenciesString.length() - 1),
-					',')));
-
 		return new Module(
 			projectPath, Paths.get(properties.getProperty("module.path")),
 			_getPath(properties, "source.path"),
@@ -136,7 +126,10 @@ public class Module {
 			_getPath(properties, "test.integration.resource.path"),
 			_getDependencyList(properties.getProperty("module.dependencies")),
 			_getDependencyList(properties.getProperty("jar.dependencies")),
-			portalDependencies, properties.getProperty("checksum"));
+			Arrays.asList(
+				StringUtil.split(
+					properties.getProperty("portal.dependencies"), ',')),
+			properties.getProperty("checksum"));
 	}
 
 	@Override
@@ -465,7 +458,9 @@ public class Module {
 			_putProperty(properties, "module.dependencies", moduleDependencySB);
 		}
 
-		_putProperty(properties, "portal.dependencies", _portalDependencies);
+		_putProperty(
+			properties, "portal.dependencies",
+			StringUtil.merge(_portalDependencies, ','));
 
 		Files.createDirectories(_projectPath);
 
