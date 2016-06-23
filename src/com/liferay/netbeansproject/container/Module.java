@@ -116,44 +116,6 @@ public class Module {
 
 		Properties properties = PropertiesUtil.loadProperties(moduleInfoPath);
 
-		String jarDependenciesString = properties.getProperty(
-			"jar.dependencies");
-
-		List<JarDependency> jarDependencies = new ArrayList<>();
-
-		if (jarDependenciesString != null) {
-			for (String jarDependencyString :
-					StringUtil.split(jarDependenciesString, ';')) {
-
-				String[] jarDependencySplit = StringUtil.split(
-					jarDependencyString, ',');
-
-				jarDependencies.add(
-					new JarDependency(
-						Paths.get(jarDependencySplit[0]),
-						Boolean.valueOf(jarDependencySplit[1])));
-			}
-		}
-
-		String moduleDependenciesString = properties.getProperty(
-			"module.dependencies");
-
-		List<ModuleDependency> moduleDependencies = new ArrayList<>();
-
-		if (moduleDependenciesString != null) {
-			for (String moduleDependencyString :
-					StringUtil.split(moduleDependenciesString, ';')) {
-
-				String[] moduleDependencySplit = StringUtil.split(
-					moduleDependencyString, ',');
-
-				moduleDependencies.add(
-					new ModuleDependency(
-						Paths.get(moduleDependencySplit[0]),
-						Boolean.valueOf(moduleDependencySplit[1])));
-			}
-		}
-
 		String portalDependenciesString = properties.getProperty(
 			"portal.dependencies");
 
@@ -172,8 +134,9 @@ public class Module {
 			_getPath(properties, "test.unit.resource.path"),
 			_getPath(properties, "test.integration.path"),
 			_getPath(properties, "test.integration.resource.path"),
-			moduleDependencies, jarDependencies, portalDependencies,
-			properties.getProperty("checksum"));
+			_getDependencyList(properties.getProperty("module.dependencies")),
+			_getDependencyList(properties.getProperty("jar.dependencies")),
+			portalDependencies, properties.getProperty("checksum"));
 	}
 
 	@Override
@@ -300,6 +263,25 @@ public class Module {
 		sb.append("}");
 
 		return sb.toString();
+	}
+
+	private static <T> List<T> _getDependencyList(String dependenciesString) {
+		List<T> dependencies = new ArrayList<>();
+
+		if (dependenciesString != null) {
+			for (String dependencyString :
+					StringUtil.split(dependenciesString, ';')) {
+
+				String[] dependencySplit = StringUtil.split(
+					dependencyString, ',');
+
+				dependencies.add((T)new JarDependency(
+						Paths.get(dependencySplit[0]),
+						Boolean.valueOf(dependencySplit[1])));
+			}
+		}
+
+		return dependencies;
 	}
 
 	private static Path _getPath(Properties properties, String key) {
