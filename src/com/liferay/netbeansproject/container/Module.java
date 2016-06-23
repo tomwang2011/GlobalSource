@@ -154,6 +154,16 @@ public class Module {
 			}
 		}
 
+		String portalDependenciesString = properties.getProperty(
+			"portal.dependencies");
+
+		List<String> portalDependencies = new ArrayList<>(
+			Arrays.asList(
+				StringUtil.split(
+					portalDependenciesString.substring(
+						1, portalDependenciesString.length() - 1),
+					',')));
+
 		return new Module(
 			projectPath, Paths.get(properties.getProperty("module.path")),
 			_getPath(properties, "source.path"),
@@ -162,7 +172,7 @@ public class Module {
 			_getPath(properties, "test.unit.resource.path"),
 			_getPath(properties, "test.integration.path"),
 			_getPath(properties, "test.integration.resource.path"),
-			moduleDependencies, jarDependencies, null,
+			moduleDependencies, jarDependencies, portalDependencies,
 			properties.getProperty("checksum"));
 	}
 
@@ -472,6 +482,9 @@ public class Module {
 
 			_putProperty(properties, "module.dependencies", moduleDependencySB);
 		}
+
+		_putProperty(
+			properties, "portal.dependencies", _portalLevelModuleDependencies);
 
 		Files.createDirectories(_projectPath);
 
