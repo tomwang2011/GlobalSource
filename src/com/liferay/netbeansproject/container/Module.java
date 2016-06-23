@@ -229,7 +229,7 @@ public class Module {
 	}
 
 	public List<String> getPortalLevelModuleDependencies() {
-		return _portalLevelModuleDependencies;
+		return _portalDependencies;
 	}
 
 	public Path getSourcePath() {
@@ -418,7 +418,7 @@ public class Module {
 		_testIntegrationResourcePath = testIntegrationResourcePath;
 		_moduleDependencies = moduleDependencies;
 		_jarDependencies = jarDependencies;
-		_portalLevelModuleDependencies = portalLevelModuleDependencies;
+		_portalDependencies = portalLevelModuleDependencies;
 		_checksum = checksum;
 	}
 
@@ -483,8 +483,7 @@ public class Module {
 			_putProperty(properties, "module.dependencies", moduleDependencySB);
 		}
 
-		_putProperty(
-			properties, "portal.dependencies", _portalLevelModuleDependencies);
+		_putProperty(properties, "portal.dependencies", _portalDependencies);
 
 		Files.createDirectories(_projectPath);
 
@@ -499,7 +498,7 @@ public class Module {
 	private final List<JarDependency> _jarDependencies;
 	private final List<ModuleDependency> _moduleDependencies;
 	private final Path _modulePath;
-	private final List<String> _portalLevelModuleDependencies;
+	private final List<String> _portalDependencies;
 	private final Path _projectPath;
 	private final Path _sourcePath;
 	private final Path _sourceResourcePath;
