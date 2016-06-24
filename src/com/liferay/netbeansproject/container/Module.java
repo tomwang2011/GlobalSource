@@ -116,6 +116,25 @@ public class Module {
 
 		Properties properties = PropertiesUtil.loadProperties(moduleInfoPath);
 
+		String jarDependenciesString = properties.getProperty(
+			"jar.dependencies");
+
+		List<JarDependency> jarDependencies = new ArrayList<>();
+
+		if (jarDependenciesString != null) {
+			for (String jarDependencyString :
+					StringUtil.split(jarDependenciesString, ';')) {
+
+				String[] jarDependencySplit = StringUtil.split(
+					jarDependencyString, ',');
+
+				jarDependencies.add(
+					new JarDependency(
+						Paths.get(jarDependencySplit[0]),
+						Boolean.valueOf(jarDependencySplit[1])));
+			}
+		}
+
 		return new Module(
 			projectPath, Paths.get(properties.getProperty("module.path")),
 			_getPath(properties, "source.path"),
@@ -123,8 +142,8 @@ public class Module {
 			_getPath(properties, "test.unit.path"),
 			_getPath(properties, "test.unit.resource.path"),
 			_getPath(properties, "test.integration.path"),
-			_getPath(properties, "test.integration.resource.path"), null, null,
-			null, properties.getProperty("checksum"));
+			_getPath(properties, "test.integration.resource.path"), null,
+			jarDependencies, null, properties.getProperty("checksum"));
 	}
 
 	@Override
@@ -401,6 +420,21 @@ public class Module {
 		}
 		catch (NoSuchAlgorithmException nsae) {
 			throw new Error(nsae);
+		}
+
+		if (!_jarDependencies.isEmpty()) {
+			StringBuilder jarDependencySB = new StringBuilder();
+
+			for (JarDependency jarDependency : _jarDependencies) {
+				jarDependencySB.append(jarDependency.getJarPath());
+				jarDependencySB.append(',');
+				jarDependencySB.append(jarDependency.isTest());
+				jarDependencySB.append(';');
+			}
+
+			jarDependencySB.setLength(jarDependencySB.length() - 1);
+
+			_putProperty(properties, "jar.dependencies", jarDependencySB);
 		}
 
 		Files.createDirectories(_projectPath);
