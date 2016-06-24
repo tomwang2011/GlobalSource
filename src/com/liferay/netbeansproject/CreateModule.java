@@ -399,8 +399,8 @@ public class CreateModule {
 		referencesElement.setAttribute(
 			"xmlns", "http://www.netbeans.org/ns/ant-project-references/1");
 
-		for (Dependency moduleDependency : module.getModuleDependencies()) {
-			Path moduleRelativePath = moduleDependency.getPath();
+		for (Dependency dependency : module.getModuleDependencies()) {
+			Path moduleRelativePath = dependency.getPath();
 
 			_createReference(
 				document, referencesElement,
@@ -443,10 +443,10 @@ public class CreateModule {
 
 		StringBuilder sb = null;
 
-		for (Dependency jarDependency : module.getJarDependencies()) {
-			Path jarPath = jarDependency.getPath();
+		for (Dependency dependency : module.getJarDependencies()) {
+			Path jarPath = dependency.getPath();
 
-			if (jarDependency.isTest()) {
+			if (dependency.isTest()) {
 				sb = testSB;
 			}
 			else {
@@ -463,10 +463,10 @@ public class CreateModule {
 		Module module, StringBuilder projectSB, StringBuilder javacSB,
 		StringBuilder testSB) {
 
-		for (Dependency moduleDependency : module.getModuleDependencies()) {
-			Path dependencyModulePath = moduleDependency.getPath();
+		for (Dependency dependency : module.getModuleDependencies()) {
+			Path dependencyModulePath = dependency.getPath();
 
-			if (moduleDependency.isTest()) {
+			if (dependency.isTest()) {
 				_appendProjectDependencies(
 					String.valueOf(dependencyModulePath.getFileName()),
 					projectSB, testSB);

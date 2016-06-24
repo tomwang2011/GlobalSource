@@ -258,6 +258,23 @@ public class Module {
 		return sb.toString();
 	}
 
+	private static String _createDependencyString(
+		List<Dependency> dependencies) {
+
+		StringBuilder dependenciesSB = new StringBuilder();
+
+		for (Dependency dependency : dependencies) {
+			dependenciesSB.append(dependency.getPath());
+			dependenciesSB.append(',');
+			dependenciesSB.append(dependency.isTest());
+			dependenciesSB.append(';');
+		}
+
+		dependenciesSB.setLength(dependenciesSB.length() - 1);
+
+		return dependenciesSB.toString();
+	}
+
 	private static List<Dependency> _getDependencyList(String dependencies) {
 		if (dependencies == null) {
 			return Collections.emptyList();
@@ -394,21 +411,6 @@ public class Module {
 		_jarDependencies = jarDependencies;
 		_portalLevelModuleDependencies = portalLevelModuleDependencies;
 		_checksum = checksum;
-	}
-
-	private String _createDependencyString(List<Dependency> dependencies) {
-		StringBuilder dependenciesSB = new StringBuilder();
-
-		for (Dependency dependency : dependencies) {
-			dependenciesSB.append(dependency.getPath());
-			dependenciesSB.append(',');
-			dependenciesSB.append(dependency.isTest());
-			dependenciesSB.append(';');
-		}
-
-		dependenciesSB.setLength(dependenciesSB.length() - 1);
-
-		return dependenciesSB.toString();
 	}
 
 	private void _save() throws IOException {
