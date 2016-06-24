@@ -19,15 +19,15 @@ import java.nio.file.Path;
 /**
  * @author Tom Wang
  */
-public class JarDependency {
+public class Dependency {
 
-	public JarDependency(Path jarPath, boolean test) {
-		_jarPath = jarPath;
+	public Dependency(Path path, boolean test) {
+		_path = path;
 		_test = test;
 	}
 
-	public Path getJarPath() {
-		return _jarPath;
+	public Path getPath() {
+		return _path;
 	}
 
 	public boolean isTest() {
@@ -38,8 +38,8 @@ public class JarDependency {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 
-		sb.append("{jarPath=");
-		sb.append(_jarPath);
+		sb.append("{Path=");
+		sb.append(_path);
 		sb.append(", test=");
 		sb.append(_test);
 		sb.append("}");
@@ -47,7 +47,7 @@ public class JarDependency {
 		return sb.toString();
 	}
 
-	private final Path _jarPath;
+	private final Path _path;
 	private final boolean _test;
 
 }

@@ -42,8 +42,7 @@ import java.util.Properties;
 public class Module {
 
 	public static Module createModule(
-			Path projectPath, Path modulePath,
-			List<JarDependency> jarDependencies,
+			Path projectPath, Path modulePath, List<Dependency> jarDependencies,
 			Properties projectDependencyProperties)
 		throws IOException {
 
@@ -58,7 +57,7 @@ public class Module {
 					Files.newDirectoryStream(moduleLibPath, "*.jar")) {
 
 				for (Path jarPath : directoryStream) {
-					jarDependencies.add(new JarDependency(jarPath, false));
+					jarDependencies.add(new Dependency(jarPath, false));
 				}
 			}
 		}
@@ -119,7 +118,7 @@ public class Module {
 		String jarDependenciesString = properties.getProperty(
 			"jar.dependencies");
 
-		List<JarDependency> jarDependencies = new ArrayList<>();
+		List<Dependency> jarDependencies = new ArrayList<>();
 
 		if (jarDependenciesString != null) {
 			for (String jarDependencyString :
@@ -129,7 +128,7 @@ public class Module {
 					jarDependencyString, ',');
 
 				jarDependencies.add(
-					new JarDependency(
+					new Dependency(
 						Paths.get(jarDependencySplit[0]),
 						Boolean.valueOf(jarDependencySplit[1])));
 			}
@@ -138,7 +137,7 @@ public class Module {
 		String moduleDependenciesString = properties.getProperty(
 			"module.dependencies");
 
-		List<ModuleDependency> moduleDependencies = new ArrayList<>();
+		List<Dependency> moduleDependencies = new ArrayList<>();
 
 		if (moduleDependenciesString != null) {
 			for (String moduleDependencyString :
@@ -148,7 +147,7 @@ public class Module {
 					moduleDependencyString, ',');
 
 				moduleDependencies.add(
-					new ModuleDependency(
+					new Dependency(
 						Paths.get(moduleDependencySplit[0]),
 						Boolean.valueOf(moduleDependencySplit[1])));
 			}
@@ -203,11 +202,11 @@ public class Module {
 		return _checksum;
 	}
 
-	public List<JarDependency> getJarDependencies() {
+	public List<Dependency> getJarDependencies() {
 		return _jarDependencies;
 	}
 
-	public List<ModuleDependency> getModuleDependencies() {
+	public List<Dependency> getModuleDependencies() {
 		return _moduleDependencies;
 	}
 
@@ -397,8 +396,7 @@ public class Module {
 		Path projectPath, Path modulePath, Path sourcePath,
 		Path sourceResourcePath, Path testUnitPath, Path testUnitResourcePath,
 		Path testIntegrationPath, Path testIntegrationResourcePath,
-		List<ModuleDependency> moduleDependencies,
-		List<JarDependency> jarDependencies,
+		List<Dependency> moduleDependencies, List<Dependency> jarDependencies,
 		List<String> portalLevelModuleDependencies, String checksum) {
 
 		_projectPath = projectPath;
@@ -448,8 +446,8 @@ public class Module {
 		if (!_jarDependencies.isEmpty()) {
 			StringBuilder jarDependencySB = new StringBuilder();
 
-			for (JarDependency jarDependency : _jarDependencies) {
-				jarDependencySB.append(jarDependency.getJarPath());
+			for (Dependency jarDependency : _jarDependencies) {
+				jarDependencySB.append(jarDependency.getPath());
 				jarDependencySB.append(',');
 				jarDependencySB.append(jarDependency.isTest());
 				jarDependencySB.append(';');
@@ -463,9 +461,8 @@ public class Module {
 		if (!_moduleDependencies.isEmpty()) {
 			StringBuilder moduleDependencySB = new StringBuilder();
 
-			for (ModuleDependency moduleDependency : _moduleDependencies) {
-				moduleDependencySB.append(
-					moduleDependency.getModuleRelativePath());
+			for (Dependency moduleDependency : _moduleDependencies) {
+				moduleDependencySB.append(moduleDependency.getPath());
 				moduleDependencySB.append(',');
 				moduleDependencySB.append(moduleDependency.isTest());
 				moduleDependencySB.append(';');
@@ -490,8 +487,8 @@ public class Module {
 	}
 
 	private final String _checksum;
-	private final List<JarDependency> _jarDependencies;
-	private final List<ModuleDependency> _moduleDependencies;
+	private final List<Dependency> _jarDependencies;
+	private final List<Dependency> _moduleDependencies;
 	private final Path _modulePath;
 	private final List<String> _portalLevelModuleDependencies;
 	private final Path _projectPath;
