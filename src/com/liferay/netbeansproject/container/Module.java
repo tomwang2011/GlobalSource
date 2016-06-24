@@ -32,6 +32,7 @@ import java.security.NoSuchAlgorithmException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
@@ -259,19 +260,20 @@ public class Module {
 	}
 
 	private static <T> List<T> _getDependencyList(String dependenciesString) {
+		if (dependenciesString == null) {
+			return Collections.emptyList();
+		}
+
 		List<T> dependencies = new ArrayList<>();
 
-		if (dependenciesString != null) {
-			for (String dependencyString :
-					StringUtil.split(dependenciesString, ';')) {
+		for (String dependencyString :
+				StringUtil.split(dependenciesString, ';')) {
 
-				String[] dependencySplit = StringUtil.split(
-					dependencyString, ',');
+			String[] dependencySplit = StringUtil.split(dependencyString, ',');
 
-				dependencies.add((T)new JarDependency(
-						Paths.get(dependencySplit[0]),
-						Boolean.valueOf(dependencySplit[1])));
-			}
+			dependencies.add((T)new JarDependency(
+					Paths.get(dependencySplit[0]),
+					Boolean.valueOf(dependencySplit[1])));
 		}
 
 		return dependencies;
