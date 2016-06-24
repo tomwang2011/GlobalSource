@@ -261,11 +261,11 @@ public class ProjectBuilder {
 
 			if (moduleGroup == null) {
 				moduleGroup = new ArrayList<>();
+
+				moduleGroups.put(groupPath, moduleGroup);
 			}
 
 			moduleGroup.add(module);
-
-			moduleGroups.put(groupPath, moduleGroup);
 		}
 
 		return moduleGroups;
