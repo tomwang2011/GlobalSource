@@ -241,6 +241,16 @@ public class ProjectBuilder {
 
 		Map<Path, List<Module>> moduleGroups = _createModuleGroups(
 			modules, groupDepth, groupStopWords);
+
+		Path groupProjectPath = projectPath.resolve("Group-modules");
+
+		FileUtil.delete(groupProjectPath);
+
+		for (Map.Entry<Path, List<Module>> entry : moduleGroups.entrySet()) {
+			CreateGroupModule.createModule(
+				groupProjectPath, portalPath.relativize(entry.getKey()),
+				entry.getValue());
+		}
 	}
 
 	private Map<Path, List<Module>> _createModuleGroups(
