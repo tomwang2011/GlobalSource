@@ -131,7 +131,7 @@ public class ProjectBuilder {
 
 		final Set<Path> newModulePaths = new HashSet<>();
 
-		final List<Module> moduleList = new ArrayList<>();
+		final List<Module> modules = new ArrayList<>();
 
 		Files.walkFileTree(
 			portalPath, EnumSet.allOf(FileVisitOption.class), Integer.MAX_VALUE,
@@ -170,7 +170,7 @@ public class ProjectBuilder {
 						newModulePaths.add(path);
 					}
 					else {
-						moduleList.add(module);
+						modules.add(module);
 					}
 
 					return FileVisitResult.SKIP_SUBTREE;
@@ -223,7 +223,7 @@ public class ProjectBuilder {
 					String.valueOf(newModulePath.getFileName())),
 				portalModuleDependencyProperties);
 
-			moduleList.add(module);
+			modules.add(module);
 
 			CreateModule.createModule(
 				module, projectPath, excludedTypes, portalLibJars, portalPath);
@@ -233,16 +233,16 @@ public class ProjectBuilder {
 			portalPath, projectName, umbrellaSourceList, excludedTypes,
 			moduleNames, projectPath.resolve("umbrella"));
 
-		Map<Path, List<Module>> groupMap = _createGroupMap(
-			moduleList, groupDepth, groupStopWords);
+		Map<Path, List<Module>> moduleGroups = _createModuleGroups(
+			modules, groupDepth, groupStopWords);
 	}
 
-	private Map<Path, List<Module>> _createGroupMap(
-		List<Module> moduleList, int groupDepth, String groupStopWords) {
+	private Map<Path, List<Module>> _createModuleGroups(
+		List<Module> modules, int groupDepth, String groupStopWords) {
 
-		Map<Path, List<Module>> map = new HashMap<>();
+		Map<Path, List<Module>> moduleGroups = new HashMap<>();
 
-		for (Module module : moduleList) {
+		for (Module module : modules) {
 			Path groupPath = module.getModulePath();
 
 			for (int i = 1; i < groupDepth; i++) {
@@ -254,18 +254,18 @@ public class ProjectBuilder {
 				}
 			}
 
-			List<Module> groupList = map.get(groupPath);
+			List<Module> moduleGroup = moduleGroups.get(groupPath);
 
-			if (groupList == null) {
-				groupList = new ArrayList<>();
+			if (moduleGroup == null) {
+				moduleGroup = new ArrayList<>();
 			}
 
-			groupList.add(module);
+			moduleGroup.add(module);
 
-			map.put(groupPath, groupList);
+			moduleGroups.put(groupPath, moduleGroup);
 		}
 
-		return map;
+		return moduleGroups;
 	}
 
 	private void _loadExistingProjects(
