@@ -32,6 +32,7 @@ import java.security.NoSuchAlgorithmException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
@@ -115,44 +116,6 @@ public class Module {
 
 		Properties properties = PropertiesUtil.loadProperties(moduleInfoPath);
 
-		String jarDependenciesString = properties.getProperty(
-			"jar.dependencies");
-
-		List<Dependency> jarDependencies = new ArrayList<>();
-
-		if (jarDependenciesString != null) {
-			for (String jarDependencyString :
-					StringUtil.split(jarDependenciesString, ';')) {
-
-				String[] jarDependencySplit = StringUtil.split(
-					jarDependencyString, ',');
-
-				jarDependencies.add(
-					new Dependency(
-						Paths.get(jarDependencySplit[0]),
-						Boolean.valueOf(jarDependencySplit[1])));
-			}
-		}
-
-		String moduleDependenciesString = properties.getProperty(
-			"module.dependencies");
-
-		List<Dependency> moduleDependencies = new ArrayList<>();
-
-		if (moduleDependenciesString != null) {
-			for (String moduleDependencyString :
-					StringUtil.split(moduleDependenciesString, ';')) {
-
-				String[] moduleDependencySplit = StringUtil.split(
-					moduleDependencyString, ',');
-
-				moduleDependencies.add(
-					new Dependency(
-						Paths.get(moduleDependencySplit[0]),
-						Boolean.valueOf(moduleDependencySplit[1])));
-			}
-		}
-
 		return new Module(
 			projectPath, Paths.get(properties.getProperty("module.path")),
 			_getPath(properties, "source.path"),
@@ -161,7 +124,8 @@ public class Module {
 			_getPath(properties, "test.unit.resource.path"),
 			_getPath(properties, "test.integration.path"),
 			_getPath(properties, "test.integration.resource.path"),
-			moduleDependencies, jarDependencies,
+			_getDependencyList(properties.getProperty("module.dependencies")),
+			_getDependencyList(properties.getProperty("jar.dependencies")),
 			Arrays.asList(
 				StringUtil.split(
 					properties.getProperty("portal.dependencies"), ',')),
@@ -292,6 +256,25 @@ public class Module {
 		sb.append("}");
 
 		return sb.toString();
+	}
+
+	private static List<Dependency> _getDependencyList(String dependencies) {
+		if (dependencies == null) {
+			return Collections.emptyList();
+		}
+
+		List<Dependency> dependencyList = new ArrayList<>();
+
+		for (String dependencyString : StringUtil.split(dependencies, ';')) {
+			String[] dependencySplit = StringUtil.split(dependencyString, ',');
+
+			dependencyList.add(
+				new Dependency(
+					Paths.get(dependencySplit[0]),
+					Boolean.valueOf(dependencySplit[1])));
+		}
+
+		return dependencyList;
 	}
 
 	private static Path _getPath(Properties properties, String key) {
