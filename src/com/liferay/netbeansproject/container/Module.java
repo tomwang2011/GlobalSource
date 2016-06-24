@@ -413,6 +413,21 @@ public class Module {
 		_checksum = checksum;
 	}
 
+	private String _createDependencyString(List<Dependency> dependencies) {
+		StringBuilder dependenciesSB = new StringBuilder();
+
+		for (Dependency dependency : dependencies) {
+			dependenciesSB.append(dependency.getPath());
+			dependenciesSB.append(',');
+			dependenciesSB.append(dependency.isTest());
+			dependenciesSB.append(';');
+		}
+
+		dependenciesSB.setLength(dependenciesSB.length() - 1);
+
+		return dependenciesSB.toString();
+	}
+
 	private void _save() throws IOException {
 		Properties properties = new Properties();
 
@@ -444,33 +459,15 @@ public class Module {
 		}
 
 		if (!_jarDependencies.isEmpty()) {
-			StringBuilder jarDependencySB = new StringBuilder();
-
-			for (Dependency jarDependency : _jarDependencies) {
-				jarDependencySB.append(jarDependency.getPath());
-				jarDependencySB.append(',');
-				jarDependencySB.append(jarDependency.isTest());
-				jarDependencySB.append(';');
-			}
-
-			jarDependencySB.setLength(jarDependencySB.length() - 1);
-
-			_putProperty(properties, "jar.dependencies", jarDependencySB);
+			_putProperty(
+				properties, "jar.dependencies",
+				_createDependencyString(_jarDependencies));
 		}
 
 		if (!_moduleDependencies.isEmpty()) {
-			StringBuilder moduleDependencySB = new StringBuilder();
-
-			for (Dependency moduleDependency : _moduleDependencies) {
-				moduleDependencySB.append(moduleDependency.getPath());
-				moduleDependencySB.append(',');
-				moduleDependencySB.append(moduleDependency.isTest());
-				moduleDependencySB.append(';');
-			}
-
-			moduleDependencySB.setLength(moduleDependencySB.length() - 1);
-
-			_putProperty(properties, "module.dependencies", moduleDependencySB);
+			_putProperty(
+				properties, "module.dependencies",
+				_createDependencyString(_moduleDependencies));
 		}
 
 		_putProperty(
