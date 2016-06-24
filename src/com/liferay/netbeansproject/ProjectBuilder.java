@@ -249,7 +249,7 @@ public class ProjectBuilder {
 		for (Map.Entry<Path, List<Module>> entry : moduleGroups.entrySet()) {
 			CreateGroupModule.createModule(
 				groupProjectPath, portalPath.relativize(entry.getKey()),
-				entry.getValue());
+				entry.getValue(), excludedTypes);
 		}
 	}
 
