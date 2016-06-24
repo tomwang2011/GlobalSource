@@ -81,15 +81,26 @@ public class ProjectBuilder {
 		int groupDepth = Integer.valueOf(
 			PropertiesUtil.getRequiredProperty(buildProperties, "group.depth"));
 
+		List<String> groupStopWords = Arrays.asList(
+			StringUtil.split(
+				PropertiesUtil.getRequiredProperty(
+					buildProperties, "group.stop.words"),
+				','));
+
 		ProjectBuilder projectBuilder = new ProjectBuilder();
 
 		for (String portalDir : portalDirs) {
 			Path portalDirPath = Paths.get(portalDir);
 
+			groupStopWords.add(
+				String.valueOf(
+					portalDirPath.getName(portalDirPath.getNameCount() - 2)));
+
 			projectBuilder.scanPortal(
 				rebuild, projectDirPath.resolve(portalDirPath.getFileName()),
 				portalDirPath, displayGradleProcessOutput, ignoredDirs,
-				projectName, excludeTypes, umbrellaSourceListMap, groupDepth);
+				projectName, excludeTypes, umbrellaSourceListMap, groupDepth,
+				groupStopWords);
 		}
 	}
 
@@ -97,7 +108,8 @@ public class ProjectBuilder {
 			boolean rebuild, final Path projectPath, Path portalPath,
 			final boolean displayGradleProcessOutput, String ignoredDirs,
 			String projectName, String excludedTypes,
-			Map<String, String> umbrellaSourceList, int groupDepth)
+			Map<String, String> umbrellaSourceList, int groupDepth,
+			List<String> groupStopWords)
 		throws Exception {
 
 		final Map<Path, Module> oldModulePaths = new HashMap<>();
@@ -225,11 +237,11 @@ public class ProjectBuilder {
 			moduleNames, projectPath.resolve("umbrella"));
 
 		Map<Path, List<Module>> moduleGroups = _createModuleGroups(
-			modules, groupDepth);
+			modules, groupDepth, groupStopWords);
 	}
 
 	private Map<Path, List<Module>> _createModuleGroups(
-		List<Module> modules, int groupDepth) {
+		List<Module> modules, int groupDepth, List<String> groupStopWords) {
 
 		Map<Path, List<Module>> moduleGroups = new HashMap<>();
 
@@ -237,7 +249,12 @@ public class ProjectBuilder {
 			Path groupPath = module.getModulePath();
 
 			for (int i = 1; i < groupDepth; i++) {
-				groupPath = groupPath.getParent();
+				if (!groupStopWords.contains(
+						String.valueOf(
+							groupPath.getName(groupPath.getNameCount() - 2)))) {
+
+					groupPath = groupPath.getParent();
+				}
 			}
 
 			List<Module> moduleGroup = moduleGroups.get(groupPath);
