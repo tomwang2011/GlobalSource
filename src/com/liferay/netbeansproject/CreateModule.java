@@ -343,7 +343,7 @@ public class CreateModule {
 	}
 
 	private static void _createReference(
-			Document document, Element referencesElement, String module)
+			Document document, Element referencesElement, String moduleName)
 		throws IOException {
 
 		Element referenceElement = document.createElement("reference");
@@ -355,7 +355,7 @@ public class CreateModule {
 
 		referenceElement.appendChild(foreignProjectElement);
 
-		foreignProjectElement.appendChild(document.createTextNode(module));
+		foreignProjectElement.appendChild(document.createTextNode(moduleName));
 
 		Element artifactTypeElement = document.createElement("artifact-type");
 
@@ -407,8 +407,8 @@ public class CreateModule {
 				String.valueOf(moduleRelativePath.getFileName()));
 		}
 
-		for (String dependency : module.getPortalLevelModuleDependencies()) {
-			_createReference(document, referencesElement, dependency);
+		for (String moduleName : module.getPortalModuleDependencies()) {
+			_createReference(document, referencesElement, moduleName);
 		}
 	}
 
@@ -478,7 +478,7 @@ public class CreateModule {
 			}
 		}
 
-		for (String moduleName : module.getPortalLevelModuleDependencies()) {
+		for (String moduleName : module.getPortalModuleDependencies()) {
 			if (!moduleName.isEmpty()) {
 				_appendProjectDependencies(moduleName, projectSB, javacSB);
 			}
