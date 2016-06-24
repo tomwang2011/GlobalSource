@@ -92,7 +92,10 @@ public class ProjectBuilder {
 		for (String portalDir : portalDirs) {
 			Path portalDirPath = Paths.get(portalDir);
 
-			groupStopWords.add(
+			List<String> currentGroupStopWords = new ArrayList<>(
+				groupStopWords);
+
+			currentGroupStopWords.add(
 				String.valueOf(
 					portalDirPath.getName(portalDirPath.getNameCount() - 2)));
 
@@ -100,7 +103,7 @@ public class ProjectBuilder {
 				rebuild, projectDirPath.resolve(portalDirPath.getFileName()),
 				portalDirPath, displayGradleProcessOutput, ignoredDirs,
 				projectName, excludeTypes, umbrellaSourceListMap, groupDepth,
-				groupStopWords);
+				currentGroupStopWords);
 		}
 	}
 
@@ -249,12 +252,14 @@ public class ProjectBuilder {
 			Path groupPath = module.getModulePath();
 
 			for (int i = 1; i < groupDepth; i++) {
-				if (!groupStopWords.contains(
+				if (groupStopWords.contains(
 						String.valueOf(
 							groupPath.getName(groupPath.getNameCount() - 2)))) {
 
-					groupPath = groupPath.getParent();
+					break;
 				}
+
+				groupPath = groupPath.getParent();
 			}
 
 			List<Module> moduleGroup = moduleGroups.get(groupPath);
