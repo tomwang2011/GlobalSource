@@ -16,7 +16,6 @@ package com.liferay.netbeansproject.container;
 
 import com.liferay.netbeansproject.util.GradleUtil;
 import com.liferay.netbeansproject.util.HashUtil;
-import com.liferay.netbeansproject.util.ModuleUtil;
 import com.liferay.netbeansproject.util.PropertiesUtil;
 import com.liferay.netbeansproject.util.StringUtil;
 
@@ -33,6 +32,7 @@ import java.security.NoSuchAlgorithmException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
@@ -82,6 +82,12 @@ public class Module {
 			}
 		}
 
+		Path moduleName = modulePath.getFileName();
+
+		if (projectPath != null) {
+			projectPath = projectPath.resolve(moduleName);
+		}
+
 		Module module = new Module(
 			projectPath, modulePath, _resolveSourcePath(modulePath),
 			_resolveResourcePath(modulePath, "main"),
@@ -92,7 +98,7 @@ public class Module {
 			GradleUtil.getModuleDependencies(modulePath), jarDependencies,
 			_resolvePortalLevelDependencies(
 				projectDependencyProperties,
-				ModuleUtil.getModuleName(modulePath)),
+				moduleName.toString()),
 			checksum);
 
 		if (projectPath != null) {
@@ -118,8 +124,13 @@ public class Module {
 			_getPath(properties, "test.unit.path"),
 			_getPath(properties, "test.unit.resource.path"),
 			_getPath(properties, "test.integration.path"),
-			_getPath(properties, "test.integration.resource.path"), null, null,
-			null, properties.getProperty("checksum"));
+			_getPath(properties, "test.integration.resource.path"),
+			_getDependencyList(properties.getProperty("module.dependencies")),
+			_getDependencyList(properties.getProperty("jar.dependencies")),
+			Arrays.asList(
+				StringUtil.split(
+					properties.getProperty("portal.dependencies"), ',')),
+			properties.getProperty("checksum"));
 	}
 
 	@Override
@@ -165,7 +176,9 @@ public class Module {
 	}
 
 	public String getModuleName() {
-		return ModuleUtil.getModuleName(_modulePath);
+		Path fileName = _modulePath.getFileName();
+
+		return fileName.toString();
 	}
 
 	public Path getModulePath() {
@@ -173,7 +186,7 @@ public class Module {
 	}
 
 	public List<String> getPortalLevelModuleDependencies() {
-		return _portalLevelModuleDependencies;
+		return _portalDependencies;
 	}
 
 	public Path getSourcePath() {
@@ -244,6 +257,26 @@ public class Module {
 		sb.append("}");
 
 		return sb.toString();
+	}
+
+	private static <T> List<T> _getDependencyList(String dependenciesString) {
+		if (dependenciesString == null) {
+			return Collections.emptyList();
+		}
+
+		List<T> dependencies = new ArrayList<>();
+
+		for (String dependencyString :
+				StringUtil.split(dependenciesString, ';')) {
+
+			String[] dependencySplit = StringUtil.split(dependencyString, ',');
+
+			dependencies.add((T)new JarDependency(
+					Paths.get(dependencySplit[0]),
+					Boolean.valueOf(dependencySplit[1])));
+		}
+
+		return dependencies;
 	}
 
 	private static Path _getPath(Properties properties, String key) {
@@ -362,7 +395,7 @@ public class Module {
 		_testIntegrationResourcePath = testIntegrationResourcePath;
 		_moduleDependencies = moduleDependencies;
 		_jarDependencies = jarDependencies;
-		_portalLevelModuleDependencies = portalLevelModuleDependencies;
+		_portalDependencies = portalLevelModuleDependencies;
 		_checksum = checksum;
 	}
 
@@ -396,6 +429,41 @@ public class Module {
 			throw new Error(nsae);
 		}
 
+		if (!_jarDependencies.isEmpty()) {
+			StringBuilder jarDependencySB = new StringBuilder();
+
+			for (JarDependency jarDependency : _jarDependencies) {
+				jarDependencySB.append(jarDependency.getJarPath());
+				jarDependencySB.append(',');
+				jarDependencySB.append(jarDependency.isTest());
+				jarDependencySB.append(';');
+			}
+
+			jarDependencySB.setLength(jarDependencySB.length() - 1);
+
+			_putProperty(properties, "jar.dependencies", jarDependencySB);
+		}
+
+		if (!_moduleDependencies.isEmpty()) {
+			StringBuilder moduleDependencySB = new StringBuilder();
+
+			for (ModuleDependency moduleDependency : _moduleDependencies) {
+				moduleDependencySB.append(
+					moduleDependency.getModuleRelativePath());
+				moduleDependencySB.append(',');
+				moduleDependencySB.append(moduleDependency.isTest());
+				moduleDependencySB.append(';');
+			}
+
+			moduleDependencySB.setLength(moduleDependencySB.length() - 1);
+
+			_putProperty(properties, "module.dependencies", moduleDependencySB);
+		}
+
+		_putProperty(
+			properties, "portal.dependencies",
+			StringUtil.merge(_portalDependencies, ','));
+
 		Files.createDirectories(_projectPath);
 
 		try (Writer writer = Files.newBufferedWriter(
@@ -409,7 +477,7 @@ public class Module {
 	private final List<JarDependency> _jarDependencies;
 	private final List<ModuleDependency> _moduleDependencies;
 	private final Path _modulePath;
-	private final List<String> _portalLevelModuleDependencies;
+	private final List<String> _portalDependencies;
 	private final Path _projectPath;
 	private final Path _sourcePath;
 	private final Path _sourceResourcePath;

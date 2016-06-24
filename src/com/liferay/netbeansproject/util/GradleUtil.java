@@ -40,7 +40,7 @@ public class GradleUtil {
 
 	public static Map<String, List<JarDependency>> getJarDependencies(
 			Path portalDirPath, Path workDirPath,
-			boolean displayGradleProcessOutput)
+			boolean displayGradleProcessOutput, boolean daemon)
 		throws Exception {
 
 		Path dependenciesDirPath = Files.createTempDirectory(null);
@@ -52,6 +52,11 @@ public class GradleUtil {
 		List<String> gradleTask = new ArrayList<>();
 
 		gradleTask.add(String.valueOf(portalDirPath.resolve("gradlew")));
+
+		if (daemon) {
+			gradleTask.add("--daemon");
+		}
+
 		gradleTask.add("--parallel");
 		gradleTask.add("--init-script=dependency.gradle");
 		gradleTask.add("-p");
@@ -178,6 +183,51 @@ public class GradleUtil {
 		}
 
 		return moduleDependencies;
+	}
+
+	public static void stopGradleDaemon(
+			Path portalDirPath, boolean displayGradleProcessOutput)
+		throws Exception {
+
+		List<String> gradleTask = new ArrayList<>();
+
+		gradleTask.add(String.valueOf(portalDirPath.resolve("gradlew")));
+
+		gradleTask.add("--stop");
+
+		ProcessBuilder processBuilder = new ProcessBuilder(gradleTask);
+
+		Process process = processBuilder.start();
+
+		if (displayGradleProcessOutput) {
+			String line = null;
+
+			try(
+				BufferedReader br = new BufferedReader(
+					new InputStreamReader(process.getInputStream()))) {
+
+				while ((line = br.readLine()) != null) {
+					System.out.println(line);
+				}
+			}
+
+			try(
+				BufferedReader br = new BufferedReader(
+					new InputStreamReader(process.getErrorStream()))) {
+
+				while ((line = br.readLine()) != null) {
+					System.out.println(line);
+				}
+			}
+		}
+
+		int exitCode = process.waitFor();
+
+		if (exitCode != 0) {
+			throw new IOException(
+				"Process " + processBuilder.command() + " failed with " +
+					exitCode);
+		}
 	}
 
 	private static String _getTaskName(Path portalDirPath, Path workDirPath) {
