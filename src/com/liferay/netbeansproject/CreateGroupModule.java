@@ -61,7 +61,7 @@ public class CreateGroupModule {
 
 		String groupPathString = groupPath.toString();
 
-		groupPathString = groupPathString.replace('/', '-');
+		groupPathString = groupPathString.replace('/', ':');
 
 		projectPath = projectPath.resolve(groupPathString);
 
