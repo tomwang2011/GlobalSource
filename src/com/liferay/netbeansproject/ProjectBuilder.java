@@ -242,7 +242,7 @@ public class ProjectBuilder {
 		Map<Path, List<Module>> moduleGroups = _createModuleGroups(
 			modules, groupDepth, groupStopWords);
 
-		Path groupProjectPath = projectPath.resolve("Group-modules");
+		Path groupProjectPath = projectPath.resolve("group-modules");
 
 		FileUtil.delete(groupProjectPath);
 
