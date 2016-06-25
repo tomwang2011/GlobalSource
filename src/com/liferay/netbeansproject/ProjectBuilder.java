@@ -33,6 +33,7 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -77,15 +78,32 @@ public class ProjectBuilder {
 			PropertiesUtil.getProperties(
 				buildProperties, "umbrella.source.list");
 
+		int groupDepth = Integer.valueOf(
+			PropertiesUtil.getRequiredProperty(buildProperties, "group.depth"));
+
+		List<String> groupStopWords = Arrays.asList(
+			StringUtil.split(
+				PropertiesUtil.getRequiredProperty(
+					buildProperties, "group.stop.words"),
+				','));
+
 		ProjectBuilder projectBuilder = new ProjectBuilder();
 
 		for (String portalDir : portalDirs) {
 			Path portalDirPath = Paths.get(portalDir);
 
+			List<String> currentGroupStopWords = new ArrayList<>(
+				groupStopWords);
+
+			currentGroupStopWords.add(
+				String.valueOf(
+					portalDirPath.getName(portalDirPath.getNameCount() - 2)));
+
 			projectBuilder.scanPortal(
 				rebuild, projectDirPath.resolve(portalDirPath.getFileName()),
 				portalDirPath, displayGradleProcessOutput, ignoredDirs,
-				projectName, excludeTypes, umbrellaSourceListMap);
+				projectName, excludeTypes, umbrellaSourceListMap, groupDepth,
+				currentGroupStopWords);
 		}
 	}
 
@@ -93,7 +111,8 @@ public class ProjectBuilder {
 			boolean rebuild, final Path projectPath, Path portalPath,
 			final boolean displayGradleProcessOutput, String ignoredDirs,
 			String projectName, String excludedTypes,
-			Map<String, String> umbrellaSourceList)
+			Map<String, String> umbrellaSourceList, int groupDepth,
+			List<String> groupStopWords)
 		throws Exception {
 
 		final Map<Path, Module> oldModulePaths = new HashMap<>();
@@ -110,13 +129,15 @@ public class ProjectBuilder {
 		final Set<String> ignoredDirSet = new HashSet<>(
 			Arrays.asList(StringUtil.split(ignoredDirs, ',')));
 
-		final Properties projectDependencyProperties =
+		final Properties portalModuleDependencyProperties =
 			PropertiesUtil.loadProperties(
-				Paths.get("project-dependency.properties"));
+				Paths.get("portal-module-dependency.properties"));
 
 		final Set<String> moduleNames = new HashSet<>();
 
 		final Set<Path> newModulePaths = new HashSet<>();
+
+		final List<Module> modules = new ArrayList<>();
 
 		Files.walkFileTree(
 			portalPath, EnumSet.allOf(FileVisitOption.class), Integer.MAX_VALUE,
@@ -150,9 +171,12 @@ public class ProjectBuilder {
 						!module.equals(
 							Module.createModule(
 								null, path, null,
-								projectDependencyProperties))) {
+								portalModuleDependencyProperties))) {
 
 						newModulePaths.add(path);
+					}
+					else {
+						modules.add(module);
 					}
 
 					return FileVisitResult.SKIP_SUBTREE;
@@ -203,7 +227,9 @@ public class ProjectBuilder {
 				projectPath.resolve("modules"), newModulePath,
 				jarDependenciesMap.get(
 					String.valueOf(newModulePath.getFileName())),
-				projectDependencyProperties);
+				portalModuleDependencyProperties);
+
+			modules.add(module);
 
 			CreateModule.createModule(
 				module, projectPath, excludedTypes, portalLibJars, portalPath);
@@ -212,6 +238,52 @@ public class ProjectBuilder {
 		CreateUmbrella.createUmbrella(
 			portalPath, projectName, umbrellaSourceList, excludedTypes,
 			moduleNames, projectPath.resolve("umbrella"));
+
+		Map<Path, List<Module>> moduleGroups = _createModuleGroups(
+			modules, groupDepth, groupStopWords);
+
+		Path groupProjectPath = projectPath.resolve("group-modules");
+
+		FileUtil.delete(groupProjectPath);
+
+		for (Map.Entry<Path, List<Module>> entry : moduleGroups.entrySet()) {
+			CreateGroupModule.createModule(
+				groupProjectPath, portalPath, entry.getKey(), entry.getValue(),
+				excludedTypes, portalLibJars);
+		}
+	}
+
+	private Map<Path, List<Module>> _createModuleGroups(
+		List<Module> modules, int groupDepth, List<String> groupStopWords) {
+
+		Map<Path, List<Module>> moduleGroups = new HashMap<>();
+
+		for (Module module : modules) {
+			Path groupPath = module.getModulePath();
+
+			for (int i = 1; i < groupDepth; i++) {
+				if (groupStopWords.contains(
+						String.valueOf(
+							groupPath.getName(groupPath.getNameCount() - 2)))) {
+
+					break;
+				}
+
+				groupPath = groupPath.getParent();
+			}
+
+			List<Module> moduleGroup = moduleGroups.get(groupPath);
+
+			if (moduleGroup == null) {
+				moduleGroup = new ArrayList<>();
+
+				moduleGroups.put(groupPath, moduleGroup);
+			}
+
+			moduleGroup.add(module);
+		}
+
+		return moduleGroups;
 	}
 
 	private void _loadExistingProjects(

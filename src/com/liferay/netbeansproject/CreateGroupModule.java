@@ -25,10 +25,13 @@ import java.io.Writer;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -44,33 +47,48 @@ import org.w3c.dom.Element;
 /**
  * @author Tom Wang
  */
-public class CreateModule {
+public class CreateGroupModule {
 
 	public static void createModule(
-			Module module, Path projectPath, String excludedTypes,
-			String portalLibJars, Path portalPath)
+			Path projectPath, Path portalPath, Path groupPath,
+			List<Module> moduleList, String excludedTypes, String portalLibJars)
 		throws Exception {
 
-		Path projectModulePath = projectPath.resolve(
-			Paths.get("modules", module.getModuleName()));
+		String projectName = _createProjectName(portalPath, groupPath);
 
-		FileUtil.unZip(projectModulePath);
+		projectPath = projectPath.resolve(projectName);
 
-		_replaceProjectName(module, projectModulePath);
+		FileUtil.unZip(projectPath);
+
+		_replaceProjectName(projectName, projectPath);
 
 		_appendProperties(
-			module, excludedTypes, portalLibJars, portalPath,
-			projectModulePath.resolve("nbproject/project.properties"));
+			projectName, String.valueOf(portalPath.getFileName()), moduleList,
+			excludedTypes, portalLibJars,
+			projectPath.resolve("nbproject/project.properties"));
 
-		_createProjectXML(module, portalPath.getParent(), projectModulePath);
+		_createProjectXML(projectName, moduleList, projectPath);
+	}
+
+	private static void _appendJars(Set<Path> jarSet, StringBuilder sb) {
+		for (Path jarPath : jarSet) {
+			sb.append('\t');
+			sb.append(jarPath);
+			sb.append(":\\\n");
+		}
 	}
 
 	private static void _appendProjectDependencies(
-		String moduleName, StringBuilder projectSB, StringBuilder javacSB) {
+		String moduleName, String portalName, StringBuilder projectSB,
+		StringBuilder javacSB) {
 
 		projectSB.append("project.");
 		projectSB.append(moduleName);
-		projectSB.append("=../");
+		projectSB.append("=../../");
+		projectSB.append(portalName);
+		projectSB.append('/');
+		projectSB.append("modules");
+		projectSB.append('/');
 		projectSB.append(moduleName);
 		projectSB.append('\n');
 		projectSB.append("reference.");
@@ -87,11 +105,10 @@ public class CreateModule {
 	}
 
 	private static void _appendProperties(
-			Module module, String excludeTypes, String portalLibJars,
-			Path portalPath, Path projectPropertiesPath)
-		throws Exception {
-
-		String projectName = module.getModuleName();
+			String projectName, String portalName, List<Module> moduleList,
+			String excludeTypes, String portalLibJars,
+			Path projectPropertiesPath)
+		throws IOException {
 
 		StringBuilder projectSB = new StringBuilder();
 
@@ -100,14 +117,19 @@ public class CreateModule {
 		projectSB.append('\n');
 
 		projectSB.append("application.title=");
-		projectSB.append(module.getModulePath());
+		projectSB.append(projectName);
 		projectSB.append('\n');
 
 		projectSB.append("dist.jar=${dist.dir}/");
 		projectSB.append(projectName);
 		projectSB.append(".jar\n");
 
-		_appendSourcePaths(module, projectSB);
+		_appendSourcePaths(moduleList, projectSB);
+
+		Set<Path> javacJars = new LinkedHashSet<>();
+		Set<Path> testJars = new LinkedHashSet<>();
+
+		_resolveJarDependencySet(moduleList, javacJars, testJars);
 
 		StringBuilder javacSB = new StringBuilder("javac.classpath=\\\n");
 
@@ -116,26 +138,13 @@ public class CreateModule {
 		testSB.append("\t${build.classes.dir}:\\\n");
 		testSB.append("\t${javac.classpath}:\\\n");
 
-		_resolveJarDependencySet(module, javacSB, testSB);
+		_appendJars(javacJars, javacSB);
+		_appendJars(testJars, testSB);
 
-		_resolveProjectDependencySet(module, projectSB, javacSB, testSB);
+		_resolveProjectDependencySet(
+			moduleList, portalName, projectSB, javacSB, testSB);
 
 		javacSB.append(portalLibJars);
-
-		if (projectName.equals("portal-impl")) {
-			projectSB.append("\nfile.reference.portal-test-integration-src=");
-			projectSB.append(portalPath);
-			projectSB.append("/portal-test-integration/src\n");
-			projectSB.append("src.test.dir=");
-			projectSB.append("${file.reference.portal-test-integration-src}");
-		}
-
-		if (projectName.equals("portal-kernel")) {
-			projectSB.append("\nfile.reference.portal-test-src=");
-			projectSB.append(portalPath);
-			projectSB.append("/portal-test/src\n");
-			projectSB.append("src.test.dir=${file.reference.portal-test-src}");
-		}
 
 		try (BufferedWriter bufferedWriter = Files.newBufferedWriter(
 				projectPropertiesPath, StandardOpenOption.APPEND)) {
@@ -183,32 +192,34 @@ public class CreateModule {
 	}
 
 	private static void _appendSourcePaths(
-		Module module, StringBuilder projectSB) {
+		List<Module> moduleList, StringBuilder projectSB) {
 
-		String moduleName = module.getModuleName();
+		for (Module module : moduleList) {
+			String moduleName = module.getModuleName();
 
-		_appendSourcePathIndividual(
-			module.getSourcePath(), "src", moduleName, "src", projectSB);
-		_appendSourcePathIndividual(
-			module.getSourceResourcePath(), "src", moduleName, "resources",
-			projectSB);
-		_appendSourcePathIndividual(
-			module.getTestUnitPath(), "test", moduleName, "test-unit",
-			projectSB);
-		_appendSourcePathIndividual(
-			module.getTestUnitResourcePath(), "test", moduleName,
-			"test-unit-resources", projectSB);
-		_appendSourcePathIndividual(
-			module.getTestIntegrationPath(), "test", moduleName,
-			"test-integration", projectSB);
-		_appendSourcePathIndividual(
-			module.getTestIntegrationPath(), "test", moduleName,
-			"test-integration-resources", projectSB);
+			_appendSourcePathIndividual(
+				module.getSourcePath(), "src", moduleName, "src", projectSB);
+			_appendSourcePathIndividual(
+				module.getSourceResourcePath(), "src", moduleName, "resources",
+				projectSB);
+			_appendSourcePathIndividual(
+				module.getTestUnitPath(), "test", moduleName, "test-unit",
+				projectSB);
+			_appendSourcePathIndividual(
+				module.getTestUnitResourcePath(), "test", moduleName,
+				"test-unit-resources", projectSB);
+			_appendSourcePathIndividual(
+				module.getTestIntegrationPath(), "test", moduleName,
+				"test-integration", projectSB);
+			_appendSourcePathIndividual(
+				module.getTestIntegrationPath(), "test", moduleName,
+				"test-integration-resources", projectSB);
+		}
 	}
 
 	private static void _createData(
-		Document document, Element configurationElement, Module module,
-		Path portalPath) {
+		Document document, String groupPathString, Element configurationElement,
+		List<Module> moduleList) {
 
 		Element dataElement = document.createElement("data");
 
@@ -221,71 +232,62 @@ public class CreateModule {
 
 		dataElement.appendChild(nameElement);
 
-		Path moduleRelativePath = portalPath.relativize(module.getModulePath());
-
-		nameElement.appendChild(
-			document.createTextNode(moduleRelativePath.toString()));
+		nameElement.appendChild(document.createTextNode(groupPathString));
 
 		Element sourceRootsElement = document.createElement("source-roots");
 
 		dataElement.appendChild(sourceRootsElement);
 
-		String moduleName = module.getModuleName();
-
-		if (module.getSourcePath() != null) {
-			_createRoots(
-				document, sourceRootsElement, "src",
-				"src." + moduleName + ".src.dir");
-		}
-
-		if (module.getSourceResourcePath() != null) {
-			_createRoots(
-				document, sourceRootsElement, "resources",
-				"src." + moduleName + ".resources.dir");
-		}
-
 		Element testRootsElement = document.createElement("test-roots");
 
 		dataElement.appendChild(testRootsElement);
 
-		if (module.getTestUnitPath() != null) {
-			_createRoots(
-				document, testRootsElement, "test-unit",
-				"test." + moduleName + ".test-unit.dir");
-		}
+		for (Module module : moduleList) {
+			String moduleName = module.getModuleName();
 
-		if (module.getTestUnitResourcePath() != null) {
-			_createRoots(
-				document, testRootsElement, "test-unit-resources",
-				"test." + moduleName + ".test-unit-resources.dir");
-		}
+			if (module.getSourcePath() != null) {
+				_createRoots(
+					document, sourceRootsElement, moduleName + "-src",
+					"src." + moduleName + ".src.dir");
+			}
 
-		if (module.getTestIntegrationPath() != null) {
-			_createRoots(
-				document, testRootsElement, "test-integration",
-				"test." + moduleName + ".test-integration.dir");
-		}
+			if (module.getSourceResourcePath() != null) {
+				_createRoots(
+					document, sourceRootsElement, moduleName + "-resources",
+					"src." + moduleName + ".resources.dir");
+			}
 
-		if (module.getTestIntegrationResourcePath() != null) {
-			_createRoots(
-				document, testRootsElement, "test-integration-resources",
-				"test." + moduleName + ".test-integration-resources.dir");
-		}
+			if (module.getTestUnitPath() != null) {
+				_createRoots(
+					document, testRootsElement, moduleName + "-test-unit",
+					"test." + moduleName + ".test-unit.dir");
+			}
 
-		if (moduleName.equals("portal-impl")) {
-			_createRoots(
-				document, sourceRootsElement, "portal-test-integration",
-				"src.test.dir");
-		}
+			if (module.getTestUnitResourcePath() != null) {
+				_createRoots(
+					document, testRootsElement,
+					moduleName + "-test-unit-resources",
+					"test." + moduleName + ".test-unit-resources.dir");
+			}
 
-		if (moduleName.equals("portal-kernel")) {
-			_createRoots(
-				document, sourceRootsElement, "portal-test", "src.test.dir");
+			if (module.getTestIntegrationPath() != null) {
+				_createRoots(
+					document, testRootsElement,
+					moduleName + "-test-integration",
+					"test." + moduleName + ".test-integration.dir");
+			}
+
+			if (module.getTestIntegrationResourcePath() != null) {
+				_createRoots(
+					document, testRootsElement,
+					moduleName + "-test-integration-resources",
+					"test." + moduleName + ".test-integration-resources.dir");
+			}
 		}
 	}
 
 	private static void _createProjectElement(
-			Document document, Module module, Path portalPath)
+			Document document, String groupPathString, List<Module> moduleList)
 		throws IOException {
 
 		Element projectElement = document.createElement("project");
@@ -306,13 +308,26 @@ public class CreateModule {
 
 		projectElement.appendChild(configurationElement);
 
-		_createData(document, configurationElement, module, portalPath);
+		_createData(
+			document, groupPathString, configurationElement, moduleList);
 
-		_createReferences(document, configurationElement, module);
+		_createReferences(document, configurationElement, moduleList);
+	}
+
+	private static String _createProjectName(Path portalPath, Path groupPath) {
+		if (portalPath.equals(groupPath)) {
+			return "portal";
+		}
+
+		groupPath = portalPath.relativize(groupPath);
+
+		String projectName = groupPath.toString();
+
+		return projectName.replace('/', ':');
 	}
 
 	private static void _createProjectXML(
-			Module module, Path portalPath, Path projectModulePath)
+			String projectName, List<Module> moduleList, Path projectModulePath)
 		throws Exception {
 
 		DocumentBuilderFactory documentBuilderFactory =
@@ -323,7 +338,7 @@ public class CreateModule {
 
 		Document document = documentBuilder.newDocument();
 
-		_createProjectElement(document, module, portalPath);
+		_createProjectElement(document, projectName, moduleList);
 
 		TransformerFactory transformerFactory =
 			TransformerFactory.newInstance();
@@ -343,7 +358,7 @@ public class CreateModule {
 	}
 
 	private static void _createReference(
-			Document document, Element referencesElement, String moduleName)
+			Document document, Element referencesElement, String module)
 		throws IOException {
 
 		Element referenceElement = document.createElement("reference");
@@ -355,7 +370,7 @@ public class CreateModule {
 
 		referenceElement.appendChild(foreignProjectElement);
 
-		foreignProjectElement.appendChild(document.createTextNode(moduleName));
+		foreignProjectElement.appendChild(document.createTextNode(module));
 
 		Element artifactTypeElement = document.createElement("artifact-type");
 
@@ -389,7 +404,8 @@ public class CreateModule {
 	}
 
 	private static void _createReferences(
-			Document document, Element configurationElement, Module module)
+			Document document, Element configurationElement,
+			List<Module> moduleList)
 		throws IOException {
 
 		Element referencesElement = document.createElement("references");
@@ -399,16 +415,31 @@ public class CreateModule {
 		referencesElement.setAttribute(
 			"xmlns", "http://www.netbeans.org/ns/ant-project-references/1");
 
-		for (Dependency dependency : module.getModuleDependencies()) {
-			Path moduleRelativePath = dependency.getPath();
+		Set<String> resolvedSet = new HashSet<>();
 
-			_createReference(
-				document, referencesElement,
-				String.valueOf(moduleRelativePath.getFileName()));
-		}
+		for (Module module : moduleList) {
+			for (Dependency moduleDependency : module.getModuleDependencies()) {
+				Path moduleRelativePath = moduleDependency.getPath();
 
-		for (String moduleName : module.getPortalModuleDependencies()) {
-			_createReference(document, referencesElement, moduleName);
+				if (!resolvedSet.contains(
+						String.valueOf(moduleRelativePath.getFileName()))) {
+
+					_createReference(
+						document, referencesElement,
+						String.valueOf(moduleRelativePath.getFileName()));
+
+					resolvedSet.add(
+						String.valueOf(moduleRelativePath.getFileName()));
+				}
+			}
+
+			for (String dependency : module.getPortalModuleDependencies()) {
+				if (!resolvedSet.contains(dependency)) {
+					_createReference(document, referencesElement, dependency);
+
+					resolvedSet.add(dependency);
+				}
+			}
 		}
 	}
 
@@ -426,61 +457,73 @@ public class CreateModule {
 	}
 
 	private static void _replaceProjectName(
-			Module module, Path projectModulePath)
+			String projectName, Path projectModulePath)
 		throws IOException {
 
 		Path buildXMLPath = projectModulePath.resolve("build.xml");
 
 		String content = StringUtil.replace(
 			new String(Files.readAllBytes(buildXMLPath)), "%placeholder%",
-			module.getModuleName());
+			projectName);
 
 		Files.write(buildXMLPath, Arrays.asList(content));
 	}
 
 	private static void _resolveJarDependencySet(
-		Module module, StringBuilder javacSB, StringBuilder testSB) {
+		List<Module> moduleList, Set<Path> javacJars, Set<Path> testJars) {
 
-		StringBuilder sb = null;
+		for (Module module : moduleList) {
+			for (Dependency jarDependency : module.getJarDependencies()) {
+				Path jarPath = jarDependency.getPath();
 
-		for (Dependency dependency : module.getJarDependencies()) {
-			Path jarPath = dependency.getPath();
-
-			if (dependency.isTest()) {
-				sb = testSB;
+				if (jarDependency.isTest()) {
+					testJars.add(jarPath);
+				}
+				else {
+					javacJars.add(jarPath);
+				}
 			}
-			else {
-				sb = javacSB;
-			}
-
-			sb.append('\t');
-			sb.append(jarPath);
-			sb.append(":\\\n");
 		}
 	}
 
 	private static void _resolveProjectDependencySet(
-		Module module, StringBuilder projectSB, StringBuilder javacSB,
-		StringBuilder testSB) {
+		List<Module> moduleList, String portalName, StringBuilder projectSB,
+		StringBuilder javacSB, StringBuilder testSB) {
 
-		for (Dependency dependency : module.getModuleDependencies()) {
-			Path dependencyModulePath = dependency.getPath();
+		Set<String> resolvedSet = new HashSet<>();
 
-			if (dependency.isTest()) {
-				_appendProjectDependencies(
-					String.valueOf(dependencyModulePath.getFileName()),
-					projectSB, testSB);
+		for (Module module : moduleList) {
+			for (Dependency moduleDependency : module.getModuleDependencies()) {
+				Path dependencyModulePath = moduleDependency.getPath();
+
+				if (!resolvedSet.contains(
+						String.valueOf(dependencyModulePath.getFileName()))) {
+
+					if (moduleDependency.isTest()) {
+						_appendProjectDependencies(
+							String.valueOf(dependencyModulePath.getFileName()),
+							portalName, projectSB, testSB);
+					}
+					else {
+						_appendProjectDependencies(
+							String.valueOf(dependencyModulePath.getFileName()),
+							portalName, projectSB, javacSB);
+					}
+
+					resolvedSet.add(
+						String.valueOf(dependencyModulePath.getFileName()));
+				}
 			}
-			else {
-				_appendProjectDependencies(
-					String.valueOf(dependencyModulePath.getFileName()),
-					projectSB, javacSB);
-			}
-		}
 
-		for (String moduleName : module.getPortalModuleDependencies()) {
-			if (!moduleName.isEmpty()) {
-				_appendProjectDependencies(moduleName, projectSB, javacSB);
+			for (String moduleName : module.getPortalModuleDependencies()) {
+				if (!resolvedSet.contains(moduleName)) {
+					if (!moduleName.isEmpty()) {
+						_appendProjectDependencies(
+							moduleName, portalName, projectSB, javacSB);
+
+						resolvedSet.add(moduleName);
+					}
+				}
 			}
 		}
 	}
