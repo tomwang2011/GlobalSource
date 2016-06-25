@@ -25,7 +25,6 @@ import java.io.Writer;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
 import java.util.Arrays;
@@ -51,17 +50,11 @@ import org.w3c.dom.Element;
 public class CreateGroupModule {
 
 	public static void createModule(
-			Path projectPath, String portalName, Path groupPath,
+			Path projectPath, Path portalPath, Path groupPath,
 			List<Module> moduleList, String excludedTypes, String portalLibJars)
 		throws Exception {
 
-		if (groupPath.equals(Paths.get(""))) {
-			groupPath = groupPath.resolve("portal");
-		}
-
-		String projectName = groupPath.toString();
-
-		projectName = projectName.replace('/', ':');
+		String projectName = _createProjectName(portalPath, groupPath);
 
 		projectPath = projectPath.resolve(projectName);
 
@@ -70,7 +63,8 @@ public class CreateGroupModule {
 		_replaceProjectName(projectName, projectPath);
 
 		_appendProperties(
-			projectName, portalName, moduleList, excludedTypes, portalLibJars,
+			projectName, String.valueOf(portalPath.getFileName()), moduleList,
+			excludedTypes, portalLibJars,
 			projectPath.resolve("nbproject/project.properties"));
 
 		_createProjectXML(projectName, moduleList, projectPath);
@@ -318,6 +312,18 @@ public class CreateGroupModule {
 			document, groupPathString, configurationElement, moduleList);
 
 		_createReferences(document, configurationElement, moduleList);
+	}
+
+	private static String _createProjectName(Path portalPath, Path groupPath) {
+		if (portalPath.equals(groupPath)) {
+			return "portal";
+		}
+
+		groupPath = portalPath.relativize(groupPath);
+
+		String projectName = groupPath.toString();
+
+		return projectName.replace('/', ':');
 	}
 
 	private static void _createProjectXML(
