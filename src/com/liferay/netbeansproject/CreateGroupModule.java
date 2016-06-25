@@ -59,21 +59,21 @@ public class CreateGroupModule {
 			groupPath = groupPath.resolve("portal");
 		}
 
-		String groupPathString = groupPath.toString();
+		String projectName = groupPath.toString();
 
-		groupPathString = groupPathString.replace('/', ':');
+		projectName = projectName.replace('/', ':');
 
-		projectPath = projectPath.resolve(groupPathString);
+		projectPath = projectPath.resolve(projectName);
 
 		FileUtil.unZip(projectPath);
 
-		_replaceProjectName(groupPathString, projectPath);
+		_replaceProjectName(projectName, projectPath);
 
 		_appendProperties(
-			groupPathString, portalName, moduleList, excludedTypes,
-			portalLibJars, projectPath.resolve("nbproject/project.properties"));
+			projectName, portalName, moduleList, excludedTypes, portalLibJars,
+			projectPath.resolve("nbproject/project.properties"));
 
-		_createProjectXML(groupPathString, moduleList, projectPath);
+		_createProjectXML(projectName, moduleList, projectPath);
 	}
 
 	private static void _appendJars(Set<Path> jarSet, StringBuilder sb) {
@@ -111,7 +111,7 @@ public class CreateGroupModule {
 	}
 
 	private static void _appendProperties(
-			String groupPathString, String portalName, List<Module> moduleList,
+			String projectName, String portalName, List<Module> moduleList,
 			String excludeTypes, String portalLibJars,
 			Path projectPropertiesPath)
 		throws IOException {
@@ -123,11 +123,11 @@ public class CreateGroupModule {
 		projectSB.append('\n');
 
 		projectSB.append("application.title=");
-		projectSB.append(groupPathString);
+		projectSB.append(projectName);
 		projectSB.append('\n');
 
 		projectSB.append("dist.jar=${dist.dir}/");
-		projectSB.append(groupPathString);
+		projectSB.append(projectName);
 		projectSB.append(".jar\n");
 
 		_appendSourcePaths(moduleList, projectSB);
@@ -321,8 +321,7 @@ public class CreateGroupModule {
 	}
 
 	private static void _createProjectXML(
-			String groupPathString, List<Module> moduleList,
-			Path projectModulePath)
+			String projectName, List<Module> moduleList, Path projectModulePath)
 		throws Exception {
 
 		DocumentBuilderFactory documentBuilderFactory =
@@ -333,7 +332,7 @@ public class CreateGroupModule {
 
 		Document document = documentBuilder.newDocument();
 
-		_createProjectElement(document, groupPathString, moduleList);
+		_createProjectElement(document, projectName, moduleList);
 
 		TransformerFactory transformerFactory =
 			TransformerFactory.newInstance();
