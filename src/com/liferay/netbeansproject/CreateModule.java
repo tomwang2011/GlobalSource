@@ -17,9 +17,10 @@ package com.liferay.netbeansproject;
 import com.liferay.netbeansproject.container.Dependency;
 import com.liferay.netbeansproject.container.Module;
 import com.liferay.netbeansproject.util.FileUtil;
-import com.liferay.netbeansproject.util.StringUtil;
+import com.liferay.netbeansproject.util.FreeMarkerUtil;
 
 import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 
@@ -28,7 +29,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
-import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -56,7 +58,7 @@ public class CreateModule {
 
 		FileUtil.unZip(projectModulePath);
 
-		_replaceProjectName(module, projectModulePath);
+		_generateBuildXML(module, projectModulePath.resolve("build.xml"));
 
 		_appendProperties(
 			module, excludedTypes, portalLibJars, portalPath,
@@ -425,17 +427,16 @@ public class CreateModule {
 		rootElement.setAttribute("name", label);
 	}
 
-	private static void _replaceProjectName(
-			Module module, Path projectModulePath)
-		throws IOException {
+	private static void _generateBuildXML(Module module, Path buildXMLPath)
+		throws Exception {
 
-		Path buildXMLPath = projectModulePath.resolve("build.xml");
+		Map<String, String> data = new HashMap<>();
 
-		String content = StringUtil.replace(
-			new String(Files.readAllBytes(buildXMLPath)), "%placeholder%",
-			module.getModuleName());
+		data.put("projectName", module.getModuleName());
 
-		Files.write(buildXMLPath, Arrays.asList(content));
+		try (Writer writer = new FileWriter(buildXMLPath.toFile())) {
+			FreeMarkerUtil.process("resources/buildXML.ftl", data, writer);
+		}
 	}
 
 	private static void _resolveJarDependencySet(
