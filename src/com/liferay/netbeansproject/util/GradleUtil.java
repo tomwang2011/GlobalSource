@@ -102,7 +102,7 @@ public class GradleUtil {
 					exitCode);
 		}
 
-		final Map<String, List<Dependency>> dependenciesMap = new HashMap<>();
+		Map<String, List<Dependency>> dependenciesMap = new HashMap<>();
 
 		try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(
 				dependenciesDirPath)) {
