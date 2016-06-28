@@ -12,9 +12,9 @@
 		<fileset dir="lib" includes="ivy-2.4.0.jar" />
 	</path>
 
-	 <path id="lib.classpath">
-        <fileset dir="lib" includes="*.jar"/>
-    </path>
+	<path id="lib.classpath">
+		<fileset dir="lib" includes="*.jar"/>
+	</path>
 
 	<property file="build-ext.properties" />
 	<property file="build.properties" />
@@ -95,8 +95,7 @@
 			</javac>
 
 			<copy todir="classes">
-			    <fileset dir="src"
-			             includes="**/*.ftl" />
+				<fileset dir="src" includes="**/*.ftl" />
 			</copy>
 		</sequential>
 	</macrodef>
