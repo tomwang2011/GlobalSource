@@ -16,12 +16,12 @@ package com.liferay.netbeansproject;
 
 import com.liferay.netbeansproject.container.Dependency;
 import com.liferay.netbeansproject.container.Module;
-import com.liferay.netbeansproject.util.FileUtil;
 import com.liferay.netbeansproject.util.FreeMarkerUtil;
 
 import java.io.FileWriter;
 import java.io.Writer;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -42,7 +42,7 @@ public class CreateModule {
 		Path projectModulePath = projectPath.resolve(
 			Paths.get("modules", module.getModuleName()));
 
-		FileUtil.unZip(projectModulePath);
+		Files.createDirectories(projectModulePath.resolve("nbproject"));
 
 		_generateBuildXML(module, projectModulePath.resolve("build.xml"));
 
