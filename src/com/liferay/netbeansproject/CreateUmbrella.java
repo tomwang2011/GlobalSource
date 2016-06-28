@@ -56,9 +56,9 @@ public class CreateUmbrella {
 
 		FileUtil.unZip(projectPath);
 
-		Path buildXMLPath = projectPath.resolve("build.xml");
+		try (Writer writer = Files.newBufferedWriter(
+				projectPath.resolve("build.xml"))) {
 
-		try (Writer writer = Files.newBufferedWriter(buildXMLPath)) {
 			FreeMarkerUtil.process(
 				"resources/build_xml.ftl",
 				Collections.singletonMap(
