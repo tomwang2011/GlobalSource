@@ -60,7 +60,7 @@ public class CreateUmbrella {
 
 		try (Writer writer = Files.newBufferedWriter(buildXMLPath)) {
 			FreeMarkerUtil.process(
-				"resources/buildXML.ftl",
+				"resources/build_xml.ftl",
 				Collections.singletonMap(
 					"projectName", "IndividualModuleUmbrella"),
 				writer);

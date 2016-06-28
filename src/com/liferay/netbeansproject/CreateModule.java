@@ -67,7 +67,7 @@ public class CreateModule {
 
 		try (Writer writer = Files.newBufferedWriter(projectPropertiesPath)) {
 			FreeMarkerUtil.process(
-				"resources/projectProperties.ftl", data, writer);
+				"resources/project_properties.ftl", data, writer);
 		}
 	}
 
@@ -83,7 +83,7 @@ public class CreateModule {
 			portalParentPath.relativize(module.getModulePath()));
 
 		try (Writer writer = Files.newBufferedWriter(projectXMLPath)) {
-			FreeMarkerUtil.process("resources/projectXML.ftl", data, writer);
+			FreeMarkerUtil.process("resources/project_xml.ftl", data, writer);
 		}
 	}
 
@@ -92,7 +92,7 @@ public class CreateModule {
 
 		try (Writer writer = Files.newBufferedWriter(buildXMLPath)) {
 			FreeMarkerUtil.process(
-				"resources/buildXML.ftl",
+				"resources/build_xml.ftl",
 				Collections.singletonMap("projectName", module.getModuleName()),
 				writer);
 		}
