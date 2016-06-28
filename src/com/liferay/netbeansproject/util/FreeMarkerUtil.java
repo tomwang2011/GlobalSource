@@ -31,16 +31,14 @@ public class FreeMarkerUtil {
 	public static void process(String name, Object context, Writer writer)
 		throws Exception {
 
-		Template template = _getConfiguration().getTemplate(name);
+		Template template = _configuration.getTemplate(name);
 
 		template.process(context, writer);
 	}
 
-	private static Configuration _getConfiguration() {
-		if (_configuration != null) {
-			return _configuration;
-		}
+	private static final Configuration _configuration;
 
+	static {
 		_configuration = new Configuration(Configuration.getVersion());
 
 		DefaultObjectWrapperBuilder defaultObjectWrapperBuilder =
@@ -51,10 +49,6 @@ public class FreeMarkerUtil {
 		_configuration.setTemplateLoader(
 			new ClassTemplateLoader(FreeMarkerUtil.class, "/"));
 		_configuration.setTemplateUpdateDelayMilliseconds(Long.MAX_VALUE);
-
-		return _configuration;
 	}
-
-	private static Configuration _configuration;
 
 }
