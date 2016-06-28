@@ -24,6 +24,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -89,12 +90,11 @@ public class CreateModule {
 	private static void _generateBuildXML(Module module, Path buildXMLPath)
 		throws Exception {
 
-		Map<String, String> data = new HashMap<>();
-
-		data.put("projectName", module.getModuleName());
-
 		try (Writer writer = Files.newBufferedWriter(buildXMLPath)) {
-			FreeMarkerUtil.process("resources/buildXML.ftl", data, writer);
+			FreeMarkerUtil.process(
+				"resources/buildXML.ftl",
+				Collections.singletonMap("projectName", module.getModuleName()),
+				writer);
 		}
 	}
 

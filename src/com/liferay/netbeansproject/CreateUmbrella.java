@@ -25,7 +25,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -56,14 +56,14 @@ public class CreateUmbrella {
 
 		FileUtil.unZip(projectPath);
 
-		Map<String, String> data = new HashMap<>();
-
-		data.put("projectName", "IndividualModuleUmbrella");
-
 		Path buildXMLPath = projectPath.resolve("build.xml");
 
 		try (Writer writer = Files.newBufferedWriter(buildXMLPath)) {
-			FreeMarkerUtil.process("resources/buildXML.ftl", data, writer);
+			FreeMarkerUtil.process(
+				"resources/buildXML.ftl",
+				Collections.singletonMap(
+					"projectName", "IndividualModuleUmbrella"),
+				writer);
 		}
 
 		_appendProjectProperties(
