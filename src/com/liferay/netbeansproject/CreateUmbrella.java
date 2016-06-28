@@ -18,7 +18,6 @@ import com.liferay.netbeansproject.template.FreeMarkerUtil;
 import com.liferay.netbeansproject.util.FileUtil;
 
 import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 
@@ -63,7 +62,7 @@ public class CreateUmbrella {
 
 		Path buildXMLPath = projectPath.resolve("build.xml");
 
-		try (Writer writer = new FileWriter(buildXMLPath.toFile())) {
+		try (Writer writer = Files.newBufferedWriter(buildXMLPath)) {
 			FreeMarkerUtil.process("resources/buildXML.ftl", data, writer);
 		}
 

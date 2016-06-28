@@ -18,7 +18,6 @@ import com.liferay.netbeansproject.container.Dependency;
 import com.liferay.netbeansproject.container.Module;
 import com.liferay.netbeansproject.template.FreeMarkerUtil;
 
-import java.io.FileWriter;
 import java.io.Writer;
 
 import java.nio.file.Files;
@@ -65,7 +64,7 @@ public class CreateModule {
 		data.put("module", module);
 		data.put("portalLibJars", portalLibJars);
 
-		try (Writer writer = new FileWriter(projectPropertiesPath.toFile())) {
+		try (Writer writer = Files.newBufferedWriter(projectPropertiesPath)) {
 			FreeMarkerUtil.process(
 				"resources/projectProperties.ftl", data, writer);
 		}
@@ -82,7 +81,7 @@ public class CreateModule {
 			"moduleDisplayName",
 			portalParentPath.relativize(module.getModulePath()));
 
-		try (Writer writer = new FileWriter(projectXMLPath.toFile())) {
+		try (Writer writer = Files.newBufferedWriter(projectXMLPath)) {
 			FreeMarkerUtil.process("resources/projectXML.ftl", data, writer);
 		}
 	}
@@ -94,7 +93,7 @@ public class CreateModule {
 
 		data.put("projectName", module.getModuleName());
 
-		try (Writer writer = new FileWriter(buildXMLPath.toFile())) {
+		try (Writer writer = Files.newBufferedWriter(buildXMLPath)) {
 			FreeMarkerUtil.process("resources/buildXML.ftl", data, writer);
 		}
 	}
