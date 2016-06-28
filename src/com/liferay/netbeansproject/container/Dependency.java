@@ -40,11 +40,7 @@ public class Dependency {
 
 		Dependency dependency = (Dependency)obj;
 
-		if (Objects.equals(_path, dependency._path)) {
-			return true;
-		}
-
-		return false;
+		return Objects.equals(_path, dependency._path);
 	}
 
 	public Path getName() {
