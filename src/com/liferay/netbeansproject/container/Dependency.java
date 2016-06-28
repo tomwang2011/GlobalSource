@@ -14,7 +14,6 @@
 
 package com.liferay.netbeansproject.container;
 
-
 import java.nio.file.Path;
 
 import java.util.Objects;

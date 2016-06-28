@@ -28,16 +28,18 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 /**
  * @author Tom Wang
  */
 public class GradleUtil {
 
-	public static Map<String, List<Dependency>> getJarDependencies(
+	public static Map<String, Set<Dependency>> getJarDependencies(
 			Path portalDirPath, Path workDirPath,
 			boolean displayGradleProcessOutput, boolean daemon)
 		throws Exception {
@@ -102,13 +104,13 @@ public class GradleUtil {
 					exitCode);
 		}
 
-		Map<String, List<Dependency>> dependenciesMap = new HashMap<>();
+		Map<String, Set<Dependency>> dependenciesMap = new HashMap<>();
 
 		try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(
 				dependenciesDirPath)) {
 
 			for (Path dependencyPath : directoryStream) {
-				List<Dependency> jarDependencies = new ArrayList<>();
+				Set<Dependency> jarDependencies = new HashSet<>();
 
 				Properties dependencies = PropertiesUtil.loadProperties(
 					dependencyPath);
@@ -138,16 +140,16 @@ public class GradleUtil {
 		return dependenciesMap;
 	}
 
-	public static List<Dependency> getModuleDependencies(Path modulePath)
+	public static Set<Dependency> getModuleDependencies(Path modulePath)
 		throws IOException {
 
 		Path buildGradlePath = modulePath.resolve("build.gradle");
 
 		if (!Files.exists(buildGradlePath)) {
-			return Collections.emptyList();
+			return Collections.emptySet();
 		}
 
-		List<Dependency> moduleDependencies = new ArrayList<>();
+		Set<Dependency> moduleDependencies = new HashSet<>();
 
 		for (String line : Files.readAllLines(buildGradlePath)) {
 			if (!line.contains(" project(")) {
