@@ -12,7 +12,7 @@
  * details.
  */
 
-package com.liferay.netbeansproject.util;
+package com.liferay.netbeansproject.template;
 
 import freemarker.cache.ClassTemplateLoader;
 

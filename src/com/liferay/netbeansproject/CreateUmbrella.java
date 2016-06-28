@@ -14,8 +14,8 @@
 
 package com.liferay.netbeansproject;
 
+import com.liferay.netbeansproject.template.FreeMarkerUtil;
 import com.liferay.netbeansproject.util.FileUtil;
-import com.liferay.netbeansproject.util.FreeMarkerUtil;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
