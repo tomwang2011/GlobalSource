@@ -114,44 +114,42 @@ public class CreateGroupModule {
 	private static Set<Dependency> _filterJarDependencies(
 		List<Module> moduleList) {
 
-		Map<Path, Dependency> jarMap = new HashMap<>();
+		Map<Path, Dependency> jarDependencies = new HashMap<>();
 
 		for (Module module : moduleList) {
 			for (Dependency dependency : module.getJarDependencies()) {
 				Path dependencyPath = dependency.getPath();
 
-				if (!jarMap.containsKey(dependency)) {
-					jarMap.put(dependencyPath, dependency);
-				}
-				else {
-					Dependency current = jarMap.get(dependencyPath);
+				Dependency existDependency = jarDependencies.get(
+					dependencyPath);
 
-					if (current.isTest() && !dependency.isTest()) {
-						jarMap.put(dependencyPath, dependency);
-					}
+				if ((existDependency == null) ||
+					(existDependency.isTest() && !dependency.isTest())) {
+
+					jarDependencies.put(dependencyPath, dependency);
 				}
 			}
 		}
 
-		return new HashSet<>(jarMap.values());
+		return new HashSet<>(jarDependencies.values());
 	}
 
 	private static Set<Dependency> _filterModuleDependencies(
 		List<Module> moduleList, Path groupPath) {
 
-		Set<Dependency> moduleSet = new HashSet<>();
+		Set<Dependency> moduleDependencies = new HashSet<>();
 
 		for (Module module : moduleList) {
 			for (Dependency dependency : module.getModuleDependencies()) {
 				Path dependencyPath = dependency.getPath();
 
 				if (!dependencyPath.startsWith(groupPath)) {
-					moduleSet.add(dependency);
+					moduleDependencies.add(dependency);
 				}
 			}
 		}
 
-		return moduleSet;
+		return moduleDependencies;
 	}
 
 	private static void _generateBuildXML(String projectName, Path buildXMLPath)
