@@ -23,6 +23,7 @@ import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -48,7 +49,7 @@ public class CreateGroupModule {
 
 		_generateBuildXML(projectName, projectPath.resolve("build.xml"));
 
-		Set<Dependency> jarDependencies = _filterJarDependencies(moduleList);
+		List<Dependency> jarDependencies = _filterJarDependencies(moduleList);
 
 		Set<Dependency> moduleDependencies = _filterModuleDependencies(
 			moduleList, portalPath.relativize(groupPath));
@@ -64,8 +65,9 @@ public class CreateGroupModule {
 
 	private static void _appendProperties(
 			String projectName, List<Module> moduleList,
-			Set<Dependency> jarDependencies, Set<Dependency> moduleDependencies,
-			Set<Dependency> portalLibJars, Path projectPropertiesPath)
+			List<Dependency> jarDependencies,
+			Set<Dependency> moduleDependencies, Set<Dependency> portalLibJars,
+			Path projectPropertiesPath)
 		throws Exception {
 
 		Map<String, Object> data = new HashMap<>();
@@ -111,7 +113,7 @@ public class CreateGroupModule {
 		}
 	}
 
-	private static Set<Dependency> _filterJarDependencies(
+	private static List<Dependency> _filterJarDependencies(
 		List<Module> moduleList) {
 
 		Map<Path, Dependency> jarDependencies = new HashMap<>();
@@ -131,7 +133,7 @@ public class CreateGroupModule {
 			}
 		}
 
-		return new HashSet<>(jarDependencies.values());
+		return new ArrayList<>(jarDependencies.values());
 	}
 
 	private static Set<Dependency> _filterModuleDependencies(
