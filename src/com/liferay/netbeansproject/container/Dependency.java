@@ -21,11 +21,22 @@ import java.util.Objects;
 /**
  * @author Tom Wang
  */
-public class Dependency {
+public class Dependency implements Comparable<Dependency> {
 
 	public Dependency(Path path, boolean test) {
 		_path = path;
 		_test = test;
+	}
+
+	@Override
+	public int compareTo(Dependency dependency) {
+		int value = _path.compareTo(dependency._path);
+
+		if (value != 0) {
+			return value;
+		}
+
+		return Boolean.compare(_test, dependency._test);
 	}
 
 	@Override
