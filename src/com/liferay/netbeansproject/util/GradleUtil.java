@@ -118,32 +118,41 @@ public class GradleUtil {
 				Properties dependencies = PropertiesUtil.loadProperties(
 					dependencyPath);
 
-				String[] sourceSet = StringUtil.split(
-					dependencies.getProperty("compileSources"), ':');
+				Map<String, Path> sourceJarPaths = _loadSourceJarPaths(
+					dependencies.getProperty("compileSources"));
 
 				for (String jar :
 						StringUtil.split(
 							dependencies.getProperty("compile"), ':')) {
 
 					if (!jar.startsWith(portalToolsPath)) {
+						Path jarPath = Paths.get(jar);
+
 						jarDependencies.add(
-							_createDependencyWithSource(
-								Paths.get(jar), sourceSet, false));
+							new Dependency(
+								jarPath,
+								sourceJarPaths.get(
+									String.valueOf(jarPath.getFileName())),
+								false));
 					}
 				}
 
-				sourceSet = StringUtil.split(
-					dependencies.getProperty("testIntegrationRuntimeSources"),
-					':');
+				sourceJarPaths = _loadSourceJarPaths(
+					dependencies.getProperty("testIntegrationRuntimeSources"));
 
 				for (String jar :
 						StringUtil.split(
 							dependencies.getProperty("compileTest"), ':')) {
 
 					if (!jar.startsWith(portalToolsPath)) {
+						Path jarPath = Paths.get(jar);
+
 						jarDependencies.add(
-							_createDependencyWithSource(
-								Paths.get(jar), sourceSet, true));
+							new Dependency(
+								jarPath,
+								sourceJarPaths.get(
+									String.valueOf(jarPath.getFileName())),
+								true));
 					}
 				}
 
@@ -246,24 +255,6 @@ public class GradleUtil {
 		}
 	}
 
-	private static Dependency _createDependencyWithSource(
-		Path jarPath, String[] sourceSet, boolean isTest) {
-
-		String jarName = String.valueOf(jarPath.getFileName());
-
-		jarName = jarName.substring(0, jarName.length() - 4);
-
-		Path sourcePath = null;
-
-		for (String source : sourceSet) {
-			if (source.contains(jarName)) {
-				sourcePath = Paths.get(source);
-			}
-		}
-
-		return new Dependency(jarPath, sourcePath, isTest);
-	}
-
 	private static String _getTaskName(Path portalDirPath, Path workDirPath) {
 		Path modulesPath = portalDirPath.resolve("modules");
 
@@ -278,6 +269,21 @@ public class GradleUtil {
 		relativeWorkPathString = relativeWorkPathString.replace('/', ':');
 
 		return relativeWorkPathString.concat(":").concat("printDependencies");
+	}
+
+	private static Map<String, Path> _loadSourceJarPaths(String sources) {
+		Map<String, Path> sourceJarPaths = new HashMap<>();
+
+		for (String sourceJarLocation : StringUtil.split(sources, ':')) {
+			Path path = Paths.get(sourceJarLocation);
+
+			sourceJarPaths.put(
+				StringUtil.replace(
+					String.valueOf(path.getFileName()), "-sources.jar", ".jar"),
+				path);
+		}
+
+		return sourceJarPaths;
 	}
 
 }
