@@ -24,7 +24,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +39,8 @@ public class CreateGroupModule {
 			Path projectPath, Path portalPath, Path groupPath,
 			List<Module> moduleList, Set<Dependency> portalLibJars)
 		throws Exception {
+
+		Collections.sort(moduleList);
 
 		String projectName = _createProjectName(portalPath, groupPath);
 
@@ -62,16 +63,6 @@ public class CreateGroupModule {
 				.filter(
 					dependency -> !dependency.getPath().startsWith(groupPath))
 				.collect(Collectors.toSet());
-
-		Collections.sort(moduleList, new Comparator<Module>() {
-			@Override
-			public int compare(Module moduleA, Module moduleB) {
-				String moduleName = moduleA.getModuleName();
-
-				return moduleName.compareTo(moduleB.getModuleName());
-			}
-
-		});
 
 		_appendProperties(
 			projectName, moduleList, jarDependencies, moduleDependencies,

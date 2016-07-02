@@ -40,7 +40,7 @@ import java.util.Set;
 /**
  * @author Tom Wang
  */
-public class Module {
+public class Module implements Comparable<Module> {
 
 	public static Module createModule(
 			Path projectPath, Path modulePath, Set<Dependency> jarDependencies,
@@ -132,6 +132,13 @@ public class Module {
 						properties.getProperty("portal.module.dependencies"),
 						','))),
 			properties.getProperty("checksum"));
+	}
+
+	@Override
+	public int compareTo(Module module) {
+		String moduleName = getModuleName();
+
+		return moduleName.compareTo(module.getModuleName());
 	}
 
 	@Override
