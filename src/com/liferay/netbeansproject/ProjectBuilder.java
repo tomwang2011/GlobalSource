@@ -40,6 +40,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
@@ -125,7 +126,8 @@ public class ProjectBuilder {
 
 		final Map<String, Path> moduleProjectPaths = new HashMap<>();
 
-		final Set<Path> newModulePaths = new HashSet<>();
+		final Map<Path, Set<Dependency>> moduleDependenciesMap =
+			new HashMap<>();
 
 		final List<Module> modules = new ArrayList<>();
 
@@ -172,7 +174,10 @@ public class ProjectBuilder {
 								null, path, null, null,
 								portalModuleDependencyProperties))) {
 
-						newModulePaths.add(path);
+						moduleDependenciesMap.put(
+							path,
+							GradleUtil.getModuleDependencies(
+								path, moduleProjectPaths));
 					}
 					else {
 						modules.add(module);
@@ -182,15 +187,6 @@ public class ProjectBuilder {
 				}
 
 			});
-
-		Map<Path, Set<Dependency>> moduleDependenciesMap = new HashMap<>();
-
-		for (Path newModulePath : newModulePaths) {
-			moduleDependenciesMap.put(
-				newModulePath,
-				GradleUtil.getModuleDependencies(
-					newModulePath, moduleProjectPaths));
-		}
 
 		Map<String, Set<Dependency>> jarDependenciesMap = new HashMap<>();
 
@@ -210,7 +206,7 @@ public class ProjectBuilder {
 				moduleProjectPaths.keySet(), displayGradleProcessOutput, false);
 		}
 		else {
-			for (Path newModulePath : newModulePaths) {
+			for (Path newModulePath : moduleDependenciesMap.keySet()) {
 				Path newModulePathName = newModulePath.getFileName();
 
 				FileUtil.delete(
@@ -231,12 +227,15 @@ public class ProjectBuilder {
 
 		Set<Dependency> portalLibJars = ModuleUtil.getPortalLibJars(portalPath);
 
-		for (Path newModulePath : newModulePaths) {
+		for (Entry<Path, Set<Dependency>> entry :
+				moduleDependenciesMap.entrySet()) {
+
+			Path modulePath = entry.getKey();
+
 			Module module = Module.createModule(
-				projectPath.resolve("modules"), newModulePath,
-				moduleDependenciesMap.get(newModulePath),
+				projectPath.resolve("modules"), modulePath, entry.getValue(),
 				jarDependenciesMap.get(
-					String.valueOf(newModulePath.getFileName())),
+					String.valueOf(modulePath.getFileName())),
 				portalModuleDependencyProperties);
 
 			modules.add(module);
