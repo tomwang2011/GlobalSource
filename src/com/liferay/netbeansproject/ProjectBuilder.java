@@ -123,6 +123,8 @@ public class ProjectBuilder {
 
 		final Set<String> moduleNames = new HashSet<>();
 
+		final Map<String, Path> moduleSymbolicNames = new HashMap<>();
+
 		final Set<Path> newModulePaths = new HashSet<>();
 
 		final List<Module> modules = new ArrayList<>();
@@ -152,6 +154,15 @@ public class ProjectBuilder {
 					}
 
 					moduleNames.add(String.valueOf(path.getFileName()));
+
+					String symbolicName = ModuleUtil.getSymbolicName(path);
+
+					if (symbolicName != null) {
+						moduleSymbolicNames.put(
+							symbolicName,
+							Paths.get(
+								"modules", String.valueOf(path.getFileName())));
+					}
 
 					Module module = oldModulePaths.remove(path);
 
