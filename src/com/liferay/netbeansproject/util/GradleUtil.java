@@ -173,11 +173,11 @@ public class GradleUtil {
 				String moduleSymbolicName = StringUtil.extractQuotedText(
 					split[1]);
 
-				if (!moduleProjectPaths.containsKey(moduleSymbolicName)) {
+				moduleProjectPath = moduleProjectPaths.get(moduleSymbolicName);
+
+				if (moduleProjectPath == null) {
 					continue;
 				}
-
-				moduleProjectPath = moduleProjectPaths.get(moduleSymbolicName);
 			}
 			else {
 				continue;
