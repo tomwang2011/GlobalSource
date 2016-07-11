@@ -83,7 +83,7 @@ public class ModuleUtil {
 			if (lineSplit[1].equals("${manifest.bundle.symbolic.name}")) {
 				String symbolicName = String.valueOf(path.getFileName());
 
-				return "com.liferay." + symbolicName.replace('-', '.');
+				return "com.liferay.".concat(symbolicName.replace('-', '.'));
 			}
 
 			return lineSplit[1];

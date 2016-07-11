@@ -147,7 +147,7 @@ public class GradleUtil {
 	}
 
 	public static Set<Dependency> getModuleDependencies(
-			Path modulePath, Map<String, Path> symbolicNames)
+			Path modulePath, Map<String, Path> moduleProjectPaths)
 		throws IOException {
 
 		Path buildGradlePath = modulePath.resolve("build.gradle");
@@ -173,11 +173,11 @@ public class GradleUtil {
 				String moduleSymbolicName = StringUtil.extractQuotedText(
 					split[1]);
 
-				if (!symbolicNames.containsKey(moduleSymbolicName)) {
+				if (!moduleProjectPaths.containsKey(moduleSymbolicName)) {
 					continue;
 				}
 
-				moduleProjectPath = symbolicNames.get(moduleSymbolicName);
+				moduleProjectPath = moduleProjectPaths.get(moduleSymbolicName);
 			}
 			else {
 				continue;

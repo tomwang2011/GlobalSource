@@ -123,7 +123,7 @@ public class ProjectBuilder {
 
 		final Set<String> moduleNames = new HashSet<>();
 
-		final Map<String, Path> moduleSymbolicNames = new HashMap<>();
+		final Map<String, Path> moduleProjectPaths = new HashMap<>();
 
 		final Set<Path> newModulePaths = new HashSet<>();
 
@@ -158,7 +158,7 @@ public class ProjectBuilder {
 					String symbolicName = ModuleUtil.getSymbolicName(path);
 
 					if (symbolicName != null) {
-						moduleSymbolicNames.put(
+						moduleProjectPaths.put(
 							symbolicName,
 							Paths.get(
 								"modules", String.valueOf(path.getFileName())));
@@ -189,7 +189,7 @@ public class ProjectBuilder {
 			moduleDependenciesMap.put(
 				newModulePath,
 				GradleUtil.getModuleDependencies(
-					newModulePath, moduleSymbolicNames));
+					newModulePath, moduleProjectPaths));
 		}
 
 		Map<String, Set<Dependency>> jarDependenciesMap = new HashMap<>();
@@ -207,8 +207,7 @@ public class ProjectBuilder {
 
 			jarDependenciesMap = GradleUtil.getJarDependencies(
 				portalPath, portalPath.resolve("modules"),
-				moduleSymbolicNames.keySet(), displayGradleProcessOutput,
-				false);
+				moduleProjectPaths.keySet(), displayGradleProcessOutput, false);
 		}
 		else {
 			for (Path newModulePath : newModulePaths) {
@@ -222,7 +221,7 @@ public class ProjectBuilder {
 					jarDependenciesMap.putAll(
 						GradleUtil.getJarDependencies(
 							portalPath, newModulePath,
-							moduleSymbolicNames.keySet(),
+							moduleProjectPaths.keySet(),
 							displayGradleProcessOutput, true));
 				}
 			}
