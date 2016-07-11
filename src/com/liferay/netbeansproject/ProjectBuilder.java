@@ -169,7 +169,7 @@ public class ProjectBuilder {
 					if ((module == null) ||
 						!module.equals(
 							Module.createModule(
-								null, path, null,
+								null, path, null, null,
 								portalModuleDependencyProperties))) {
 
 						newModulePaths.add(path);
@@ -182,6 +182,15 @@ public class ProjectBuilder {
 				}
 
 			});
+
+		Map<Path, Set<Dependency>> moduleDependenciesMap = new HashMap<>();
+
+		for (Path newModulePath : newModulePaths) {
+			moduleDependenciesMap.put(
+				newModulePath,
+				GradleUtil.getModuleDependencies(
+					newModulePath, moduleSymbolicNames));
+		}
 
 		Map<String, Set<Dependency>> jarDependenciesMap = new HashMap<>();
 
@@ -224,6 +233,7 @@ public class ProjectBuilder {
 		for (Path newModulePath : newModulePaths) {
 			Module module = Module.createModule(
 				projectPath.resolve("modules"), newModulePath,
+				moduleDependenciesMap.get(newModulePath),
 				jarDependenciesMap.get(
 					String.valueOf(newModulePath.getFileName())),
 				portalModuleDependencyProperties);
