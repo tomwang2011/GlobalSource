@@ -21,7 +21,6 @@ import com.liferay.netbeansproject.util.StringUtil;
 import java.io.IOException;
 import java.io.Writer;
 
-import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -49,18 +48,6 @@ public class Module implements Comparable<Module> {
 
 		if (jarDependencies == null) {
 			jarDependencies = new HashSet<>();
-		}
-
-		Path moduleLibPath = modulePath.resolve("lib");
-
-		if (Files.exists(moduleLibPath)) {
-			try (DirectoryStream<Path> directoryStream =
-					Files.newDirectoryStream(moduleLibPath, "*.jar")) {
-
-				for (Path jarPath : directoryStream) {
-					jarDependencies.add(new Dependency(jarPath, null, false));
-				}
-			}
 		}
 
 		String checksum = null;
