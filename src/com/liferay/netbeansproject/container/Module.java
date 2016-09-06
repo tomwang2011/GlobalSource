@@ -64,8 +64,9 @@ public class Module implements Comparable<Module> {
 								sourcePath.toString(), "-sources.jar", ".jar")),
 						sourcePath, false);
 
-					jarDependencies.remove(dependency);
-					jarDependencies.add(dependency);
+					if (jarDependencies.remove(dependency)) {
+						jarDependencies.add(dependency);
+					}
 				}
 			}
 		}
