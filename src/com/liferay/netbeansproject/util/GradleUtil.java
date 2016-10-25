@@ -44,6 +44,8 @@ public class GradleUtil {
 			boolean displayGradleProcessOutput, boolean daemon)
 		throws Exception {
 
+		installPortalSnapshots(portalDirPath);
+
 		Path dependenciesDirPath = Files.createTempDirectory(null);
 
 		FileUtil.delete(dependenciesDirPath);
@@ -69,9 +71,7 @@ public class GradleUtil {
 
 		Path gradleCachePath = Paths.get(".gradle");
 
-		FileUtil.copy(
-			portalDirPath.resolve(".gradle"),
-			gradleCachePath);
+		FileUtil.copy(portalDirPath.resolve(".gradle"), gradleCachePath);
 
 		gradleTask.add(String.valueOf(gradleCachePath));
 
@@ -189,6 +189,42 @@ public class GradleUtil {
 		}
 
 		return moduleDependencies;
+	}
+
+	public static void installPortalSnapshots(Path portalDirPath)
+		throws IOException {
+
+		List<String> antTask = new ArrayList<>();
+
+		antTask.add("ant");
+
+		antTask.add("install-portal-snapshots");
+
+		ProcessBuilder processBuilder = new ProcessBuilder(antTask);
+
+		processBuilder.directory(portalDirPath.toFile());
+
+		Process process = processBuilder.start();
+
+		String line = null;
+
+		try(
+			BufferedReader br = new BufferedReader(
+				new InputStreamReader(process.getInputStream()))) {
+
+			while ((line = br.readLine()) != null) {
+				System.out.println(line);
+			}
+		}
+
+		try(
+			BufferedReader br = new BufferedReader(
+				new InputStreamReader(process.getErrorStream()))) {
+
+			while ((line = br.readLine()) != null) {
+				System.out.println(line);
+			}
+		}
 	}
 
 	public static void stopGradleDaemon(
