@@ -437,7 +437,7 @@ public class GradleUtil {
 			String fileName = String.valueOf(path.getFileName());
 
 			if ((fileName.startsWith("javax.portlet") ||
-				fileName.startsWith("javax.servlet"))) {
+				 fileName.startsWith("javax.servlet"))) {
 
 				if (!(sourceJarLocation.contains("org.glassfish.web") &&
 					!sourceJarLocation.contains("LIFERAY-PATCHED"))) {
