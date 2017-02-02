@@ -143,6 +143,12 @@ public class GradleUtil {
 
 				jarDependencies.addAll(
 					_getConfigurationDependencies(
+						dependencyPath, "compileInclude",
+						"compileIncludeSources", false, portalToolsPath,
+						symbolicNameSet));
+
+				jarDependencies.addAll(
+					_getConfigurationDependencies(
 						dependencyPath, "compileTest",
 						"testIntegrationRuntimeSources", true, portalToolsPath,
 						symbolicNameSet));
