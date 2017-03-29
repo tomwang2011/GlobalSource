@@ -413,7 +413,7 @@ public class Module implements Comparable<Module> {
 		throws IOException {
 
 		if (!Files.exists(gradleFilePath)) {
-			return "1.7";
+			return "1.8";
 		}
 
 		List<String> lines = Files.readAllLines(gradleFilePath);
