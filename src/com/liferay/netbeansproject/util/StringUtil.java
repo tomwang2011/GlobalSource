@@ -38,13 +38,13 @@ public class StringUtil {
 		int index1 = line.indexOf('\"');
 
 		if (index1 < 0) {
-			throw new IllegalStateException("Broken syntax in " + line);
+			return line;
 		}
 
 		int index2 = line.indexOf('\"', index1 + 1);
 
 		if (index2 < 0) {
-			throw new IllegalStateException("Broken syntax in " + line);
+			return line;
 		}
 
 		return line.substring(index1 + 1, index2);
