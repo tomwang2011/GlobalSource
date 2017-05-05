@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -134,7 +135,7 @@ public class GradleUtil {
 				portalDirPath.resolve("tools/sdk"));
 
 			for (Path dependencyPath : directoryStream) {
-				Set<Dependency> jarDependencies = new HashSet<>();
+				Set<Dependency> jarDependencies = new TreeSet<>();
 
 				jarDependencies.addAll(
 					_getConfigurationDependencies(
