@@ -184,9 +184,7 @@ public class ProjectBuilder {
 
 					if (symbolicName != null) {
 						moduleProjectPaths.put(
-							symbolicName,
-							Paths.get(
-								"modules", String.valueOf(path.getFileName())));
+							symbolicName, portalPath.relativize(path));
 					}
 
 					Module module = oldModulePaths.remove(path);
