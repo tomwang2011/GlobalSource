@@ -438,13 +438,17 @@ public class Module implements Comparable<Module> {
 		String dependencies = properties.getProperty(moduleName);
 
 		if (dependencies == null) {
-			dependencies = PropertiesUtil.getRequiredProperty(
-				properties, "portal.module.dependencies");
+			sb.append(
+				PropertiesUtil.getRequiredProperty(
+					properties, "portal.module.dependencies"));
 		}
-
-		sb.append(dependencies);
-		sb.append(',');
-		sb.append(properties.getProperty("petra.modules"));
+		else {
+			if (!dependencies.isEmpty()) {
+				sb.append(dependencies);
+				sb.append(',');
+			}
+			sb.append(properties.getProperty("petra.modules"));
+		}
 
 		return new HashSet(Arrays.asList(StringUtil.split(sb.toString(), ',')));
 	}
