@@ -61,9 +61,10 @@ public class CreateModule {
 
 		Set<Dependency> combinedJars = new TreeSet<>();
 
-		combinedJars.addAll(compatJars);
-
-		if (!modulePath.contains("modules")) {
+		if (modulePath.contains("modules")) {
+			combinedJars.addAll(compatJars);
+		}
+		else {
 			combinedJars.addAll(portalLibJars);
 		}
 
