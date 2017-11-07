@@ -118,8 +118,8 @@ project.${dependency.getName()}=../${dependency.getName()}
 reference.${dependency.getName()}.jar=${"$"}{project.${dependency.getName()}}/dist/${dependency.getName()}.jar
 </#list>
 <#list module.getPortalModuleDependencies() as dependency>
-project.${dependency}=../${dependency}
-reference.${dependency}.jar=${"$"}{project.${dependency}}/dist/${dependency}.jar
+project.${dependency.getName()}=../${dependency.getName()}
+reference.${dependency.getName()}.jar=${"$"}{project.${dependency.getName()}}/dist/${dependency.getName()}.jar
 </#list>
 
 <#list portalLibJars as jarDependency>
@@ -138,7 +138,9 @@ javac.classpath=\
 		</#if>
 	</#list>
 	<#list module.getPortalModuleDependencies() as dependency>
-	${"$"}{reference.${dependency}.jar}:\
+                <#if !dependency.isTest()>
+	${"$"}{reference.${dependency.getName()}.jar}:\
+		</#if>
 	</#list>
 	<#list portalLibJars as jarDependency>
 	${"$"}{file.reference.${jarDependency.getName()}}:\
@@ -153,6 +155,11 @@ javac.test.classpath=\
 		</#if>
 	</#list>
 	<#list module.getModuleDependencies() as dependency>
+		<#if dependency.isTest()>
+	${"$"}{reference.${dependency.getName()}.jar}:\
+		</#if>
+	</#list>
+	<#list module.getPortalModuleDependencies() as dependency>
 		<#if dependency.isTest()>
 	${"$"}{reference.${dependency.getName()}.jar}:\
 		</#if>

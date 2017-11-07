@@ -245,7 +245,7 @@ public class Module implements Comparable<Module> {
 		return _modulePath;
 	}
 
-	public Set<String> getPortalModuleDependencies() {
+	public Set<Dependency> getPortalModuleDependencies() {
 		return _portalModuleDependencies;
 	}
 
@@ -430,7 +430,7 @@ public class Module implements Comparable<Module> {
 		return "1.7";
 	}
 
-	private static Set<String> _resolvePortalModuleDependencies(
+	private static Set<Dependency> _resolvePortalModuleDependencies(
 			Properties properties, String moduleName)
 		throws IOException {
 
@@ -438,20 +438,31 @@ public class Module implements Comparable<Module> {
 
 		String dependencies = properties.getProperty(moduleName);
 
+		Set<Dependency> dependencySet = new TreeSet<>();
+
 		if (dependencies == null) {
-			sb.append(
-				PropertiesUtil.getRequiredProperty(
-					properties, "portal.module.dependencies"));
+			for (String name :
+					StringUtil.split(
+						PropertiesUtil.getRequiredProperty(
+							properties, "portal.module.dependencies"),
+						',')) {
+
+				dependencySet.add(new Dependency(Paths.get(name), null, true));
+			}
 		}
 		else {
-			if (!dependencies.isEmpty()) {
-				sb.append(dependencies);
-				sb.append(',');
+			for (String name : StringUtil.split(dependencies, ',')) {
+				dependencySet.add(new Dependency(Paths.get(name), null, false));
 			}
-			sb.append(properties.getProperty("petra.modules"));
+
+			for (String name : StringUtil.split(
+					properties.getProperty("petra.modules"), ',')) {
+
+				dependencySet.add(new Dependency(Paths.get(name), null, false));
+			}
 		}
 
-		return new TreeSet(Arrays.asList(StringUtil.split(sb.toString(), ',')));
+		return dependencySet;
 	}
 
 	private static Path _resolveResourcePath(Path modulePath, String type) {
@@ -525,8 +536,9 @@ public class Module implements Comparable<Module> {
 		Path sourceResourcePath, Path testUnitPath, Path testUnitResourcePath,
 		Path testIntegrationPath, Path testIntegrationResourcePath,
 		Path jspPath, Set<Dependency> moduleDependencies,
-		Set<Dependency> jarDependencies, Set<String> portalModuleDependencies,
-		String checksum, String jdkVersion) {
+		Set<Dependency> jarDependencies,
+		Set<Dependency> portalModuleDependencies, String checksum,
+		String jdkVersion) {
 
 		_projectPath = projectPath;
 		_modulePath = modulePath;
@@ -589,7 +601,7 @@ public class Module implements Comparable<Module> {
 
 		_putProperty(
 			properties, "portal.module.dependencies",
-			StringUtil.merge(_portalModuleDependencies, ','));
+			_createDependencyString(_portalModuleDependencies));
 
 		_putProperty(properties, "jdk.version", _jdkVersion);
 
@@ -608,7 +620,7 @@ public class Module implements Comparable<Module> {
 	private final Path _jspPath;
 	private final Set<Dependency> _moduleDependencies;
 	private final Path _modulePath;
-	private final Set<String> _portalModuleDependencies;
+	private final Set<Dependency> _portalModuleDependencies;
 	private final Path _projectPath;
 	private final Path _sourcePath;
 	private final Path _sourceResourcePath;

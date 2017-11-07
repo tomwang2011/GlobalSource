@@ -51,7 +51,7 @@
 			</#list>
 			<#list module.getPortalModuleDependencies() as dependency>
 				<reference>
-					<foreign-project>${dependency}</foreign-project>
+					<foreign-project>${dependency.getName()}</foreign-project>
 					<artifact-type>jar</artifact-type>
 					<script>build.xml</script>
 					<target>jar</target>
