@@ -31,8 +31,7 @@ public class Dependency implements Comparable<Dependency> {
 
 	@Override
 	public int compareTo(Dependency dependency) {
-		int value =
-			_path.compareTo(dependency._path);
+		int value = _path.compareTo(dependency._path);
 
 		if (value != 0) {
 			return value;
